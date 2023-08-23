@@ -1,3 +1,7 @@
+# Web-game-engine is a simple web platform allowing you to design multiplayer games that communicate over a local network.
+# This is the server-side code that runs on the host computer. This code is written in Python and uses Flask and SocketIO.
+# The client-side code is written in JavaScript, and it is served by the server-side code.
+
 import webbrowser
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, jsonify, send_from_directory, request
