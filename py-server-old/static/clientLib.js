@@ -11,8 +11,8 @@ class WSClient {
         this.socket.onmessage = event => {
             const responseData = JSON.parse(event.data);
             console.log(responseData);
-            if (responseData.key) {
-                this.triggerEventListeners(responseData.key, responseData.payload);
+            if (responseData.action) {
+                this.triggerEventListeners(responseData.action, responseData.payload);
             }
         };
         this.socket.onclose = event => {
@@ -45,6 +45,7 @@ class WSClient {
                 action: action,
                 payload: payload
             };
+            console.log("Sending message: ", message);
             this.socket.send(JSON.stringify(message));
 
             this.socket.onmessage = event => {

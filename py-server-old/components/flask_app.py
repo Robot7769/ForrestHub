@@ -10,8 +10,11 @@ app = Flask(__name__, template_folder=TEMPLATES_DIR, static_folder=STATIC_DIR)
 
 @app.route('/')
 def index():
-    # index.html is in the templates folder in the root directory
     return render_template('index.html')
+
+@app.route('/game')
+def game():
+    return render_template('game.html')
 
 def run_flask_app():
     app.run(host='0.0.0.0', port=5000)

@@ -1,7 +1,7 @@
 const client = new WSClient(`ws://${window.location.hostname}:8765`);
 
-client.addEventListener("countdown", (count) => {
-	document.getElementById("countdown").textContent = "Countdown: " + count + " seconds left";
+client.addEventListener("update_time", (count) => {
+	document.getElementById("update_time").textContent = "Game timer: " + count;
 });
 
 function setValue() {
