@@ -77,3 +77,33 @@ document.getElementById("upload-button").addEventListener("click", function() {
 });
 
 
+// Function to get URL parameters
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+// Add the "reload=true" parameter and reload the page
+document.getElementById('startReload').addEventListener('click', function() {
+    window.location.href = window.location.pathname + '?reload=true';
+});
+
+let reloadInterval;
+
+// Autonomously check for the "reload" parameter in the URL
+if (getParameterByName('reload') === 'true') {
+    reloadInterval = setInterval(function() {
+        location.reload();
+    }, 2000);
+}
+
+// Add an event listener to the stop button to clear the reload interval and remove the URL parameter
+document.getElementById('stopReload').addEventListener('click', function() {
+    clearInterval(reloadInterval);
+    // Remove the URL parameter
+    window.location.href = window.location.pathname;
+});

@@ -1,5 +1,5 @@
 class SocketClient {
-    constructor(url = `http://${window.location.hostname}:5000`) {
+    constructor(url = `http://${window.location.hostname}:80`) {
         if (io === undefined) {
             throw new Error('Socket.io is not loaded.');
         }

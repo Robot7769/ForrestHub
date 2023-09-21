@@ -13,17 +13,19 @@ import sys
 import socket
 from database import Database
 
-PORT = 5000
+PORT = 80
 DATAFILE = 'data.json'
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 ALLOWED_EXTENSIONS = {'json'}
 
 if getattr(sys, 'frozen', False):
     # frozen
+    ROOT_DIR = os.path.dirname(sys.executable)
     TEMPLATES_DIR = os.path.join(sys._MEIPASS, 'templates')
     STATIC_DIR = os.path.join(sys._MEIPASS, 'static')
     DEBUG = False
 else:
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     TEMPLATES_DIR = os.path.join(ROOT_DIR, 'templates')
     STATIC_DIR = os.path.join(ROOT_DIR, 'static')
     DEBUG = True
@@ -49,6 +51,10 @@ local_ip = f'http://{get_local_ip_address()}:{PORT}'
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/udavac')
+def udavac():
+    return render_template('udavac.html')
 
 @app.route('/admin')
 def admin():
@@ -134,13 +140,13 @@ def handle_delete_data(key):
 
 if __name__ == '__main__':
     if not DEBUG:
-        webbrowser.open('http://localhost:5000/admin')
-        webbrowser.open('http://localhost:5000')
+        webbrowser.open(f'http://localhost:{PORT}/admin')
+        webbrowser.open(f'http://localhost:{PORT}')
 
     # stop the server with Ctrl-C
     try:
         print(f'Server started at {local_ip}')
-        socketio.run(app, debug=DEBUG, host='0.0.0.0', port=5000)
+        socketio.run(app, debug=DEBUG, host='0.0.0.0', port=PORT)
     except KeyboardInterrupt:
         print('Server stopped')
         sys.exit(0)
