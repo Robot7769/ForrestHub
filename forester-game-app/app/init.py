@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
-from app.custom_loader import CustomLoader, get_root_path
+from app.custom_loader import CustomLoader
 from app.database import Database
 import os
 

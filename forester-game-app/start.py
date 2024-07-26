@@ -10,5 +10,5 @@ if __name__ == "__main__":
     flask_process.start()
     time.sleep(2)  # Wait for the Flask server to start
     webbrowser.open('http://localhost:5000')  # Optionally open the browser automatically
-    # start_gui()
+    start_gui()
     flask_process.join()
