@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'templates/head.html' %}
+</head>
+<body>
+{% include 'templates/header.html' %}
+<div class="container" id="content">
+    {% block content %}{% endblock %}
+</div>
+{% include 'templates/footer.html' %}
+{% include 'templates/scripts.html' %}
+</body>
+</html>

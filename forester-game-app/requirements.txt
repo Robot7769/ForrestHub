@@ -1,0 +1,9 @@
+flask==3.0.3
+flask-socketio==5.3.6
+gevent-websocket==0.10.1
+requests==2.32.3
+websocket-client==1.8.0
+flask-cors==4.0.1
+pyinstaller==6.9.0
+flask_cors==4.0.1
+pyinstaller==6.9.0
