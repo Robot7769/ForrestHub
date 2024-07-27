@@ -5,7 +5,7 @@ class ForesterLib {
     STOPPED = "stopped";
 
     constructor(isAdmin = false, url = `http://${window.location.hostname}:${window.location.port}`) {
-        this.isGameMode = false;
+        this.isGameMode = true;
         this.isAdmin = isAdmin;
 
 
@@ -22,7 +22,7 @@ class ForesterLib {
 
         this.socket.on('disconnect', () => {
             console.log('Disconnected from the server.');
-            this.showOverlay('Byl jsi odpojen od serveru. <br/>Hra nejspíš skončila nebo nastala neočekávaná chyba.', null);
+            this.showOverlay('Byl jsi odpojen od serveru. <br/>Hra nejspíš skončila nebo nastala neočekávaná chyba.', null, "danger", true);
         });
 
         this.socket.on('admin_messages', (message) => {
@@ -33,7 +33,8 @@ class ForesterLib {
             if (status === this.RUNNING) {
                 this.removeOverlay();
                 if (this.isGameMode) {
-                    this.showOverlay('Hra spuštěna', 500, 'success');
+                    // this.showOverlay('Hra spuštěna', 500, 'success');
+                    this.showAlert('success', 'Hra spuštěna', 5000);
                 }
             } else if (status === this.PAUSED) {
                 this.showOverlay('Hra je pozastavena', null, 'info');
@@ -169,9 +170,9 @@ class ForesterLib {
     }
 
 
-    showOverlay(text, duration = null, status = 'info') {
+    showOverlay(text, duration = null, status = 'info', forceShow = false) {
         // do not show messages with duration on admin page
-        if (this.isAdmin) {
+        if (this.isAdmin && !forceShow) {
             this.showAlert('info', `Zpráva: ${text}`, 5000);
             return;
         }
@@ -213,9 +214,9 @@ class ForesterLib {
         overlay.appendChild(countdown);
         document.body.appendChild(overlay);
 
-        if (!duration && !this.isGameMode) {
-            duration = 5000;
-        }
+        // if (!duration && !this.isGameMode) {
+        //     duration = 5000;
+        // }
 
         // Countdown logic
         if (duration) {
@@ -261,4 +262,4 @@ class ForesterLib {
 
 }
 
-let foresterLib = new ForesterLib();
+// let foresterLib = new ForesterLib();

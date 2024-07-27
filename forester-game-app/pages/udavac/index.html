@@ -1,6 +1,15 @@
 {% extends "templates/base.html" %}
 {% block content %}
     <h1>Hra Udavač</h1>
-    <a href="./kontrolor">Kontrolor</a>
-    <a href="./udavac">Udavač</a>
+    <a href="/" class="btn btn-primary">Domů</a>
+
+    <h2>Vyberte si roli:</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <a href="./kontrolor" class="btn btn-secondary btn-lg">Kontrolor</a>
+        </div>
+        <div class="col-md-6">
+            <a href="./udavac" class="btn btn-danger btn-lg">Udavač</a>
+        </div>
+    </div>
 {% endblock %}

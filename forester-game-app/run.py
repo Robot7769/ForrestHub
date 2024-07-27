@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import webbrowser
 from datetime import datetime
 
 from app.init import create_app, socketio
@@ -9,17 +10,9 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 
-def setup_logging():
-    # Determine the directory where the script or executable is located
-    if getattr(sys, "frozen", False):
-        # If the application is run as a bundle, use the sys._MEIPASS
-        script_dir = os.path.dirname(sys.executable)
-    else:
-        # If the application is run as a script, use the script's directory
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-
+def setup_logging(root_dir: str, log_folder: str = "ForesterLogs"):
     # Create a logs directory if it doesn't exist
-    logs_dir = os.path.join(script_dir, "ForesterLogs")
+    logs_dir = os.path.join(root_dir, log_folder)
     os.makedirs(logs_dir, exist_ok=True)
 
     # Create a log file name with a timestamp
@@ -57,10 +50,14 @@ def run_flask():
 
 
 if __name__ == "__main__":
-    logger = setup_logging()
+    config = Config()
+
+    logger = setup_logging(config.ROOT_DIR, config.LOG_FOLDER)
     logging.basicConfig(level=logging.INFO)
 
-    config = Config()
+    if not config.DEBUG:
+        webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}")
+        webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}/admin")
 
     try:
         local_ip = f"http://{config.IP_ADDRESS}:{config.PORT}"

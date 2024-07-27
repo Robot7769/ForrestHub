@@ -55,7 +55,8 @@ def render_page(folder, page):
             folder=folder,
             page=page,
             data=db.get_data(),
-            ip_address=get_local_ip_address()
+            ip_address=get_local_ip_address(),
+            config=current_app.config,
         )
 
     except TemplateNotFound:

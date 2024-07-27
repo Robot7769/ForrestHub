@@ -7,7 +7,7 @@ socketio_bp = Blueprint('socketio', __name__)
 connected_clients = 0
 connected_admins = 0
 
-game_status = 'paused'
+game_status = 'running'
 
 
 @socketio.on('send_admin_message')

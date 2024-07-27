@@ -5,7 +5,7 @@
         <h1 class="text-center mb-4">Admin Panel</h1>
 
         <nav class="nav justify-content-center mb-4">
-            <a class="nav-link" href="/">Home</a>
+            <a class="nav-link" href="/">Domů</a>
             <a class="nav-link" href="/udavac">Udavač</a>
         </nav>
 
@@ -13,7 +13,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Server Information</h5>
+                        <h5 class="card-title">Připojení do hry</h5>
                         <p class="card-text">IP adresa serveru: <strong>{{ ip_address }}</strong></p>
                         <p class="card-text"><small>Tuto adresu zadejte do prohlížeče na zařízení, které chcete připojit do hry.</small></p>
                         <div id="qrcode" class="mt-3"></div>
@@ -24,7 +24,7 @@
             <div class="col-md-6">
                 <div class="card p-3">
                     <div class="card-body">
-                        <h5 class="card-title">Connected Devices</h5>
+                        <h5 class="card-title">Připojená zařízení</h5>
                         <p class="card-text">Počet připojených zařízení: <span id="connected_clients" class="badge bg-primary">?</span></p>
                     </div>
                 </div>
@@ -77,9 +77,13 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Data Management</h5>
-                        <button id="download-button" class="btn btn-primary mb-2">Stáhnout data</button>
-                        <button id="clear-button" class="btn btn-danger mb-2">Vymazat data</button>
+                        <h5 class="card-title">Správa dat hry</h5>
+                        <button id="download-button" class="btn btn-primary mb-2">Stáhnout data hry</button>
+                        <button id="clear-button" class="btn btn-danger mb-2">Vymazat data hry</button>
+                        <p class="card-text">Data hry jsou uložena v počítači: <strong>{{ config.ROOT_DIR }}/{{ config.DATAFILE }}</strong></p>
+                        <p class="card-text">Veškerý informace jsou logovány do souboru: <strong>{{ config.ROOT_DIR }}/{{ config.LOG_FOLDER }}</strong></p>
+                        <p class="card-text">Debug: <strong>{{ config.DEBUG }}</strong></p>
+                        <p class="card-text">Temp: <strong>{{ config.TEMP_DIR }}</strong></p>
                     </div>
                 </div>
             </div>
@@ -87,6 +91,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Nahrát data</h5>
+                        <p class="card-text">Nahraná data přepíšou stávající data hry.</p>
                         <div class="input-group mb-3">
                             <input type="file" id="uploadFile" class="form-control" accept=".json">
                             <button id="upload-button" class="btn btn-primary">Nahrát data</button>
@@ -102,42 +107,42 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Edit Data</h5>
+                    <h5 class="modal-title" id="editModalLabel">Upravit data</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editForm">
                         <div class="mb-3">
-                            <label for="editKey" class="form-label">Key</label>
+                            <label for="editKey" class="form-label">Klíč</label>
                             <input type="text" class="form-control" id="editKey" readonly>
                         </div>
                         <div class="mb-3">
-                            <label for="editType" class="form-label">Type</label>
+                            <label for="editType" class="form-label">Typ</label>
                             <select class="form-select" id="editType" onchange="updateEditForm()">
-                                <option value="value">Value</option>
-                                <option value="list">List</option>
-                                <option value="keyvalue">Key-Value Pairs</option>
+                                <option value="value">Hodnota</option>
+                                <option value="list">Seznam</option>
+                                <option value="keyvalue">Páry klíč-hodnota</option>
                             </select>
                         </div>
                         <div id="editValueContainer" class="mb-3">
-                            <label for="editValue" class="form-label">Value</label>
+                            <label for="editValue" class="form-label">Hodnota</label>
                             <input type="text" class="form-control" id="editValue">
                         </div>
                         <div id="editListContainer" class="mb-3 d-none">
-                            <label class="form-label">List Items</label>
+                            <label class="form-label">Seznam položek</label>
                             <div id="listItems"></div>
-                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addListItem()">Add Item</button>
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addListItem()">Přidat položku</button>
                         </div>
                         <div id="editKeyValueContainer" class="mb-3 d-none">
-                            <label class="form-label">Key-Value Pairs</label>
+                            <label class="form-label">Páry klíč-hodnota</label>
                             <div id="keyValuePairs"></div>
-                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addKeyValuePair()">Add Pair</button>
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addKeyValuePair()">Přidat pár</button>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="saveData()">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít <small>(bez uložení)</small></button>
+                    <button type="button" class="btn btn-primary" onclick="saveData()">Uložit</button>
                 </div>
             </div>
         </div>

@@ -1,6 +1,9 @@
+const foresterLib = new ForesterLib();
+foresterLib.setAdmin(true);
+foresterLib.setGameMode(false);
+
 let globalData = {};
 
-foresterLib.setAdmin(true);
 
 foresterLib.addEventListener("connect", async () => {
     foresterLib.showAlert('success', 'Připojeno k serveru.');
