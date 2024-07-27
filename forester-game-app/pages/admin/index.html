@@ -1,57 +1,149 @@
 {% extends "templates/base.html" %}
-{% block content %}
-    <div class="container text-center">
-        <h2>Admin Panel</h2>
-        <a href="/">Home</a>
-        <a href="/udavac">Udavač</a>
-        {#    <button id="reloadButton">Start Auto Reload</button>#}
 
-        <div>
-            <button id="startReload">Spuštění automatického obnovení</button>
-            <button id="stopReload">Zastavení automatického obnovení</button>
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Admin Panel</h1>
+
+        <nav class="nav justify-content-center mb-4">
+            <a class="nav-link" href="/">Home</a>
+            <a class="nav-link" href="/udavac">Udavač</a>
+        </nav>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Server Information</h5>
+                        <p class="card-text">IP adresa serveru: <strong>{{ ip_address }}</strong></p>
+                        <p class="card-text"><small>Tuto adresu zadejte do prohlížeče na zařízení, které chcete připojit do hry.</small></p>
+                        <div id="qrcode" class="mt-3"></div>
+                        <p><small>QR kód pro připojení do hry</small></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Connected Devices</h5>
+                        <p class="card-text">Počet připojených zařízení: <span id="connected_clients" class="badge bg-primary">?</span></p>
+                    </div>
+                </div>
+
+                <div class="card p-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Stav hry</h5>
+{#                        <p class="card-text">Počet připojených zařízení: <span id="connected_clients" class="badge bg-primary">?</span></p>#}
+                        <p class="card-text">Hra běží: <span class="game_status badge bg-primary">?</span></p>
+                        <div class="mt-3 d-grid gap-2">
+                            <button id="game_start" class="btn btn-success">Spustit hru na všech zařízeních</button>
+                            <button id="game_pause" class="btn btn-warning">Pozastavit hru na všech zařízeních</button>
+                            <button id="game_stop" class="btn btn-danger">Ukončit hru na všech zařízeních</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <h3>Počet připojených zařízení: <span id="connected_clients">?</span></h3>
-        <h3>Počet připojených adminů: <span id="connected_admins">?</span></h3>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Odeslat zprávu do všech zařízení</h5>
+                        <div class="input-group mb-3">
+                            <input type="text" id="adminMessage" class="form-control" placeholder="Zpráva">
+                            <button class="btn btn-primary" onclick="sendAdminMessage()">Odeslat</button>
+                        </div>
+                        <p><small>Zpráva se odešle všem připojeným zařízením, které jsou v danou chvíli ve hře.</small></p>
+                        <p>Poslední odeslaná zpráva: <span id="lastAdminMessage" class="fst-italic">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <h3>IP adresa serveru: {{ ip_address }}</h3>
-        <h4>Tuto adresu zadejte do prohlížeče na zařízení, které chcete připojit do hry.</h4>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Upravit data</h5>
+                        <ul id="data-list" class="list-group">
+                            <!-- Data will be populated here by JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <h3>Odeslat zprávu do všech zařízení:</h3>
-        <input type="text" id="adminMessage" placeholder="Zpráva">
-        <button onclick="sendAdminMessage()">Odeslat</button>
-        <p><small>Zpráva se odešle všem připojeným zařízením, které jsou v danou chvíli ve hře.</small></p>
-        <p>Poslední odeslaná zpráva: <span id="lastAdminMessage">-</span></p>
-
-        <h3>Upravit data:</h3>
-        <ul id="data-list">
-            {% if not data %}
-                <li>Žádná data</li>
-            {% endif %}
-            {% for key, value in data.items() %}
-                <li>
-                    <span><strong>{{ key }}:</strong> <span id="{{ key }}">{{ value }}</span></span>
-                    <button onclick="editData('{{ key }}')">Edit</button>
-                    <button onclick="deleteData('{{ key }}')">Delete</button>
-                </li>
-            {% endfor %}
-        </ul>
-
-        <button id="download-button">Stáhnout data</button>
-        <button id="clear-button">Vymazat data</button>
-
-        <h3>Nahrát data:</h3>
-        <input type="file" id="uploadFile" accept=".json">
-        <button id="upload-button">Nahrát data</button>
-
-        <br/>
-        <br/>
-
-        <div id="qrcode"></div>
-        <small>QR kód pro připojení do hry</small>
-        <script type="text/javascript">
-            let ip_address = `http://{{ ip_address }}:${window.location.port}`;
-            new QRCode(document.getElementById("qrcode"), ip_address);
-        </script>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Data Management</h5>
+                        <button id="download-button" class="btn btn-primary mb-2">Stáhnout data</button>
+                        <button id="clear-button" class="btn btn-danger mb-2">Vymazat data</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Nahrát data</h5>
+                        <div class="input-group mb-3">
+                            <input type="file" id="uploadFile" class="form-control" accept=".json">
+                            <button id="upload-button" class="btn btn-primary">Nahrát data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <div class="mb-3">
+                            <label for="editKey" class="form-label">Key</label>
+                            <input type="text" class="form-control" id="editKey" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editType" class="form-label">Type</label>
+                            <select class="form-select" id="editType" onchange="updateEditForm()">
+                                <option value="value">Value</option>
+                                <option value="list">List</option>
+                                <option value="keyvalue">Key-Value Pairs</option>
+                            </select>
+                        </div>
+                        <div id="editValueContainer" class="mb-3">
+                            <label for="editValue" class="form-label">Value</label>
+                            <input type="text" class="form-control" id="editValue">
+                        </div>
+                        <div id="editListContainer" class="mb-3 d-none">
+                            <label class="form-label">List Items</label>
+                            <div id="listItems"></div>
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addListItem()">Add Item</button>
+                        </div>
+                        <div id="editKeyValueContainer" class="mb-3 d-none">
+                            <label class="form-label">Key-Value Pairs</label>
+                            <div id="keyValuePairs"></div>
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addKeyValuePair()">Add Pair</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveData()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let ip_address = `http://{{ ip_address }}:${window.location.port}`;
+        new QRCode(document.getElementById("qrcode"), ip_address);
+    </script>
 {% endblock %}

@@ -13,12 +13,6 @@ main = Blueprint('main', __name__)
 def index():
     return render_template('menu/index.html')
 
-
-@main.route('/asd')
-def asd():
-    return "render_template('menu/asd.html')"
-
-
 @main.route('/download-data')
 def download_data():
     return send_from_directory(current_app.config['ROOT_DIR'], current_app.config['DATAFILE'], as_attachment=True)

@@ -1,4 +1,5 @@
-const foresterLib = new ForesterLib();
+const foresterLib = new ForesterLib(true);
+foresterLib.isEnabled = true;
 
 const numberInput = document.querySelector('#number');
 const udavacButton = document.querySelector('#udavac');
