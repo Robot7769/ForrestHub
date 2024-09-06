@@ -56,7 +56,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         config.PORT = int(sys.argv[1])
 
-    logger = setup_logging(config.ROOT_DIR, config.LOG_FOLDER)
+    logger = setup_logging(config.EXECUTABLE_DIR, config.LOG_FOLDER)
     logging.basicConfig(level=logging.INFO)
 
     if not config.DEBUG:

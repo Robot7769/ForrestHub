@@ -22,16 +22,16 @@ class Config:
     if getattr(sys, "frozen", False):
         FROZEN = True
         PORT = 80
-        ROOT_DIR = Path(sys.executable).parent
+        EXECUTABLE_DIR = Path(sys.executable).parent
         DATA_DIR = sys._MEIPASS
     else:
         FROZEN = False
         PORT = 4444
-        ROOT_DIR = Path(__file__).parent
-        DATA_DIR = ROOT_DIR
+        EXECUTABLE_DIR = Path(__file__).parent
+        DATA_DIR = EXECUTABLE_DIR
 
     # use live data if it exists
-    LIVE_DATA_FOLDER = Path(DATA_DIR) / LIVE_DATA_DIR
+    LIVE_DATA_FOLDER = Path(EXECUTABLE_DIR) / LIVE_DATA_DIR
     TEMPLATES_FOLDER = Path(DATA_DIR) / TEMPLATES_DIR
     GAMES_FOLDER = Path(DATA_DIR) / GAMES_DIR
     ASSETS_FOLDER = Path(DATA_DIR) / ASSETS_DIR
