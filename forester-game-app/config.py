@@ -43,17 +43,17 @@ class Config:
         GAMES_FOLDER_LIVE = pathlib.Path(LIVE_DATA_FOLDER) / GAMES_DIR
         ASSETS_FOLDER_LIVE = pathlib.Path(LIVE_DATA_FOLDER) / ASSETS_DIR
 
+        #     check if exist
+        if not TEMPLATES_FOLDER_LIVE.exists():
+            raise FileNotFoundError(f"Templates folder not found: {TEMPLATES_FOLDER}")
+
+        if not GAMES_FOLDER_LIVE.exists():
+            raise FileNotFoundError(f"Games folder not found: {GAMES_FOLDER}")
+
+        if not ASSETS_FOLDER_LIVE.exists():
+            raise FileNotFoundError(f"Assets folder not found: {ASSETS_FOLDER}")
+
     # Disable debug and reloader when using frozen data with live data - production mode
     if not LIVE_DATA_USED and FROZEN:
         DEBUG = False
         USE_RELOADER = False
-
-#     check if exist TEMPLATES_DIR, STATIC_DIR, ASSETS_DIR
-    if not TEMPLATES_FOLDER.exists():
-        raise FileNotFoundError(f"Templates folder not found: {TEMPLATES_FOLDER}")
-
-    if not GAMES_FOLDER.exists():
-        raise FileNotFoundError(f"Games folder not found: {GAMES_FOLDER}")
-
-    if not ASSETS_FOLDER.exists():
-        raise FileNotFoundError(f"Assets folder not found: {ASSETS_FOLDER}")
