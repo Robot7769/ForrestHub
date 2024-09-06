@@ -80,8 +80,8 @@
                         <h5 class="card-title">Správa dat hry</h5>
                         <button id="download-button" class="btn btn-primary mb-2">Stáhnout data hry</button>
                         <button id="clear-button" class="btn btn-danger mb-2">Vymazat data hry</button>
-                        <p class="card-text">Data hry jsou uložena v počítači: <strong>{{ config.ROOT_DIR }}/{{ config.DATAFILE }}</strong></p>
-                        <p class="card-text">Veškerý informace jsou logovány do souboru: <strong>{{ config.ROOT_DIR }}/{{ config.LOG_FOLDER }}</strong></p>
+                        <p class="card-text">Data hry jsou uložena v počítači: <strong>{{ config.EXECUTABLE_DIR }}/{{ config.DATAFILE }}</strong></p>
+                        <p class="card-text">Veškerý informace jsou logovány do souboru: <strong>{{ config.EXECUTABLE_DIR }}/{{ config.LOG_FOLDER }}</strong></p>
                         <p class="card-text">Debug: <strong>{{ config.DEBUG }}</strong></p>
                         <p class="card-text">Root: <strong>{{ config.TEMP_DIR }}</strong></p>
                     </div>

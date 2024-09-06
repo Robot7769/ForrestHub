@@ -2,10 +2,18 @@ from pathlib import Path
 
 from app.init import db
 from app.utils import get_local_ip_address
-from flask import Blueprint, render_template, abort, send_from_directory, current_app, jsonify, request
+from flask import (
+    Blueprint,
+    render_template,
+    abort,
+    send_from_directory,
+    current_app,
+    jsonify,
+    request,
+)
 from jinja2 import TemplateNotFound
 
-main = Blueprint('main', __name__)
+main = Blueprint("main", __name__)
 
 
 def get_html_and_folders(folder: Path):
@@ -13,15 +21,19 @@ def get_html_and_folders(folder: Path):
     if folder.exists():
         for folder_iter in folder.iterdir():
             if folder_iter.is_dir():
-                res.append({
-                    "name": folder_iter.name,
-                    "is_dir": True,
-                })
+                res.append(
+                    {
+                        "name": folder_iter.name,
+                        "is_dir": True,
+                    }
+                )
             elif folder_iter.suffix == ".html" and folder_iter.stem != "index":
-                res.append({
-                    "name": folder_iter.stem,
-                    "is_dir": False,
-                })
+                res.append(
+                    {
+                        "name": folder_iter.stem,
+                        "is_dir": False,
+                    }
+                )
     return res
 
 
@@ -37,59 +49,73 @@ def get_selected_level_routes(folder: str):
     return top_level_routes
 
 
-@main.route('/')
+@main.route("/")
 def index():
-    return render_template('index.html', title='Menu', same_level_routes=get_selected_level_routes('.'))
+    return render_template(
+        "index.html", title="Menu", same_level_routes=get_selected_level_routes(".")
+    )
 
 
-@main.route('/download-data')
+@main.route("/download-data")
 def download_data():
-    return send_from_directory(current_app.config['ROOT_DIR'], current_app.config['DATAFILE'], as_attachment=True)
+    return send_from_directory(
+        current_app.config["EXECUTABLE_DIR"],
+        current_app.config["DATAFILE"],
+        as_attachment=True,
+    )
 
 
-@main.route('/clear-data')
+@main.route("/clear-data")
 def clear_data():
     db.overwrite_data_dict({})
     return jsonify({"status": "success"})
 
 
-@main.route('/upload-data', methods=['POST'])
+@main.route("/upload-data", methods=["POST"])
 def upload_data():
-    if 'file' not in request.files:
+    if "file" not in request.files:
         return jsonify({"status": "error", "message": "No file part"})
-    file = request.files['file']
+    file = request.files["file"]
 
-    if file.filename == '':
+    if file.filename == "":
         return jsonify({"status": "error", "message": "No selected file"})
 
-    allowed_extensions = current_app.config['ALLOWED_EXTENSIONS']
-    if (
-            not file
-            or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions
-    ):
-        return jsonify({"status": "error", "message": f"Invalid file type - allowed extensions: {allowed_extensions}"})
-    print(f'Uploading file {file.filename} that will overwrite the current data')
+    allowed_extensions = current_app.config["ALLOWED_EXTENSIONS"]
+    if not file or file.filename.rsplit(".", 1)[1].lower() not in allowed_extensions:
+        return jsonify(
+            {
+                "status": "error",
+                "message": f"Invalid file type - allowed extensions: {allowed_extensions}",
+            }
+        )
+    print(f"Uploading file {file.filename} that will overwrite the current data")
     db.overwrite_data_file(file)
     return jsonify({"status": "success"})
 
 
-@main.route('/<folder>/', defaults={'page': 'index'})
-@main.route('/<folder>/<page>')
+@main.route("/<folder>/", defaults={"page": "index"})
+@main.route("/<folder>/<page>")
 def render_page(folder: str, page: str):
     try:
         # if page contains a dot, it is a file extension - serve as static file
-        if '.' in page:
-            path_to_file = Path(f'{current_app.config.get("GAMES_FOLDER")}/{folder}/{page}')
-            path_to_file_live = Path(f'{current_app.config.get("GAMES_FOLDER_LIVE")}/{folder}/{page}')
+        if "." in page:
+            path_to_file = Path(
+                f'{current_app.config.get("GAMES_FOLDER")}/{folder}/{page}'
+            )
+            path_to_file_live = Path(
+                f'{current_app.config.get("GAMES_FOLDER_LIVE")}/{folder}/{page}'
+            )
             if path_to_file_live.exists():
-                return send_from_directory(path_to_file_live.parent, path_to_file_live.name)
+                return send_from_directory(
+                    path_to_file_live.parent, path_to_file_live.name
+                )
             elif path_to_file.exists():
                 return send_from_directory(path_to_file.parent, path_to_file.name)
             return abort(404)
         else:
             return render_template(
-                f'{folder}/{page}.html',
-                title=f'{folder.capitalize()}',
+                f"{folder}/{page}.html",
+                title=f"{folder.capitalize()}",
                 folder=folder,
                 page=page,
                 data=db.get_data(),
@@ -102,13 +128,13 @@ def render_page(folder: str, page: str):
         abort(404)
 
 
-@main.route('/<path:filename>')
+@main.route("/<path:filename>")
 def not_allowed(filename):
     return "Not allowed depth level 3", 404
 
 
 # Serve static files
-@main.route('/assets/<path:filename>')
+@main.route("/assets/<path:filename>")
 def static_files(filename):
     static_path = current_app.config.get("ASSETS_FOLDER")
     return send_from_directory(static_path, filename)

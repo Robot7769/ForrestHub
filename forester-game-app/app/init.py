@@ -15,7 +15,7 @@ def create_app(config_class="config.Config"):
     # Enable CORS
     CORS(app)
 
-    db.init(app.config["ROOT_DIR"], app.config["DATAFILE"])
+    db.init(app.config["EXECUTABLE_DIR"], app.config["DATAFILE"])
 
     # Set custom Jinja loader
 
