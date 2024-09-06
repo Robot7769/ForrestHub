@@ -1,16 +1,9 @@
-<div class="row">
-    <div class="col-md-6">
-        <a href="/udavac" class="btn btn-primary btn-lg">Udavač</a>
-    </div>
-    <div class="col-md-6">
-        <a href="/posta" class="btn btn-primary btn-lg">Pošta</a>
-    </div>
+{% extends "templates/base.html" %}
+{% block content %}
+    <div class="container text-center">
+        <h2>{{ folder | capitalize }}</h2>
+        <a href="/" class="btn btn-primary">Domů</a>
 
-    <div class="col-md-6">
-        <a href="/demo/increment" class="btn btn-primary btn-lg">Demo</a>
+        {% include "templates/list_folders.html" %}
     </div>
-
-    <div class="col-md-6">
-        <a href="/admin" class="btn btn-secondary btn-lg">Admin</a>
-    </div>
-</div>
+{% endblock %}

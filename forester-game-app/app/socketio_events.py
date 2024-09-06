@@ -73,8 +73,10 @@ def handle_exists_key(key: str) -> dict:
 
 
 @socketio.on('get_key')
-def handle_get_key(key: str, default=None) -> dict:
-    return {'status': 'ok', 'data': db.get_data_key(key, default)}
+def handle_get_key(json: dict) -> dict:
+    key = json.get('key')
+    default_value = json.get('defaultValue')
+    return {'status': 'ok', 'data': db.get_data_key(key, default_value)}
 
 
 @socketio.on('delete_key')

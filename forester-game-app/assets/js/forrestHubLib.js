@@ -43,14 +43,6 @@ class ForrestHubLib {
             }
         });
 
-        this.addEventListenerKey('full_screen', async (data) => {
-            if (data === true) {
-                await document.documentElement.requestFullscreen();
-            } else {
-                await document.exitFullscreen();
-            }
-        });
-
         this.addEventListenerKey("game_status", (data) => {
             this.updateGameStatusUI(data);
         });
@@ -107,8 +99,8 @@ class ForrestHubLib {
         await this.emitWithResponse('set_key_broadcast', { key, value });
     }
 
-    async getKey(key) {
-        const response = await this.emitWithResponse('get_key', key);
+    async getKey(key, defaultValue = null) {
+        const response = await this.emitWithResponse('get_key', { key, defaultValue });
         return response.data;
     }
 

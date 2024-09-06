@@ -14,10 +14,12 @@ class CustomLoader(FileSystemLoader):
                 template_path = pathlib.Path(current_app.config["TEMPLATES_FOLDER_LIVE"]) / template[10:]
             else:
                 template_path = pathlib.Path(current_app.config["TEMPLATES_FOLDER"]) / template[10:]
-        elif current_app.config.get("LIVE_DATA_USED") and Path(current_app.config["GAMES_FOLDER_LIVE"]).exists():
+        elif current_app.config.get("LIVE_DATA_USED") and Path(current_app.config["GAMES_FOLDER_LIVE"]/template).exists():
             template_path = pathlib.Path(current_app.config["GAMES_FOLDER_LIVE"]) / template
-        else:
+        elif Path(current_app.config["GAMES_FOLDER"]/template).exists():
             template_path = pathlib.Path(current_app.config["GAMES_FOLDER"]) / template
+        else:
+            template_path = pathlib.Path(current_app.config["TEMPLATES_FOLDER"]) / "menu.html"
 
         if not template_path.exists():
             raise TemplateNotFound(template)

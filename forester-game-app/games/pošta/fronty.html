@@ -1,0 +1,82 @@
+{#https://chatgpt.com/share/dc75c8d2-06a6-4459-9698-8513f33aee3d#}
+{% extends "templates/base.html" %}
+{% set game_name = "Pošta - Tabule" %}
+{% block content %}
+    <div class="container">
+        <h1>Informace o frontách</h1>
+        <div class="row" id="queue_info">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Příjem</h3>
+                        <p>Čekajících: <span id="prijem_count">0</span></p>
+                        <ul id="prijem_list" class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Odeslání</h3>
+                        <p>Čekajících: <span id="odeslani_count">0</span></p>
+                        <ul id="odeslani_list" class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Los</h3>
+                        <p>Čekajících: <span id="los_count">0</span></p>
+                        <ul id="los_list" class="list-group"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const forrestLib = new ForrestHubLib();
+
+        const updateQueueDisplay = (queue, countElement, listElement) => {
+            const count = queue ? queue.length : 0;
+            countElement.innerText = count;
+            listElement.innerHTML = '';
+
+            (queue || []).slice(0, 3).forEach(ticket => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = `Číslo: ${ticket.number}`;
+                listElement.appendChild(li);
+            });
+        };
+
+        const updateAllQueues = () => {
+            Promise.all([
+                forrestLib.getKey('prijem_queue', []),
+                forrestLib.getKey('odeslani_queue', []),
+                forrestLib.getKey('los_queue', [])
+            ]).then(([prijem, odeslani, los]) => {
+                updateQueueDisplay(prijem, document.getElementById('prijem_count'), document.getElementById('prijem_list'));
+                updateQueueDisplay(odeslani, document.getElementById('odeslani_count'), document.getElementById('odeslani_list'));
+                updateQueueDisplay(los, document.getElementById('los_count'), document.getElementById('los_list'));
+            });
+        };
+
+        // Automatické aktualizace přes addEventListenerKey
+        forrestLib.addEventListenerKey('prijem_queue', (data) => {
+            updateQueueDisplay(data, document.getElementById('prijem_count'), document.getElementById('prijem_list'));
+        });
+
+        forrestLib.addEventListenerKey('odeslani_queue', (data) => {
+            updateQueueDisplay(data, document.getElementById('odeslani_count'), document.getElementById('odeslani_list'));
+        });
+
+        forrestLib.addEventListenerKey('los_queue', (data) => {
+            updateQueueDisplay(data, document.getElementById('los_count'), document.getElementById('los_list'));
+        });
+
+        // Počáteční načtení stavu front
+        updateAllQueues();
+    </script>
+{% endblock %}

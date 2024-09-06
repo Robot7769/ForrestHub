@@ -1,0 +1,21 @@
+<div class="row">
+    {% if same_level_routes|length == 0 %}
+        <div class="col-12">
+            <p>Nic k zobrazení</p> <!-- 'Nothing to display' in Czech -->
+        </div>
+    {% else %}
+        <h3>Stránky herního adresáře</h3> <!-- 'Pages of the game directory' in Czech -->
+        {% for route in same_level_routes %}
+            <div class="col-md-6 mb-3"> <!-- Added mb-3 for margin between buttons -->
+                <a href="{{ route.name }}"
+                   class="btn
+                   {% if route.name == 'admin' %}btn-warning
+                   {% elif route.is_dir %}btn-primary
+                   {% else %}btn-info
+                   {% endif %} btn-lg">
+                    {{ route.name.capitalize() }}
+                </a>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
