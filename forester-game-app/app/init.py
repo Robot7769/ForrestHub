@@ -1,9 +1,8 @@
+from app.custom_loader import CustomLoader
+from app.database import Database
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
-from app.custom_loader import CustomLoader
-from app.database import Database
-import os
 
 socketio = SocketIO(cors_allowed_origins="*")
 db = Database()
@@ -19,10 +18,19 @@ def create_app(config_class="config.Config"):
     db.init(app.config["ROOT_DIR"], app.config["DATAFILE"])
 
     # Set custom Jinja loader
-    root_path = app.config["ROOT_DIR"]
-    app.jinja_loader = CustomLoader(
-        [os.path.join(root_path, "pages"), os.path.join(root_path, "templates")]
-    )
+
+    loader_locations = [
+        app.config.get("GAMES_FOLDER"),
+        app.config.get("TEMPLATES_FOLDER"),
+        app.config.get("ASSETS_FOLDER"),
+    ]
+
+    if app.config.get("LIVE_DATA_USED"):
+        loader_locations.append(app.config.get("GAMES_FOLDER_LIVE"))
+        loader_locations.append(app.config.get("TEMPLATES_FOLDER_LIVE"))
+        loader_locations.append(app.config.get("ASSETS_FOLDER_LIVE"))
+
+    app.jinja_loader = CustomLoader(loader_locations)
 
     # Register Blueprints
     from app.routes import main as main_blueprint

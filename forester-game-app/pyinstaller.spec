@@ -9,7 +9,7 @@ a = Analysis(
     datas=[
         ('templates', 'templates'),
         ('assets', 'assets'),
-        ('pages', 'pages'),
+        ('games', 'games'),
         ('config.py', '.'),
         ('app', 'app'),
     ],

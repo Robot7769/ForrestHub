@@ -10,19 +10,29 @@ class DatabaseException(Exception):
 
 class Database:
     def __init__(self):
+        self.directory = None
+        self.file = None
         self.path_to_data = None
         self.data = {}
 
-    def init(self, path: str, file_name: str, clear_data: bool = False):
-        if not path or not os.path.exists(path):
+    def init(self, directory: str, file_name: str, clear_data: bool = False):
+        if not directory or not os.path.exists(directory):
             raise DatabaseException('Path is not provided or does not exist - Database.init()')
         if not file_name or not file_name.endswith('.json'):
             raise DatabaseException('File name is not provided or is not a JSON file - Database.init()')
 
-        self.path_to_data = os.path.join(path, file_name)
+        self.directory = directory
+        self.file = file_name
+        self.path_to_data = os.path.join(directory, file_name)
         if clear_data or not os.path.exists(self.path_to_data):
             self._write_data({})
         self.data = self._read_data()
+
+    def get_directory(self):
+        return self.directory
+
+    def get_file(self):
+        return self.file
 
     def _write_data(self, data):
         with open(self.path_to_data, 'w') as f:
@@ -47,8 +57,8 @@ class Database:
     def get_data(self):
         return self.data
 
-    def get_data_key(self, key):
-        return self.data.get(key)
+    def get_data_key(self, key, default=None):
+        return self.data.get(key, default)
 
     def set_data_key(self, key, value):
         self.data[key] = value

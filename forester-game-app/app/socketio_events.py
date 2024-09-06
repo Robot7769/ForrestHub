@@ -28,63 +28,56 @@ def handle_disconnect():
     connected_clients -= 1
     emit('update_clients', {'count': connected_clients}, broadcast=True)
 
-
-@socketio.on('game_start')
-def handle_game_start():
-    global game_status
-    game_status = 'running'
-    emit('game_status', game_status, broadcast=True)
-
-
-@socketio.on('game_stop')
-def handle_game_stop():
-    global game_status
-    game_status = 'stopped'
-    emit('game_status', game_status, broadcast=True)
-
-@socketio.on('game_pause')
-def handle_game_pause():
-    global game_status
-    game_status = 'paused'
-    emit('game_status', game_status, broadcast=True)
-
-
 @socketio.on('get_game_status')
 def handle_game_status():
+    global game_status
     emit('game_status', game_status)
 
 
+@socketio.on('set_game_status')
+def handle_set_game_status(status: str):
+    global game_status
+    game_status = status
+    emit('game_status', game_status, broadcast=True)
 
 
+@socketio.on('get_all_db')
+def handle_get_all_data(data) -> dict:
+    return {'status': 'ok', 'data': db.get_data()}
 
-@socketio.on('get_all')
-def handle_get_all_data():
-    return db.get_data()
+@socketio.on('delete_all_db')
+def handle_delete_all_data(data) -> dict:
+    db.overwrite_data_dict({})
+    return {'status': 'ok'}
 
-@socketio.on('set')
-def handle_set(json):
+@socketio.on('set_key')
+def handle_set_key(json: dict):
     key = json.get('key')
     value = json.get('value')
     db.set_data_key(key, value)
-    return {'status': 'success'}
+    return {'status': 'ok'}
 
 
-@socketio.on('get')
-def handle_get(key):
-    return {'value': db.get_data_key(key)}
-
-
-@socketio.on('edit_data')
-def handle_edit_data(json):
+@socketio.on('set_key_broadcast')
+def handle_set_key_broadcast(json: dict):
     key = json.get('key')
     value = json.get('value')
-    if db.edit_data_key(key, value):
-        return {'status': 'success'}
-    return {'status': 'error', 'message': 'Key not found'}
+    db.set_data_key(key, value)
+    emit(key, value, broadcast=True)
+    return {'status': 'ok'}
 
 
-@socketio.on('delete_data')
-def handle_delete_data(key):
-    if db.delete_data_key(key):
-        return {'status': 'success'}
-    return {'status': 'error', 'message': 'Key not found'}
+@socketio.on('exists_key')
+def handle_exists_key(key: str) -> dict:
+    return {'status': 'ok', 'exists': db.get_data_key(key) is not None}
+
+
+@socketio.on('get_key')
+def handle_get_key(key: str, default=None) -> dict:
+    return {'status': 'ok', 'data': db.get_data_key(key, default)}
+
+
+@socketio.on('delete_key')
+def handle_delete_key(key: str) -> dict:
+    db.delete_data_key(key)
+    return {'status': 'ok'}

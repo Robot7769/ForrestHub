@@ -1,0 +1,63 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Pořadové číslo a čas" %}
+{% block content %}
+    <div class="container">
+        <h1>Odesílání pořadového čísla a času</h1>
+        <p><strong>Pořadová čísla a časy:</strong></p>
+        <ul id="recordsList"></ul>
+        <button id="sendRecordButton">Odeslat záznam</button>
+    </div>
+
+    <script>
+        const foresterLib = new ForrestHubLib();
+        let localRecords = [];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const recordsList = document.getElementById('recordsList');
+            const sendRecordButton = document.getElementById('sendRecordButton');
+
+            // Načtení předchozích záznamů z databáze
+            foresterLib.getKey('records').then((value) => {
+                localRecords = value || [];
+                updateRecordList(recordsList, localRecords);
+            }).catch((err) => {
+                console.error('Chyba při načítání záznamů:', err);
+            });
+
+            // Odeslání nového záznamu po kliknutí
+            sendRecordButton.addEventListener('click', () => {
+                const now = new Date();
+                const record = {
+                    id: localRecords.length + 1,
+                    time: now.toLocaleTimeString(),
+                    date: now.toLocaleDateString()
+                };
+
+                localRecords.push(record);
+
+                // Broadcast nového záznamu do všech počítačů
+                foresterLib.setKeyBroadcast('records', localRecords).then(() => {
+                    updateRecordList(recordsList, localRecords);
+                }).catch((err) => {
+                    console.error('Chyba při odesílání záznamu:', err);
+                });
+            });
+
+            // Posluchač na příchod nových záznamů od jiných zařízení
+            foresterLib.addEventListenerKey('records', (data) => {
+                localRecords = data || [];
+                updateRecordList(recordsList, localRecords);
+            });
+        });
+
+        // Aktualizace seznamu záznamů
+        function updateRecordList(list, records) {
+            list.innerHTML = '';  // Vyprázdní seznam
+            records.forEach(record => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `ID: ${record.id}, Čas: ${record.time}, Datum: ${record.date}`;
+                list.appendChild(listItem);
+            });
+        }
+    </script>
+{% endblock %}
