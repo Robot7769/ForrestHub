@@ -38,8 +38,8 @@ def setup_logging(root_dir: str, log_folder: str = "ForesterLogs"):
     return logging.getLogger(__name__)
 
 
-def run_flask():
-    app = create_app()
+def run_flask(config="config.Config"):
+    app = create_app(config)
     socketio.run(
         app,
         host="0.0.0.0",
@@ -51,6 +51,10 @@ def run_flask():
 
 if __name__ == "__main__":
     config = Config()
+
+    # if exist argument, use them as port of app
+    if len(sys.argv) > 1:
+        config.PORT = int(sys.argv[1])
 
     logger = setup_logging(config.ROOT_DIR, config.LOG_FOLDER)
     logging.basicConfig(level=logging.INFO)
@@ -64,7 +68,7 @@ if __name__ == "__main__":
         print(f"Server started at {local_ip}")
         logger.info(f"Server started at {local_ip}")
         logger.info("Press Ctrl-C to stop the server")
-        run_flask()
+        run_flask(config=config)
     except KeyboardInterrupt:
         logger.info("Server stopped")
         sys.exit(0)
