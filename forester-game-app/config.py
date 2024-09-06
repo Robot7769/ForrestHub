@@ -1,7 +1,7 @@
 import os
 import sys
 from app.utils import get_local_ip_address
-import pathlib
+from pathlib import Path
 
 
 class Config:
@@ -22,26 +22,26 @@ class Config:
     if getattr(sys, "frozen", False):
         FROZEN = True
         PORT = 80
-        ROOT_DIR = pathlib.Path(sys.executable).parent
+        ROOT_DIR = Path(sys.executable).parent
         DATA_DIR = sys._MEIPASS
     else:
         FROZEN = False
         PORT = 4444
-        ROOT_DIR = pathlib.Path(__file__).parent
+        ROOT_DIR = Path(__file__).parent
         DATA_DIR = ROOT_DIR
 
     # use live data if it exists
-    LIVE_DATA_FOLDER = pathlib.Path(ROOT_DIR) / LIVE_DATA_DIR
-    TEMPLATES_FOLDER = pathlib.Path(ROOT_DIR) / TEMPLATES_DIR
-    GAMES_FOLDER = pathlib.Path(ROOT_DIR) / GAMES_DIR
-    ASSETS_FOLDER = pathlib.Path(ROOT_DIR) / ASSETS_DIR
+    LIVE_DATA_FOLDER = Path(DATA_DIR) / LIVE_DATA_DIR
+    TEMPLATES_FOLDER = Path(DATA_DIR) / TEMPLATES_DIR
+    GAMES_FOLDER = Path(DATA_DIR) / GAMES_DIR
+    ASSETS_FOLDER = Path(DATA_DIR) / ASSETS_DIR
     LIVE_DATA_USED = False
 
     if LIVE_DATA_FOLDER.exists():
         LIVE_DATA_USED = True
-        TEMPLATES_FOLDER_LIVE = pathlib.Path(LIVE_DATA_FOLDER) / TEMPLATES_DIR
-        GAMES_FOLDER_LIVE = pathlib.Path(LIVE_DATA_FOLDER) / GAMES_DIR
-        ASSETS_FOLDER_LIVE = pathlib.Path(LIVE_DATA_FOLDER) / ASSETS_DIR
+        TEMPLATES_FOLDER_LIVE = Path(LIVE_DATA_FOLDER) / TEMPLATES_DIR
+        GAMES_FOLDER_LIVE = Path(LIVE_DATA_FOLDER) / GAMES_DIR
+        ASSETS_FOLDER_LIVE = Path(LIVE_DATA_FOLDER) / ASSETS_DIR
 
         #     check if exist
         if not TEMPLATES_FOLDER_LIVE.exists():
