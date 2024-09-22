@@ -1,5 +1,6 @@
 # ForrestHub
 
+![ForrestHub](https://github.com/Helceletka/ForrestHub/blob/main/ForrestHub-app/assets/img/forrestHub.png?raw=true)
 
 Download the latest version of the ForrestHub app:
 - [Windows](https://github.com/Helceletka/ForrestHub/releases/latest/download/ForrestHub-Windows.exe)

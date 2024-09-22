@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-windows:
+    permissions: write-all
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -32,6 +33,7 @@ jobs:
         path: ForrestHub-app/dist/ForrestHub.exe
 
   build-macos:
+    permissions: write-all
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
