@@ -20,18 +20,18 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        cd forester-game-app
+        cd ForrestHub-app
         pip install -r requirements.txt
         pip install pyinstaller
     - name: Build executable
       run: |
-        cd forester-game-app
+        cd ForrestHub-app
         pyinstaller pyinstaller.spec
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: Forester-${{ runner.os }}
-        path: forester-game-app/dist/Forester*
+        name: ForrestHub-${{ runner.os }}
+        path: ForrestHub-app/dist/ForrestHub*
 
   create-release:
     needs: build-and-release
@@ -55,8 +55,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Forester-Windows/Forester.exe
-        asset_name: Forester-Windows.exe
+        asset_path: ./ForrestHub-Windows/ForrestHub.exe
+        asset_name: ForrestHub-Windows.exe
         asset_content_type: application/octet-stream
     - name: Upload macOS Release Asset
       uses: actions/upload-release-asset@v1
@@ -64,6 +64,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Forester-macOS/Forester
-        asset_name: Forester-macOS
+        asset_path: ./ForrestHub-macOS/ForrestHub
+        asset_name: ForrestHub-macOS
         asset_content_type: application/octet-stream

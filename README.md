@@ -2,8 +2,8 @@
 
 
 Download the latest version of the Web-game-engine app:
-- [Windows](https://github.com/Helceletka/Web-game-engine/releases/latest/download/Forester-Windows.exe)
-- [Mac OS X](https://github.com/Helceletka/Web-game-engine/releases/latest/download/Forester-macOS)
+- [Windows](https://github.com/Helceletka/Web-game-engine/releases/latest/download/ForrestHub-Windows.exe)
+- [Mac OS X](https://github.com/Helceletka/Web-game-engine/releases/latest/download/ForrestHub-macOS)
 
 ![image](https://github.com/Helceletka/Web-game-engine/assets/33494544/b00d90b0-87e1-477d-8259-f51a1f5ecc26)
 

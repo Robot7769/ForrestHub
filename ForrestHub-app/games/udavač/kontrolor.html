@@ -1,0 +1,15 @@
+{% extends "templates/base.html" %}
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center p-5" id="content">
+        <div class="text-center gap-3">
+            <img src="/assets/img/forrestHub.png" width="500px" alt="Helceletka" class="mb-4">
+            <input type="number" id="number" pattern="\d{4}" required autofocus class="form-control form-control-lg mb-4">
+
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-secondary btn-lg mb-2" id="check">Zkontroluj</button>
+            </div>
+            <p>Stiskni tlačítko nebo klikni na ENTER</p>
+            <div id="result" class="alert" role="alert"></div>
+        </div>
+    </div>
+{% endblock %}
