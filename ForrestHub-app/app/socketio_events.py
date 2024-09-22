@@ -30,7 +30,7 @@ def handle_disconnect():
 
 
 @socketio.on("get_game_status")
-def handle_game_status():
+def handle_game_status(demo):
     global game_status
     emit("game_status", game_status)
 

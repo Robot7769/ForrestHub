@@ -3,3 +3,4 @@ clear-local:
 
 pyinstaller: clear-local
 	pyinstaller ./pyinstaller.spec
+
