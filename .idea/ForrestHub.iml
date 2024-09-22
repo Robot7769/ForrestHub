@@ -9,7 +9,8 @@
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
     <option name="TEMPLATE_FOLDERS">
       <list>
-        <option value="$MODULE_DIR$/py-socket-server/templates" />
+        <option value="$MODULE_DIR$/ForrestHub-app/templates" />
+        <option value="$MODULE_DIR$/ForrestHub-app/games" />
       </list>
     </option>
   </component>
