@@ -59,9 +59,9 @@ if __name__ == "__main__":
     logger = setup_logging(config.EXECUTABLE_DIR, config.LOG_FOLDER)
     logging.basicConfig(level=logging.INFO)
 
-    if not config.DEBUG:
-        webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}")
-        webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}/admin")
+    # if not config.DEBUG:
+    webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}")
+    webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}/admin")
 
     try:
         local_ip = f"http://{config.IP_ADDRESS}:{config.PORT}"

@@ -8,7 +8,7 @@ let globalData = {};
 forrestHubLib.addEventListenerKey("connect", async () => {
     forrestHubLib.showAlert('success', 'Připojeno k serveru.');
     await loadAndDisplayData();
-    forrestHubLib.emit('get_game_status');
+    forrestHubLib.emit('get_game_status', null);
 });
 
 

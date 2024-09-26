@@ -19,7 +19,7 @@ class ForrestHubLib {
 
         this.addEventListenerKey('connect', () => {
             console.log('Connected to the server!');
-            this.socket.emit('get_game_status');
+            this.socket.emit('get_game_status', null);
             this.removeOverlay();
         });
 

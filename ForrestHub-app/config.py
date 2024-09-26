@@ -45,13 +45,16 @@ class Config:
 
         # check if exist
         if not TEMPLATES_FOLDER_LIVE.exists():
-            raise FileNotFoundError(f"Templates folder not found: {TEMPLATES_FOLDER}")
+            TEMPLATES_FOLDER_LIVE = None
+            # raise FileNotFoundError(f"Templates folder not found: {TEMPLATES_FOLDER}")
 
         if not GAMES_FOLDER_LIVE.exists():
-            raise FileNotFoundError(f"Games folder not found: {GAMES_FOLDER}")
+            GAMES_FOLDER_LIVE = None
+            # raise FileNotFoundError(f"Games folder not found: {GAMES_FOLDER}")
 
         if not ASSETS_FOLDER_LIVE.exists():
-            raise FileNotFoundError(f"Assets folder not found: {ASSETS_FOLDER}")
+            ASSETS_FOLDER_LIVE = None
+            # raise FileNotFoundError(f"Assets folder not found: {ASSETS_FOLDER}")
 
     # Disable debug and reloader when using frozen data with live data - production mode
     if not LIVE_DATA_USED and FROZEN:
