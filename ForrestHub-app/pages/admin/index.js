@@ -1,4 +1,8 @@
-const forrestHubLib = new ForrestHubLib();
+
+if (!forrestHubLib) {
+    forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+}
+
 forrestHubLib.setAdmin(true);
 forrestHubLib.setGameMode(false);
 

@@ -66,7 +66,10 @@ class ForrestHubLib {
                 if (response && response.status === 'ok') {
                     resolve(response);
                 } else {
-                    const message = `Chyba při zpracování události: ${event}`;
+                    let message = `Chyba při zpracování události: ${event}`;
+                    if (response && response.message) {
+                        message = response.message;
+                    }
                     console.error(message);
                     this.showOverlay(message, null);
                     reject(new Error(message));
@@ -236,3 +239,5 @@ class ForrestHubLib {
         }
     }
 }
+
+window.forrestHubLib = new ForrestHubLib();

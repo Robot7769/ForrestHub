@@ -1,0 +1,101 @@
+{% extends "templates/base.html" %}
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center p-5" id="content">
+        <div class="text-center gap-3">
+            <img src="/assets/img/ForrestHub-helceletka.png" width="500px" alt="Helceletka" class="mb-4">
+            <div class="d-flex justify-content-center gap-2 mb-4">
+                <input type="text" maxlength="1" class="form-control form-control-lg text-center" id="digit1">
+                <input type="text" maxlength="1" class="form-control form-control-lg text-center" id="digit2">
+                <input type="text" maxlength="1" class="form-control form-control-lg text-center" id="digit3">
+                <input type="text" maxlength="1" class="form-control form-control-lg text-center" id="digit4">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-secondary btn-lg mb-2" id="check">Zkontroluj</button>
+            </div>
+            <p>Stiskni tlačítko nebo klikni na ENTER</p>
+            <div id="result" class="alert" role="alert" style="display: none;"></div>
+        </div>
+    </div>
+
+    <style>
+        #content { font-size: 30px; }
+        .form-control-lg { width: 70px; }
+    </style>
+
+    <script>
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+
+        const inputs = [...document.querySelectorAll('.form-control')];
+        const resultDiv = document.getElementById('result');
+        let timeout = null;
+
+        // Function to check the number
+        async function checkNumber() {
+            const number = inputs.map(input => input.value).join('');
+            let numbersList = await forrestHubLib.getKey('numbersList') || [];
+
+            if (number.length !== 4 || isNaN(number)) {
+                resultDiv.innerText = 'Zadej čtyřmístné číslo';
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.style.display = 'block';
+                clearInputs();
+                return resetAlert();
+            }
+
+            if (numbersList.includes(number)) {
+                resultDiv.innerText = 'Stůj';
+                resultDiv.className = 'alert alert-danger';
+            } else {
+                resultDiv.innerText = 'Můžeš dál';
+                resultDiv.className = 'alert alert-success';
+            }
+            resultDiv.style.display = 'block';
+            clearInputs();
+            resetAlert();
+        }
+
+        // Clear input fields
+        function clearInputs() {
+            inputs.forEach(input => input.value = '');
+            inputs[0].focus();
+        }
+
+        // Reset alert after 3 seconds
+        function resetAlert() {
+            timeout && clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                resultDiv.style.display = 'none';
+                resultDiv.className = '';
+            }, 3000);
+        }
+
+        // Restrict input to numbers only
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (/\D/.test(input.value)) {
+                    input.value = ''; // Clear non-numeric input
+                } else if (input.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus(); // Move to next input
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && index > 0 && input.value === '') {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Check button click
+        document.getElementById('check').addEventListener('click', checkNumber);
+
+        // Enter key event
+        inputs.forEach(input => {
+            input.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    checkNumber();
+                }
+            });
+        });
+    </script>
+{% endblock %}

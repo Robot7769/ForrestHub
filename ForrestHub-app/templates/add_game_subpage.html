@@ -1,0 +1,74 @@
+{% if debug == true %}
+<div class="container">
+    <h3>Správa her</h3>
+    <button id="addGamePageButton" class="btn btn-primary">Vytvoř podstránku hry</button>
+</div>
+
+<!-- Modal pro zadání jména hry a obsahu -->
+<div class="modal fade" id="pageModal" tabindex="-1" aria-labelledby="pageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pageModalLabel">Nastav jméno hry a HTML obsah podstránky</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="pageNameInput" class="form-label">Jméno podstránky</label>
+                    <input type="text" id="pageNameInput" class="form-control" placeholder="Zadej jméno podstránky">
+                </div>
+                <div class="mb-3">
+                    <label for="pageContentInput" class="form-label">HTML obsah</label>
+                    <textarea id="pageContentInput" class="form-control" rows="6" placeholder="Zadej HTML obsah podstránky"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
+                <button type="button" class="btn btn-primary" id="submitPage">Vytvořit podstránku</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+    forrestHubLib.setAdmin(true);
+    forrestHubLib.setGameMode(false);
+
+    // Otevři modal pro zadání jména podstránky a HTML obsahu
+    document.getElementById('addGamePageButton').addEventListener('click', () => {
+        const pageModal = new bootstrap.Modal(document.getElementById('pageModal'));
+        pageModal.show();
+    });
+
+    // Odeslání jména a HTML obsahu podstránky
+    document.getElementById('submitPage').addEventListener('click', () => {
+        let pageName = document.getElementById('pageNameInput').value.trim();
+        let pageContent = document.getElementById('pageContentInput').value.trim();
+
+        if (pageName && pageContent) {
+            // Převod na malá písmena a nahrazení lomítek
+            pageName = pageName.toLowerCase().replace(/\//g, '-');
+
+            const game = '{{ folder }}';
+
+            // Uložení podstránky na server
+            forrestHubLib.emit('add_new_game_page', {
+                game: '{{ folder }}',
+                page: pageName,
+                content: pageContent
+            });
+
+            const pageModal = bootstrap.Modal.getInstance(document.getElementById('pageModal'));
+            pageModal.hide(); // Skrytí modalu po odeslání
+
+            // Přesměrování na novou podstránku
+            window.location.href = `/{{ folder }}/${pageName}`;
+        } else {
+            alert('Zadejte prosím jméno a obsah podstránky.');
+        }
+    });
+</script>
+{% endif %}

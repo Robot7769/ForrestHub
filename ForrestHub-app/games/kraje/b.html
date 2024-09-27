@@ -1,0 +1,55 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Hra - Tabule kraje" %}
+{% block content %}
+    <div class="container mt-4">
+        <h1 id="kraj-name" class="text-center">Kraj: ?</h1>
+        <div class="text-center mt-4">
+            <p>Aktuální držitel: <strong id="team-holder">Neobsazeno</strong></p>
+            <button id="takeover-team-a" class="btn btn-primary">Převzít Tým A</button>
+            <button id="takeover-team-b" class="btn btn-danger">Převzít Tým B</button>
+        </div>
+    </div>
+
+    <script>
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        let currentKraj = "";
+
+        document.addEventListener('DOMContentLoaded', function () {
+            assignRandomKraj();
+            updateKrajStatus();
+
+            document.getElementById('takeover-team-a').addEventListener('click', function() {
+                takeOver("Tým A");
+            });
+
+            document.getElementById('takeover-team-b').addEventListener('click', function() {
+                takeOver("Tým B");
+            });
+
+            // Poslouchej změnu vlastnictví kraje
+            forrestHubLib.addEventListenerKey(`kraj_${currentKraj}`, (team) => {
+                updateKrajStatus(team);
+            });
+        });
+
+        function assignRandomKraj() {
+            const kraje = ["Praha", "Středočeský", "Jihočeský", "Plzeňský", "Karlovarský",
+                "Ústecký", "Liberecký", "Královéhradecký", "Pardubický",
+                "Vysočina", "Jihomoravský", "Olomoucký", "Zlínský", "Moravskoslezský"];
+            currentKraj = kraje[Math.floor(Math.random() * kraje.length)];
+            document.getElementById('kraj-name').innerText = `Kraj: ${currentKraj}`;
+        }
+
+        function updateKrajStatus(team = null) {
+            forrestHubLib.getKey(`kraj_${currentKraj}`).then((team) => {
+                document.getElementById('team-holder').innerText = team || "Neobsazeno";
+            });
+        }
+
+        function takeOver(team) {
+            forrestHubLib.setKeyBroadcast(`kraj_${currentKraj}`, team).then(() => {
+                updateKrajStatus();
+            });
+        }
+    </script>
+{% endblock %}

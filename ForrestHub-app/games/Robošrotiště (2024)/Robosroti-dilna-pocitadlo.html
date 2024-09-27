@@ -1,0 +1,248 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Pořadové číslo a čas" %}
+{% block content %}
+<style>
+    .button-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 50px);
+        grid-gap: 10px;
+        margin: 20px 50px;
+    }
+
+    .button-grid button {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+   .extra-button-grid {
+        display: grid;
+ grid-template-columns: repeat(4, 150px); /* 4 sloupce po 150px */
+    grid-template-rows: repeat(5, 50px); /* 5 řad po 50px */
+    grid-gap: 10px;
+    margin: 50px;
+    justify-items: center; /* Zarovnání tlačítek na střed v každé buňce */
+}
+
+    .extra-button-grid button {
+        width: 200px;
+        height: 50px;
+        font-size: 14px;
+        cursor: pointer;
+        color: #000;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+.extra-button-grid {
+        display: flex;
+        justify-content: space-around;
+        margin: 50px;
+}
+
+    .white { background-color: white; }
+    .yellow { background-color: yellow; }
+    .green { background-color: green; }
+    .red { background-color: red; }
+.gray { background-color: gray; color: white;}
+
+    .log {
+        margin: 20px 50px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+</style>
+</head>
+<body>
+
+<div class="button-grid">
+</div>
+
+<div class="extra-button-grid">
+</div>
+
+<div class="log" id="log">
+<h3>Výrobní log</h3>
+<!-- Dynamicky přidané záznamy se objeví zde -->
+</div>
+
+<script>
+const global = {
+    dot1: 0, dot2: 0, dot3: 0, dot4: 0, dot5: 0,
+    dot6: 0, dot7: 0, dot8: 0, dot9: 0, dot10: 0,
+    dot11: 0, dot12: 0, dot13: 0, dot14: 0, dot15: 0,
+    dot16: 0, dot17: 0, dot18: 0, dot19: 0, dot20: 0,
+    dot21: 0, dot22: 0, dot23: 0, dot24: 0, dot25: 0
+};
+
+const requirements = {
+a1: { dot11: 1, dot12: 1, dot13: 1, dot14: 1, dot15: 1, dot16: 1, dot17: 1, dot18: 1, dot19: 1, dot20: 1 },
+a2: { dot16: 1, dot17: 1, dot18: 1, dot19: 1, dot20: 1 },
+a3: { dot2: 1, dot3: 1, dot4: 1, dot8: 1, dot13: 1, dot18: 1, dot22: 1, dot23: 1, dot24: 1 },
+a4: { dot2: 1, dot3: 1, dot4: 1, dot6: 1, dot10: 1, dot11: 1, dot13: 1, dot15: 1, dot16: 1, dot20: 1, dot22: 1, dot23: 1, dot24: 1 },
+a5: { dot7: 1, dot8: 1, dot9: 1, dot12: 1, dot14: 1, dot17: 1, dot18: 1, dot19: 1 },
+b1: { dot7: 1, dot8: 1, dot9: 1, dot11: 1, dot12: 1, dot13: 1, dot14: 1, dot17: 1, dot18: 1, dot19: 1 },
+b2: { dot1: 1, dot2: 1, dot3: 1, dot4: 1, dot5: 1, dot7: 1, dot8: 1, dot9: 1, dot13: 1, dot17: 1, dot18: 1, dot19: 1, dot23: 1 },
+b3: { dot3: 1, dot8: 1, dot12: 1, dot13: 1, dot14: 1, dot16: 1, dot17: 1, dot18: 1, dot19: 1, dot20: 1, dot22: 1, dot23: 1, dot24: 1 },
+b4: { dot3: 1, dot8: 1, dot13: 1, dot17: 1, dot18: 1, dot19: 1, dot22: 1, dot23: 1, dot24: 1 },
+b5: { dot6: 1, dot7: 1, dot8: 1, dot9: 1, dot10: 1, dot11: 1, dot12: 1, dot13: 1, dot14: 1, dot15: 1, dot16: 1, dot18: 1, dot20: 1 },
+c1: { dot2: 1, dot3: 1, dot4: 1, dot6: 1, dot7: 1, dot8: 1, dot9: 1, dot10: 1, dot11: 1, dot12: 1, dot14: 1, dot15: 1, dot16: 1, dot17: 1, dot19: 1, dot20: 1, dot21: 1, dot22: 1, dot24: 1, dot25: 1 },
+c2: { dot1: 1, dot4: 1, dot5: 1, dot6: 1, dot8: 1, dot12: 1, dot13: 1, dot14: 1, dot18: 1, dot20: 1, dot21: 1, dot22: 1, dot25: 1 },
+c3: { dot3: 1, dot8: 1, dot14: 1, dot17: 1, dot19: 1, dot22: 1, dot23: 1, dot24: 1 },
+c4: { dot3: 1, dot8: 1, dot9: 1, dot13: 1, dot14: 1, dot15: 1, dot17: 1, dot18: 1, dot19: 1, dot20: 1, dot21: 1, dot22: 1, dot23: 1, dot24: 1 },
+c5: { dot7: 1, dot8: 1, dot9: 1, dot10: 1, dot11: 1, dot12: 1, dot13: 1, dot18: 1, dot22: 1, dot23: 1, dot24: 1 },
+d1: { dot7: 1, dot8: 1, dot9: 1, dot12: 1, dot13: 1, dot14: 1, dot18: 1, dot23: 1 },
+d2: { dot17: 1, dot18: 1, dot19: 1, dot21: 1, dot22: 1, dot23: 1, dot24: 1 },
+d3: { dot9: 1, dot12: 1, dot13: 1, dot14: 1, dot17: 1, dot18: 1, dot19: 1 },
+d4: { dot6: 1, dot8: 1, dot11: 1, dot12: 1, dot13: 1, dot16: 1, dot17: 1, dot18: 1 },
+d5: { dot8: 1, dot12: 1, dot13: 1, dot14: 1, dot18: 1 }
+};
+
+
+function calculatePotential(productId) {
+    const req = requirements[productId];
+    let potential = Infinity;
+    for (let key in req) {
+        const possible = Math.floor(global[key] / req[key]);
+        if (possible < potential) {
+            potential = possible;
+        }
+    }
+    return potential;
+}
+
+function canProduce(productId) {
+    const req = requirements[productId];
+    for (let key in req) {
+        if (global[key] < req[key]) return false;
+    }
+    return true;
+}
+
+function produceProduct(productId) {
+    const req = requirements[productId];
+    for (let key in req) {
+        global[key] -= req[key];
+    }
+}
+
+
+function updateDotButtons() {
+for (let i = 1; i <= 25; i++) {
+    const button = document.getElementById(`btn${i}`);
+    button.innerText = global[`dot${i}`];
+}
+}
+
+function updateButtonColors() {
+buttons.forEach(button => {
+    const potential = calculatePotential(button.id);
+    const btnElement = document.getElementById(button.id);
+    if (potential > 0) {
+        btnElement.classList.remove('gray'); // Odebereme šedou barvu, pokud je přítomna
+        btnElement.classList.add(button.color); // Přidáme správnou barvu
+    } else {
+        btnElement.classList.remove(button.color); // Odebereme původní barvu
+        btnElement.classList.add('gray'); // Nastavíme šedou barvu
+    }
+});
+}
+
+function logProduction(productId, description) {
+const log = document.getElementById('log');
+const timestamp = new Date().toLocaleTimeString();
+const newEntry = `<p>${timestamp} - ${productId} - ${description}</p>`;
+log.insertAdjacentHTML('afterbegin', newEntry); // Přidá nový záznam hned pod nadpisem
+}
+
+function updateProductButtons() {
+    buttons.forEach(button => {
+        const potential = calculatePotential(button.id);
+        document.getElementById(button.id).innerText = `${button.description} (${potential})`;
+    });
+}
+
+const buttonGrid = document.querySelector('.button-grid');
+
+for (let i = 1; i <= 25; i++) {
+    const button = document.createElement('button');
+    button.id = `btn${i}`;
+    button.innerText = global[`dot${i}`];
+    button.addEventListener('click', () => {
+        global[`dot${i}`]++;
+        button.innerText = global[`dot${i}`];
+        updateProductButtons();
+    updateButtonColors();    // Aktualizace barev tlačítek výrobků
+    });
+    buttonGrid.appendChild(button);
+}
+
+const buttons = [
+{ id: 'a1', color: 'white', description: 'Základní nosník' },
+{ id: 'a2', color: 'white', description: 'Pomocný nosník' },
+{ id: 'a3', color: 'white', description: 'Traverza' },
+{ id: 'a4', color: 'white', description: 'Velké kolo' },
+{ id: 'a5', color: 'white', description: 'Malé kolo' },
+{ id: 'b1', color: 'yellow', description: 'Silná svítilna' },
+{ id: 'b2', color: 'yellow', description: 'Pneumatický vrták' },
+{ id: 'b3', color: 'yellow', description: 'Vodní dělo' },
+{ id: 'b4', color: 'yellow', description: 'Laserový řezák' },
+{ id: 'b5', color: 'yellow', description: 'Výklopná pila' },
+{ id: 'c1', color: 'green', description: 'Magnetický gripper' },
+{ id: 'c2', color: 'green', description: 'Vysoušeč vody' },
+{ id: 'c3', color: 'green', description: 'Naviják s hákem' },
+{ id: 'c4', color: 'green', description: 'Hořák s plamenometem' },
+{ id: 'c5', color: 'green', description: 'Univerzální dělo' },
+{ id: 'd1', color: 'red', description: 'Řídící jednotka' },
+{ id: 'd2', color: 'red', description: 'Solární motor' },
+{ id: 'd3', color: 'red', description: 'Naftový motor' },
+{ id: 'd4', color: 'red', description: 'Fúzní motor' },
+{ id: 'd5', color: 'red', description: 'Křeček v kolečku' }
+];
+
+const extraButtonGrid = document.querySelector('.extra-button-grid');
+
+// Rozdělení tlačítek do jednotlivých sloupců
+const columns = {
+a: document.createElement('div'),
+b: document.createElement('div'),
+c: document.createElement('div'),
+d: document.createElement('div')
+};
+
+Object.values(columns).forEach(column => {
+column.style.display = 'flex';
+column.style.flexDirection = 'column';
+column.style.alignItems = 'center';
+extraButtonGrid.appendChild(column);
+});
+
+buttons.forEach(button => {
+const btn = document.createElement('button');
+btn.className = 'gray'; // Začínáme s šedou barvou
+btn.id = button.id;
+btn.innerText = `${button.description} (${calculatePotential(button.id)})`;
+btn.addEventListener('click', () => {
+    if (canProduce(button.id)) {
+        produceProduct(button.id);
+        logProduction(button.id, button.description);
+        updateProductButtons();
+        updateDotButtons();
+        updateButtonColors();
+        alert(`Výrobek "${button.description}" byl úspěšně vyroben!`);
+    } else {
+        alert('Nedostatek součástek pro výrobu!');
+    }
+});
+const columnKey = button.id.charAt(0); // Získá první písmeno ID (a, b, c, d)
+columns[columnKey].appendChild(btn); // Přidá tlačítko do správného sloupce
+});
+
+// Inicializace tlačítek výrobků s aktuálním potenciálem
+updateProductButtons();
+</script>
+
+{% endblock %}

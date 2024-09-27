@@ -1,20 +1,24 @@
 {% extends "templates/base.html" %}
 {% set game_name = "Pořadové číslo a čas" %}
 {% block content %}
-    <div class="container">
-        <h1>Odesílání pořadového čísla a času</h1>
-        <button id="sendRecordButton">Odeslat záznam</button>
-        <p><strong>Pořadová čísla a časy:</strong></p>
-        <ul id="recordsList"></ul>
+    <div class="container mt-4">
+        <h1 class="mb-4">Odesílání pořadového čísla a času</h1>
+        <div class="d-grid gap-2 mb-4">
+            <button id="sendRecordButton" class="btn btn-primary btn-lg">Odeslat záznam</button>
+            <button id="clearRecordsButton" class="btn btn-danger btn-lg">Vyčisti záznamy</button>
+        </div>
+        <p class="fw-bold">Pořadová čísla a časy:</p>
+        <ul id="recordsList" class="list-group"></ul>
     </div>
 
     <script>
-        const forrestHubLib = new ForrestHubLib();
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
         let localRecords = [];
 
         document.addEventListener('DOMContentLoaded', function () {
             const recordsList = document.getElementById('recordsList');
             const sendRecordButton = document.getElementById('sendRecordButton');
+            const clearRecordsButton = document.getElementById('clearRecordsButton');
 
             // Načtení předchozích záznamů z databáze
             forrestHubLib.getKey('records').then((value) => {
@@ -43,6 +47,16 @@
                 });
             });
 
+            // Vyčištění všech záznamů
+            clearRecordsButton.addEventListener('click', () => {
+                localRecords = [];  // Vyprázdni místní záznamy
+                forrestHubLib.setKeyBroadcast('records', localRecords).then(() => {
+                    updateRecordList(recordsList, localRecords);  // Aktualizuj zobrazení seznamu
+                }).catch((err) => {
+                    console.error('Chyba při čištění záznamů:', err);
+                });
+            });
+
             // Posluchač na příchod nových záznamů od jiných zařízení
             forrestHubLib.addEventListenerKey('records', (data) => {
                 localRecords = data || [];
@@ -53,11 +67,16 @@
         // Aktualizace seznamu záznamů
         function updateRecordList(list, records) {
             list.innerHTML = '';  // Vyprázdní seznam
-            records.forEach(record => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `ID: ${record.id}, Čas: ${record.time}, Datum: ${record.date}`;
-                list.appendChild(listItem);
-            });
+            if (records.length === 0) {
+                list.innerHTML = '<li class="list-group-item text-muted">Žádné záznamy</li>';
+            } else {
+                records.forEach(record => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+                    listItem.textContent = `ID: ${record.id}, Čas: ${record.time}, Datum: ${record.date}`;
+                    list.appendChild(listItem);
+                });
+            }
         }
     </script>
 {% endblock %}

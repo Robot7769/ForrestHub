@@ -10,14 +10,14 @@
     </div>
 
     <script>
-        const forrestHubLib = new ForrestHubLib();
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
 
         document.addEventListener('DOMContentLoaded', function () {
             const counterElement = document.getElementById('counter');
             const incrementButton = document.getElementById('incrementButton');
 
             // Načti počáteční hodnotu počítadla
-            forrestHubLib.getKey('my_number').then((value) => {
+            forrestHubLib.getKey('my_number', 0).then((value) => {
                 counterElement.innerText = value || 0;
             }).catch((err) => {
                 console.error('Chyba při načítání počítadla:', err);

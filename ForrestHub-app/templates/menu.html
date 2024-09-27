@@ -1,9 +1,12 @@
 {% extends "templates/base.html" %}
 {% block content %}
-    <div class="container text-center">
+    <div class="containerr text-center">
         <h2>{{ folder | capitalize }}</h2>
         <a href="/" class="btn btn-primary">Domů</a>
 
         {% include "templates/list_folders.html" %}
+
+        {% include "templates/add_game_subpage.html" %}
+
     </div>
 {% endblock %}

@@ -1,0 +1,101 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Obsazování území - Konfigurace" %}
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Konfigurace hry</h1>
+        <form id="configForm">
+            <div class="mb-3">
+                <label for="teamCount" class="form-label">Počet týmů</label>
+                <input type="number" class="form-control" id="teamCount" min="2" max="10" value="4">
+            </div>
+            <div id="teamNamesContainer">
+                <!-- Pole pro názvy týmů -->
+            </div>
+
+{#            set slowdown #}
+            <button type="submit" class="btn btn-primary">Uložit konfiguraci</button>
+            <button type="button" class="btn btn-danger" id="resetButton">Resetovat hru</button>
+
+            <hr>
+            <br>
+
+            <div class="mb-3">
+                <label for="slowdown" class="form-label">Snížení rychlosti obsazování (ms)</label>
+                <label for="slowdown" class="form-label">Aktualizuje se samo po změně - nižší hodnota = rychlejší dobývání</label>
+                <input type="number" class="form-control" id="slowdown" value="100">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let forrestHubLib = new ForrestHubLib(true); // Admin režim
+        const defaultTeamNames = ['Tým A', 'Tým B', 'Tým C', 'Tým D'];
+
+        function generateTeamNameInputs(count) {
+            const container = document.getElementById('teamNamesContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div');
+                div.classList.add('mb-3');
+                div.innerHTML = `
+                <label for="teamName${i}" class="form-label">Název týmu ${i + 1}</label>
+                <input type="text" class="form-control" id="teamName${i}" value="${defaultTeamNames[i] || 'Tým ' + (i + 1)}">
+            `;
+                container.appendChild(div);
+            }
+        }
+
+        document.getElementById('teamCount').addEventListener('input', function() {
+            const count = parseInt(this.value);
+            generateTeamNameInputs(count);
+        });
+
+        {#update_interval#}
+        document.getElementById('slowdown').addEventListener('input', function() {
+            const interval = parseInt(this.value);
+            forrestHubLib.setKey('slowdown', interval);
+        });
+
+        document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const teamCount = parseInt(document.getElementById('teamCount').value);
+            const teamNames = [];
+            for (let i = 0; i < teamCount; i++) {
+                const name = document.getElementById(`teamName${i}`).value || `Tým ${i + 1}`;
+                teamNames.push(name);
+            }
+            const slowdown = parseInt(document.getElementById('slowdown').value);
+            const config = {
+                teamCount,
+                teamNames,
+                slowdown,
+            };
+            forrestHubLib.setKey('game_config', config).then(() => {
+                alert('Konfigurace uložena.');
+            });
+        });
+
+        document.getElementById('resetButton').addEventListener('click', function() {
+            if (confirm('Opravdu chcete resetovat hru?')) {
+                forrestHubLib.deleteAllDatabase().then(() => {
+                    alert('Hra byla resetována.');
+                });
+            }
+        });
+
+        // Načtení existující konfigurace
+        forrestHubLib.getKey('game_config').then((config) => {
+            if (config) {
+                document.getElementById('teamCount').value = config.teamCount;
+                generateTeamNameInputs(config.teamCount);
+                for (let i = 0; i < config.teamCount; i++) {
+                    document.getElementById(`teamName${i}`).value = config.teamNames[i];
+                }
+
+                document.getElementById('slowdown').value = config.slowdown || 100;
+            } else {
+                generateTeamNameInputs(4);
+            }
+        });
+    </script>
+{% endblock %}

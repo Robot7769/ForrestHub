@@ -1,10 +1,14 @@
 <div class="row">
+    <div class="col-md-6 mb-3">
+        <a href="/admin/" class="btn btn-warning btn-lg">Admin</a>
+    </div>
+
     {% if same_level_routes|length == 0 %}
         <div class="col-12">
             <p>Nic k zobrazení</p> <!-- 'Nothing to display' in Czech -->
         </div>
     {% else %}
-        <h3>Stránky herního adresáře</h3> <!-- 'Pages of the game directory' in Czech -->
+        <h4>Stránky herního adresáře</h4> <!-- 'Pages of the game directory' in Czech -->
         {% for route in same_level_routes %}
             <div class="col-md-6 mb-3"> <!-- Added mb-3 for margin between buttons -->
                 <a href="{{ route.name }}"

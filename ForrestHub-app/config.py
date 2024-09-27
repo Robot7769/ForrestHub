@@ -11,9 +11,10 @@ class Config:
     ALLOWED_EXTENSIONS = ["json"]
     TEMPLATES_DIR = "templates"
     GAMES_DIR = "games"
+    GAMES_DIR_LIVE = "ForrestHub-games"
     ASSETS_DIR = "assets"
+    PAGES_DIR = "pages"
 
-    LIVE_DATA_DIR = "forrestHub-live"
     IP_ADDRESS = get_local_ip_address()
 
     DEBUG = True
@@ -31,32 +32,18 @@ class Config:
         DATA_DIR = EXECUTABLE_DIR
 
     # use live data if it exists
-    LIVE_DATA_FOLDER = Path(EXECUTABLE_DIR) / LIVE_DATA_DIR
     TEMPLATES_FOLDER = Path(DATA_DIR) / TEMPLATES_DIR
     GAMES_FOLDER = Path(DATA_DIR) / GAMES_DIR
     ASSETS_FOLDER = Path(DATA_DIR) / ASSETS_DIR
-    LIVE_DATA_USED = False
+    PAGES_FOLDER = Path(DATA_DIR) / PAGES_DIR
 
-    if LIVE_DATA_FOLDER.exists():
-        LIVE_DATA_USED = True
-        TEMPLATES_FOLDER_LIVE = Path(LIVE_DATA_FOLDER) / TEMPLATES_DIR
-        GAMES_FOLDER_LIVE = Path(LIVE_DATA_FOLDER) / GAMES_DIR
-        ASSETS_FOLDER_LIVE = Path(LIVE_DATA_FOLDER) / ASSETS_DIR
+    LIVE_GAMES_MODE = False
+    GAMES_FOLDER_LIVE = Path(EXECUTABLE_DIR) / GAMES_DIR_LIVE
 
-        # check if exist
-        if not TEMPLATES_FOLDER_LIVE.exists():
-            TEMPLATES_FOLDER_LIVE = None
-            # raise FileNotFoundError(f"Templates folder not found: {TEMPLATES_FOLDER}")
-
-        if not GAMES_FOLDER_LIVE.exists():
-            GAMES_FOLDER_LIVE = None
-            # raise FileNotFoundError(f"Games folder not found: {GAMES_FOLDER}")
-
-        if not ASSETS_FOLDER_LIVE.exists():
-            ASSETS_FOLDER_LIVE = None
-            # raise FileNotFoundError(f"Assets folder not found: {ASSETS_FOLDER}")
+    if GAMES_FOLDER_LIVE.exists():
+        LIVE_GAMES_MODE = True
 
     # Disable debug and reloader when using frozen data with live data - production mode
-    if not LIVE_DATA_USED and FROZEN:
+    if not LIVE_GAMES_MODE and FROZEN:
         DEBUG = False
         USE_RELOADER = False

@@ -1,0 +1,60 @@
+
+{% if debug == true %}
+<div class="container">
+    <h3>Správa her</h3>
+    <button id="addGameButton" class="btn btn-primary">Přidej hru</button>
+</div>
+
+<!-- Modal pro zadání jména hry -->
+<div class="modal fade" id="gameModal" tabindex="-1" aria-labelledby="gameModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gameModalLabel">Nastav jméno hry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="gameNameInput" class="form-control" placeholder="Zadej jméno hry">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
+                <button type="button" class="btn btn-primary" id="submitGameName">Přidat hru</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+    forrestHubLib.setAdmin(true);
+    forrestHubLib.setGameMode(false);
+
+    // Otevři modal pro zadání jména hry
+    document.getElementById('addGameButton').addEventListener('click', () => {
+        const gameModal = new bootstrap.Modal(document.getElementById('gameModal'));
+        gameModal.show();
+    });
+
+    // Odeslání jména hry
+    document.getElementById('submitGameName').addEventListener('click', () => {
+        let gameName = document.getElementById('gameNameInput').value.trim();
+        if (gameName) {
+            // to small letters
+            gameName = gameName.toLowerCase();
+
+            {#if constains /  replace with -#}
+            gameName = gameName.replace(/\//g, '-');
+
+            forrestHubLib.emit('add_new_game', gameName);
+            const gameModal = bootstrap.Modal.getInstance(document.getElementById('gameModal'));
+            gameModal.hide(); // Skrytí modalu po odeslání
+
+            // Přesměrování na stránku s nově vytvořenou hrou
+            window.location.href = `/${gameName}`;
+        } else {
+            alert('Zadejte prosím jméno hry.');
+        }
+    });
+</script>
+{% endif %}

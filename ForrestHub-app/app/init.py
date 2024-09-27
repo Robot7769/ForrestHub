@@ -23,12 +23,11 @@ def create_app(config_class="config.Config"):
         app.config.get("GAMES_FOLDER"),
         app.config.get("TEMPLATES_FOLDER"),
         app.config.get("ASSETS_FOLDER"),
+        app.config.get("PAGES_FOLDER"),
     ]
 
-    if app.config.get("LIVE_DATA_USED"):
+    if app.config.get("LIVE_GAMES_MODE"):
         loader_locations.append(app.config.get("GAMES_FOLDER_LIVE"))
-        loader_locations.append(app.config.get("TEMPLATES_FOLDER_LIVE"))
-        loader_locations.append(app.config.get("ASSETS_FOLDER_LIVE"))
 
     app.jinja_loader = CustomLoader(loader_locations)
 

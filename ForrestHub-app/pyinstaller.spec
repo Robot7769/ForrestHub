@@ -10,6 +10,7 @@ a = Analysis(
         ('templates', 'templates'),
         ('assets', 'assets'),
         ('games', 'games'),
+        ('pages', 'pages'),
         ('config.py', '.'),
         ('app', 'app'),
     ],

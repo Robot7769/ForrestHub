@@ -1,3 +1,4 @@
+from http.cookiejar import debug
 from pathlib import Path
 
 from app.init import db
@@ -18,8 +19,11 @@ main = Blueprint("main", __name__)
 
 def get_html_and_folders(folder: Path):
     res = []
+    ignore = [".git", ".vscode", "__pycache__", "node_modules"]
     if folder.exists():
         for folder_iter in folder.iterdir():
+            if folder_iter.name in ignore:
+                continue
             if folder_iter.is_dir():
                 res.append(
                     {
@@ -52,7 +56,10 @@ def get_selected_level_routes(folder: str):
 @main.route("/")
 def index():
     return render_template(
-        "index.html", title="Menu", same_level_routes=get_selected_level_routes(".")
+        "index.html",
+        title="Menu",
+        same_level_routes=get_selected_level_routes("."),
+        debug=current_app.config.get("DEBUG"),
     )
 
 
@@ -125,6 +132,7 @@ def render_page(folder: str, page: str):
                 data=db.get_data(),
                 ip_address=get_local_ip_address(),
                 config=current_app.config,
+                debug=current_app.config.get("DEBUG"),
                 same_level_routes=get_selected_level_routes(folder),
             )
 

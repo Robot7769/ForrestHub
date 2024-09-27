@@ -2,14 +2,16 @@
 {% block content %}
     <div class="container text-center">
         <h2>Menu</h2>
-        <p class="mt-4">Verze aplikace: <span class="game_status badge bg-primary">{{ config.VERSION }}</span></p>
+        <p class="mt-4">Verze aplikace: <span class="badge bg-primary">{{ config.VERSION }}</span></p>
         {% include "templates/author.html" %}
 
         {% include "templates/list_folders.html" %}
 
+        {% include "templates/add_game.html" %}
+
         <div class="mt-5">
             <a href="https://helceletka.cz" target="_blank" rel="noopener noreferrer">
-                <img src="/assets/img/helceletka.svg" width="400" alt="Helceletka" class="">
+                <img src="/assets/img/ForrestHub-helceletka.png" width="400" alt="Helceletka" class="">
             </a>
         </div>
     </div>

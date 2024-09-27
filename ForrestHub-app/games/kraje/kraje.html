@@ -1,0 +1,66 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Hra - Držení krajů" %}
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="text-center">Centrální pult</h1>
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Seznam krajů:</h3>
+                <ul id="kraje-list" class="list-group">
+                    <!-- Kraje budou dynamicky přidány -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-5 text-center">
+            <a href="/pripojeni" class="btn btn-info">Připojení nového zařízení</a>
+        </div>
+    </div>
+
+    <script>
+        let forrestHubLib = new ForrestHubLib(true);
+
+        const kraje = [
+            "Praha", "Středočeský", "Jihočeský", "Plzeňský", "Karlovarský",
+            "Ústecký", "Liberecký", "Královéhradecký", "Pardubický",
+            "Vysočina", "Jihomoravský", "Olomoucký", "Zlínský", "Moravskoslezský"
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const krajeListElement = document.getElementById('kraje-list');
+            kraje.forEach(kraj => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `<strong>${kraj}:</strong> <span id="kraj-${kraj}">Neobsazeno</span>`;
+                krajeListElement.appendChild(li);
+            });
+
+            // Zobraz aktuální držitele krajů
+            forrestHubLib.getAllDatabase().then(db => {
+                kraje.forEach(kraj => {
+                    if (db[`kraj_${kraj}`]) {
+                        updateKrajStatus(kraj, db[`kraj_${kraj}`]);
+                    }
+                });
+            });
+
+            // Poslouchej změny ve vlastnictví kraje
+            kraje.forEach(kraj => {
+                forrestHubLib.addEventListenerKey(`kraj_${kraj}`, (team) => {
+                    updateKrajStatus(kraj, team);
+                });
+            });
+        });
+
+        function updateKrajStatus(kraj, team) {
+            const span = document.getElementById(`kraj-${kraj}`);
+            if (team) {
+                span.innerText = team;
+                span.style.color = team === "Tým A" ? 'blue' : 'red';
+            } else {
+                span.innerText = "Neobsazeno";
+                span.style.color = 'gray';
+            }
+        }
+    </script>
+{% endblock %}

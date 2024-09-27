@@ -1,4 +1,4 @@
-// const forrestHubLib = new ForrestHubLib();
+// forrestHubLib = window.forrestHubLib || new ForrestHubLib();
 //
 // document.addEventListener('DOMContentLoaded', function () {
 //     const counterElement = document.getElementById('counter');

@@ -3,9 +3,21 @@ from flask_socketio import emit
 
 from app.init import socketio, db
 
+from flask import (
+    Blueprint,
+    render_template,
+    abort,
+    send_from_directory,
+    current_app,
+    jsonify,
+    request,
+)
+
 socketio_bp = Blueprint("socketio", __name__)
 connected_clients = 0
 connected_admins = 0
+
+
 
 game_status = "running"
 
@@ -85,4 +97,97 @@ def handle_get_key(json: dict) -> dict:
 @socketio.on("delete_key")
 def handle_delete_key(key: str) -> dict:
     db.delete_data_key(key)
+    return {"status": "ok"}
+
+
+# add_new_game - create folder with game name
+@socketio.on("add_new_game")
+def handle_add_new_game(game_name: str) -> dict:
+    game_folder = current_app.config.get("GAMES_FOLDER")
+    if not game_folder:
+        return {"status": "error", "message": "No live data folder"}
+
+    game_folder = game_folder / game_name
+
+    if game_folder.exists():
+        return {"status": "error", "message": "Game already exists"}
+    game_folder.mkdir()
+    return {"status": "ok"}
+
+
+
+# add_new_game_page - create new page in game folder
+@socketio.on("add_new_game_page")
+def handle_add_new_game_page(json: dict) -> dict:
+    game_name = json.get("game")
+    game_page = json.get("page")
+    page_content = json.get("content")
+
+
+    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
+    if not game_folder:
+        return {"status": "error", "message": "No live data folder"}
+
+    game_folder = game_folder / game_name
+
+    if not game_folder.exists():
+        game_folder.mkdir()
+
+    page_path = game_folder / f"{game_page}.html"
+    if page_path.exists():
+        return {"status": "error", "message": "Page already exists"}
+
+    with open(page_path, "w") as f:
+        f.write(page_content)
+    return {"status": "ok"}
+
+# get_page_html - get html content of page
+@socketio.on("get_page_html")
+def handle_get_page_html(json: dict) -> dict:
+    game_name = json.get("game")
+    game_page = json.get("page")
+
+    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
+    if not game_folder:
+        return {"status": "error", "message": "No live data folder"}
+
+    game_folder = game_folder / game_name
+
+    if not game_folder.exists():
+        return {"status": "error", "message": "Tuhle hru nemám k editaci"}
+
+    page_path = game_folder / f"{game_page}.html"
+    if not page_path.exists():
+        return {"status": "error", "message": "Tuhle stránku hry nemám k editaci"}
+
+    with open(page_path, "r") as f:
+        content = f.read()
+    return {"status": "ok", "content": content}
+
+# set_page_html - set html content of page
+@socketio.on("set_page_html")
+def handle_set_page_html(json: dict) -> dict:
+    game_name = json.get("game")
+    game_page = json.get("page")
+    page_content = json.get("content")
+
+    header = "{% extends"
+    if header not in page_content:
+        return {"status": "error", "message": f"Zapomněli jste přidat {header}... na začátek souboru - mrkni na příklady"}
+
+    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
+    if not game_folder:
+        return {"status": "error", "message": "No live data folder"}
+
+    game_folder = game_folder / game_name
+
+    if not game_folder.exists():
+        return {"status": "error", "message": "Game does not exist"}
+
+    page_path = game_folder / f"{game_page}.html"
+    if not page_path.exists():
+        return {"status": "error", "message": "Page does not exist"}
+
+    with open(page_path, "w") as f:
+        f.write(page_content)
     return {"status": "ok"}

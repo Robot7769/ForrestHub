@@ -1,0 +1,86 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Obsazování území - Tabule" %}
+{% block content %}
+    <div class="container">
+        <h1 class="text-center mb-4">Stav obsazení území ze všech zařízení</h1>
+        <div id="charts-container" class="d-flex flex-wrap justify-content-around">
+            <!-- Grafy jednotlivých zařízení -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        const maxDevices = 10;
+        let deviceCharts = {};
+        let teamNames = [];
+
+        forrestHubLib.getKey('game_config').then((config) => {
+            if (config) {
+                teamNames = config.teamNames;
+                loadAllDevices();
+                setInterval(loadAllDevices, 5000);
+            } else {
+                alert('Konfigurace není nastavena.');
+            }
+        });
+
+        function createChart(deviceName) {
+            const container = document.getElementById('charts-container');
+            const chartDiv = document.createElement('div');
+            chartDiv.classList.add('m-3');
+            chartDiv.innerHTML = `<h3>${deviceName}</h3><canvas id="chart_${deviceName}"></canvas>`;
+            container.appendChild(chartDiv);
+
+            const ctx = document.getElementById(`chart_${deviceName}`).getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: teamNames,
+                    datasets: [{
+                        data: teamNames.map(() => 0),
+                        backgroundColor: teamNames.map((_, i) => `hsl(${i * 360 / teamNames.length}, 70%, 50%)`),
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(2);
+                                    return `${label}: ${value.toFixed(1)}s (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            deviceCharts[deviceName] = chart;
+        }
+
+        function updateChart(deviceName, teamTimes) {
+            const times = teamNames.map(name => teamTimes[name] || 0);
+            if (deviceCharts[deviceName]) {
+                deviceCharts[deviceName].data.datasets[0].data = times;
+                deviceCharts[deviceName].update();
+            }
+        }
+
+        function loadAllDevices() {
+            forrestHubLib.getAllDatabase().then((data) => {
+                const devices = Object.keys(data).filter(key => key.startsWith('device_')).slice(0, maxDevices);
+                devices.forEach((deviceName) => {
+                    if (!deviceCharts[deviceName]) {
+                        createChart(deviceName);
+                    }
+                    updateChart(deviceName, data[deviceName]);
+                });
+            });
+        }
+    </script>
+{% endblock %}

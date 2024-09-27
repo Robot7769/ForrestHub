@@ -1,0 +1,88 @@
+{% if debug == true %}
+<!-- Plovoucí tlačítko pro editaci -->
+<button id="editButton" class="btn btn-warning btn-floating">✎</button>
+
+<!-- Modal editoru -->
+<div class="modal fade modal-xl" id="editorModal" tabindex="-1" aria-labelledby="editorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editorModalLabel">Upravit obsah stránky</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="pageEditor" class="form-control" rows="20"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
+                <button type="button" class="btn btn-primary" id="saveChangesButton">Uložit změny</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+
+    const gameName = "{{ folder }}"; // Dynamicky definovaný název složky
+    const gamePage = "{{ page }}";  // Dynamicky definovaná stránka
+
+    // Zobrazí editor s aktuálním obsahem stránky
+    document.getElementById('editButton').addEventListener('click', async () => {
+        try {
+            // Načti aktuální HTML obsah přímo z serveru
+            const response = await forrestHubLib.emitWithResponse('get_page_html', {
+                game: gameName,
+                page: gamePage
+            });
+            document.getElementById('pageEditor').value = response.content || ''; // Nastaví obsah do textarea
+
+            const editorModal = new bootstrap.Modal(document.getElementById('editorModal'));
+            editorModal.show();
+        } catch (error) {
+            console.error('Chyba při načítání obsahu stránky do editoru:', error);
+            alert('Tohle asi neumím editovat.');
+        }
+    });
+
+    // Uložení změn
+    document.getElementById('saveChangesButton').addEventListener('click', async () => {
+        const newContent = document.getElementById('pageEditor').value;
+
+        try {
+            await forrestHubLib.emitWithResponse('set_page_html', {
+                game: gameName,
+                page: gamePage,
+                content: newContent
+            });
+            alert('Změny byly úspěšně uloženy.');
+
+            // Po uložení změn znovu načti stránku
+            location.reload();
+        } catch (error) {
+            console.error('Chyba při ukládání stránky:', error);
+            alert(`Nepodařilo se uložit změny: ${error}`);
+        }
+    });
+
+
+</script>
+
+<style>
+    #editButton {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endif %}
