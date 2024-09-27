@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 class Config:
-    VERSION = "1.2.3"
+    VERSION = "1.3.0"
     DATAFILE = "ForrestHub-data.json"
     LOG_FOLDER = "ForrestHub-logs"
     ALLOWED_EXTENSIONS = ["json"]
