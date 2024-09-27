@@ -161,7 +161,7 @@ def handle_get_page_html(json: dict) -> dict:
         return {"status": "error", "message": "Tuhle stránku hry nemám k editaci"}
 
     with open(page_path, "r", encoding="utf-8") as f:
-        content = f.read()
+        content = f.read().decode("utf-8")
     return {"status": "ok", "content": content}
 
 # set_page_html - set html content of page
@@ -189,5 +189,5 @@ def handle_set_page_html(json: dict) -> dict:
         return {"status": "error", "message": "Page does not exist"}
 
     with open(page_path, "w", encoding="utf-8") as f:
-        f.write(page_content)
+        f.write(page_content.encode("utf-8"))
     return {"status": "ok"}
