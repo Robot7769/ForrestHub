@@ -205,7 +205,7 @@ class ForrestHubLib {
      */
     async arrayAddRecord(arrayName, value) {
         const {project} = this;
-        await this.emitWithResponse('db_arr_add_record', {project , arrayName, value });
+        await this.emitWithResponse('array_add_record', {project , arrayName, value });
     }
 
     /**
@@ -217,7 +217,7 @@ class ForrestHubLib {
      */
     async arrayRemoveRecord(arrayName, recordId) {
         const {project} = this;
-        await this.emitWithResponse('db_arr_remove_record', { project, arrayName, recordId });
+        await this.emitWithResponse('array_remove_record', { project, arrayName, recordId });
     }
 
     /**
@@ -229,7 +229,7 @@ class ForrestHubLib {
      */
     async arrayUpdateRecord(arrayName, recordId, value) {
         const {project} = this;
-        await this.emitWithResponse('db_arr_update_record', { project, arrayName, recordId, value });
+        await this.emitWithResponse('array_update_record', { project, arrayName, recordId, value });
     }
 
     /**
@@ -239,7 +239,7 @@ class ForrestHubLib {
      */
     async arrayGetAllRecords(arrayName) {
         const {project} = this;
-        const response = await this.emitWithResponse('db_arr_get_all_records', { project, arrayName });
+        const response = await this.emitWithResponse('array_get_all_records', { project, arrayName });
         return response.data;
     }
 
@@ -251,7 +251,7 @@ class ForrestHubLib {
      */
     async arrayGetRecordId(arrayName, recordId) {
         const {project} = this;
-        const response = await this.emitWithResponse('db_arr_get_record_id', { project, arrayName, recordId });
+        const response = await this.emitWithResponse('array_get_record_id', { project, arrayName, recordId });
         return response.data;
     }
 
@@ -262,7 +262,7 @@ class ForrestHubLib {
      */
     async arrayClearRecords(arrayName) {
         const {project} = this;
-        await this.emitWithResponse('db_arr_clear_records', { project, arrayName });
+        await this.emitWithResponse('array_clear_records', { project, arrayName });
     }
 
     /**
@@ -271,7 +271,7 @@ class ForrestHubLib {
      */
     async arrayListProjects() {
         const {project} = this;
-        const response = await this.emitWithResponse('db_arr_list_projects', {});
+        const response = await this.emitWithResponse('array_list_projects', {});
         return response.data;
     }
 

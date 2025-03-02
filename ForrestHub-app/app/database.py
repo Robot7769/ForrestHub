@@ -3,8 +3,6 @@ import os
 import asyncio
 from nanoid import generate
 
-from werkzeug.datastructures import FileStorage
-
 
 class DatabaseException(Exception):
     pass
@@ -13,12 +11,14 @@ class DatabaseException(Exception):
 VAR = "VAR_"
 ARR = "ARR_"
 
+
 def save_data(func):
     def wrapper(self, *args, **kwargs):
         result = func(self, *args, **kwargs)
         self.save_to_file()
         return result
     return wrapper
+
 
 class Database:
     def __init__(self):
@@ -78,7 +78,6 @@ class Database:
             self.data[project] = {}
         self.data[project][key] = value
 
-
     @save_data
     def db_var_delete_key(self, project: str, key: str):
         project = VAR + project
@@ -95,7 +94,7 @@ class Database:
 
     # add record
     @save_data
-    def db_arr_add_record(self, project: str, array_name: str, value):
+    def array_add_record(self, project: str, array_name: str, value):
         project = ARR + project
         if project not in self.data:
             self.data[project] = {}
@@ -103,10 +102,9 @@ class Database:
             self.data[project][array_name] = {}
         self.data[project][array_name][generate(size=10)] = value
 
-
     # remove record
     @save_data
-    def db_arr_remove_record(self, project: str, array_name: str, record_id: str):
+    def array_remove_record(self, project: str, array_name: str, record_id: str):
         project = ARR + project
         if self._record_exists(project, array_name, record_id):
             del self.data[project][array_name][record_id]
@@ -115,7 +113,7 @@ class Database:
 
     # update record
     @save_data
-    def db_arr_update_record(self, project: str, array_name: str, record_id: str, value):
+    def array_update_record(self, project: str, array_name: str, record_id: str, value):
         project = ARR + project
         if self._record_exists(project, array_name, record_id):
             self.data[project][array_name][record_id] = value
@@ -125,17 +123,17 @@ class Database:
     def _record_exists(self, project_prefix: str, array_name: str, record_id: str) -> bool:
         return project_prefix in self.data and array_name in self.data[project_prefix] and record_id in self.data[project_prefix][array_name]
 
-    def db_arr_get_record_id(self, project: str, array_name: str, record_id: str):
+    def array_get_record_id(self, project: str, array_name: str, record_id: str):
         project = ARR + project
         return self.data[project][array_name].get(record_id, {}) if project in self.data and array_name in self.data[project] else {}
-        
-    def db_arr_get_all_records(self, project: str, array_name: str):
+
+    def array_get_all_records(self, project: str, array_name: str):
         project = ARR + project
         return self.data[project].get(array_name, {}) if project in self.data else []
 
 
     @save_data
-    def db_arr_clear_records(self, project: str, array_name: str):
+    def array_clear_records(self, project: str, array_name: str):
         project = ARR + project
         if project in self.data and array_name in self.data[project]:
             self.data[project][array_name] = {}
@@ -143,7 +141,7 @@ class Database:
         return False
 
 
-    def db_arr_list_projects(self):
+    def array_list_projects(self):
         # return only keys starting with ARR_
         # return list(self.data.keys())
         return [key[4:] for key in self.data.keys() if key.startswith(ARR)]
