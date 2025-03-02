@@ -1,3 +1,5 @@
+import asyncio
+
 from app.custom_loader import CustomLoader
 from app.database import Database
 from flask import Flask
@@ -8,7 +10,7 @@ socketio = SocketIO(cors_allowed_origins="*")
 db = Database()
 
 
-def create_app(config_class="config.Config"):
+async def create_app(config_class="config.Config"):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
@@ -16,6 +18,7 @@ def create_app(config_class="config.Config"):
     CORS(app)
 
     db.init(app.config["EXECUTABLE_DIR"], app.config["DATAFILE"])
+    asyncio.create_task(db.save_data_loop())
 
     # Set custom Jinja loader
 

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import sys
@@ -38,8 +39,9 @@ def setup_logging(root_dir: str, log_folder: str = "ForrestHubLogs"):
     return logging.getLogger(__name__)
 
 
-def run_flask(config="config.Config"):
-    app = create_app(config)
+async def run_flask(config="config.Config"):
+    app = await create_app(config)
+
     socketio.run(
         app,
         host="0.0.0.0",
@@ -68,7 +70,8 @@ if __name__ == "__main__":
         print(f"Server started at {local_ip}")
         logger.info(f"Server started at {local_ip}")
         logger.info("Press Ctrl-C to stop the server")
-        run_flask(config=config)
+        # run_flask(config=config)
+        asyncio.run(run_flask(config=config))
     except KeyboardInterrupt:
         logger.info("Server stopped")
         sys.exit(0)

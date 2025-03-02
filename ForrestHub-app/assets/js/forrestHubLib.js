@@ -3,14 +3,23 @@
  */
 
 class ForrestHubLib {
+    VERSION = '1.4.0';
+
     // RUNNING = 1;
     RUNNING = "running";
     PAUSED = "paused";
     STOPPED = "stopped";
 
+    /**
+     * @type {string}
+     */
+    project = "";
+
     constructor(isAdmin = false, url = `http://${window.location.hostname}:${window.location.port}`) {
-        this.isGameMode = true;
+        this.project = window.location.pathname.split('/')[1];
+        this.isGamePage = true;
         this.isAdmin = isAdmin;
+
 
         if (typeof io === 'undefined') {
             throw new Error('Socket.io is not loaded.');
@@ -35,7 +44,7 @@ class ForrestHubLib {
         this.addEventListenerKey('game_status', (status) => {
             if (status === this.RUNNING) {
                 this.removeOverlay();
-                if (this.isGameMode) {
+                if (this.isGamePage) {
                     this.showAlert('success', 'Hra spuštěna', 5000);
                 }
             } else if (status === this.PAUSED) {
@@ -45,21 +54,51 @@ class ForrestHubLib {
             } else {
                 this.showOverlay('Neznámý stav hry', null, 'warning');
             }
-        });
-
-        this.addEventListenerKey("game_status", (data) => {
-            this.updateGameStatusUI(data);
+            this.updateGameStatusUI(status);
         });
     }
 
+    /**
+     * Set if user is admin
+     * @param isAdmin {boolean} - true if user is admin
+     */
     setAdmin(isAdmin) {
         this.isAdmin = isAdmin;
     }
 
+    /**
+     * Set if user is on game page
+     * @param isGameMode {boolean} - true if user is on game page
+     */
     setGameMode(isGameMode) {
-        this.isGameMode = isGameMode;
+        this.isGamePage = isGameMode;
     }
 
+    /**
+     * Set project name (for database)
+     * @param project {string} - project name
+     */
+    setProject(project) {
+        this.project = project;
+    }
+
+    /**
+     * Add event listener for key
+     * @param eventKey
+     * @param callback
+     */
+    addEventListenerKey(eventKey, callback) {
+        this.socket.on(eventKey, (data) => {
+            callback(data);
+        });
+    }
+
+    /**
+     * Emit event with data and return response
+     * @param event - event name
+     * @param data - data to send
+     * @returns {Promise<unknown>}
+     */
     emitWithResponse(event, data) {
         return new Promise((resolve, reject) => {
             this.emit(event, data, (response) => {
@@ -94,46 +133,148 @@ class ForrestHubLib {
 
     /**
      * Set key with value and return response
-     * @param key
-     * @param value
-     * @returns {Promise<unknown>}
+     * @param key {string} - key name
+     * @param value {any} - value to set
      */
     async setKey(key, value) {
-        await this.emitWithResponse('set_key', { key, value });
+        const {project} = this;
+        await this.emitWithResponse('set_key', { project, key, value });
     }
 
-    async setKeyBroadcast(key, value) {
-        await this.emitWithResponse('set_key_broadcast', { key, value });
-    }
-
+    /**
+     * Get key value
+     * @param key {string} - key name
+     * @param defaultValue {any} - default value if key does not exist
+     * @returns {Promise<*>}
+     */
     async getKey(key, defaultValue = null) {
-        const response = await this.emitWithResponse('get_key', { key, defaultValue });
+        const {project} = this;
+        const response = await this.emitWithResponse('get_key', { project, key, defaultValue });
         return response.data;
     }
 
-    async existKey(key) {
-        const response = await this.emitWithResponse('exist_key', key);
-        return !!response.exists;
+    /**
+     * Check if key exists
+     * @param key {string} - key name
+     * @returns {Promise<boolean>} - true if key exists
+     */
+    async hasKey(key) {
+        const {project} = this;
+        const response = await this.emitWithResponse('has_key', { project, key });
+        return !!response?.exists;
     }
 
+    /**
+     * Delete key
+     * @param key {string} - key name
+     * @returns {Promise<void>}
+     */
     async deleteKey(key) {
-        await this.emitWithResponse('delete_key', key);
+        const {project} = this;
+        await this.emitWithResponse('delete_key', { project, key });
     }
 
-    addEventListenerKey(eventKey, callback) {
-        this.socket.on(eventKey, (data) => {
-            callback(data);
-        });
-    }
+    /////////////////////////// DATABASE ///////////////////////////
 
+    /**
+     * Set database value
+     * @returns {Promise<{}>}
+     */
     async getAllDatabase() {
         const db = await this.emitWithResponse('get_all_db');
         return db.data || {};
     }
 
+    /**
+     * Set database value
+     * @returns {Promise<void>}
+     */
     async deleteAllDatabase() {
         await this.emitWithResponse('delete_all_db');
     }
+
+    /////////////////////////// DATABASE ARRAY ///////////////////////////
+
+    /**
+     * Add record to array
+     * each record will have got unique id (recordId)
+     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
+     * @param arrayName {string} - array name
+     * @param value {any} - initial value
+     * @returns {Promise<void>}
+     */
+    async arrayAddRecord(arrayName, value) {
+        const {project} = this;
+        await this.emitWithResponse('db_arr_add_record', {project , arrayName, value });
+    }
+
+    /**
+     * Remove record from array by recordId
+     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
+     * @param arrayName {string} - array name
+     * @param recordId {string} - record id
+     * @returns {Promise<void>}
+     */
+    async arrayRemoveRecord(arrayName, recordId) {
+        const {project} = this;
+        await this.emitWithResponse('db_arr_remove_record', { project, arrayName, recordId });
+    }
+
+    /**
+     * Update record in array by recordId
+     * @param arrayName {string} - array name
+     * @param recordId {string} - record id
+     * @param value {any} - new value
+     * @returns {Promise<void>}
+     */
+    async arrayUpdateRecord(arrayName, recordId, value) {
+        const {project} = this;
+        await this.emitWithResponse('db_arr_update_record', { project, arrayName, recordId, value });
+    }
+
+    /**
+     * Get all records from array by arrayName
+     * @param arrayName {string} - array name
+     * @returns {Promise<*>} - record map {recordId: value, ...}
+     */
+    async arrayGetAllRecords(arrayName) {
+        const {project} = this;
+        const response = await this.emitWithResponse('db_arr_get_all_records', { project, arrayName });
+        return response.data;
+    }
+
+    /**
+     * Get record from array by recordId
+     * @param arrayName {string} - array name
+     * @param recordId {string} - record id
+     * @returns {Promise<*>} - record value
+     */
+    async arrayGetRecordId(arrayName, recordId) {
+        const {project} = this;
+        const response = await this.emitWithResponse('db_arr_get_record_id', { project, arrayName, recordId });
+        return response.data;
+    }
+
+    /**
+     * Clear all records from array
+     * @param arrayName {string} - array name
+     * @returns {Promise<void>}
+     */
+    async arrayClearRecords(arrayName) {
+        const {project} = this;
+        await this.emitWithResponse('db_arr_clear_records', { project, arrayName });
+    }
+
+    /**
+     * List all projects stored in the database
+     * @returns {Promise<*>}
+     */
+    async arrayListProjects() {
+        const {project} = this;
+        const response = await this.emitWithResponse('db_arr_list_projects', {});
+        return response.data;
+    }
+
 
     updateGameStatusUI(status) {
         let statusText = "";
@@ -240,4 +381,4 @@ class ForrestHubLib {
     }
 }
 
-window.forrestHubLib = new ForrestHubLib();
+window.forrestHubLib = new ForrestHubLib("fh");

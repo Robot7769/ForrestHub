@@ -129,7 +129,7 @@ def render_page(folder: str, page: str):
                 title=title,
                 folder=folder,
                 page=page,
-                data=db.get_data(),
+                data={},
                 ip_address=get_local_ip_address(),
                 config=current_app.config,
                 debug=current_app.config.get("DEBUG"),
