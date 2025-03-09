@@ -47,9 +47,9 @@ extra:
       link: https://github.com/JakubAndrysek
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/jakub-andrysek/
-  # analytics:
-  #   provider: google
-  #   property: UA-XXXXX-Y
+  analytics:
+    provider: google
+    property: G-FGPKM4ZKVP
 
 use_directory_urls: True
 
