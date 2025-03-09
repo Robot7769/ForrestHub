@@ -31,7 +31,6 @@
                 <div class="card p-3">
                     <div class="card-body">
                         <h5 class="card-title">Stav hry</h5>
-{#                        <p class="card-text">Počet připojených zařízení: <span id="connected_clients" class="badge bg-primary">?</span></p>#}
                         <p class="card-text">Hra běží: <span class="game_status badge bg-primary">?</span></p>
                         <div class="mt-3 d-grid gap-2">
                             <button id="game_start" class="btn btn-success">Spustit hru na všech zařízeních</button>
@@ -40,9 +39,21 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="card p-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Editační režim</h5>
+                        <p class="card-text">Je aktivní: <span class="badge bg-primary" id="edit_mode">?</span></p>
+                        <div class="mt-3 d-grid gap-2">
+                            <button id="edit_mode_on" class="btn btn-success">Zapnout editační režim</button>
+                            <button id="edit_mode_off" class="btn btn-warning">Vypnout editační režim</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- Odeslání hromadné zprávy -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
@@ -59,36 +70,35 @@
             </div>
         </div>
 
-
+        <!-- Data hry: Accordion s projekty -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
+
                         <h5 class="card-title">Data hry</h5>
-                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#data-accordion" aria-expanded="false" aria-controls="data-accordion">
-                                Zobrazit / skryt
-                            </button>
-                        </h5>
-                        <div id="data-accordion" class="collapse">
-                            <ul id="data-list" class="list-group">
-                                <!-- Data will be populated here by JavaScript -->
-                            </ul>
+                        <!-- Tlačítko "Zobrazit všechny projekty" / "Skrýt všechny projekty" -->
+                        <button class="btn btn-link" id="toggleAllProjectsBtn">Zobrazit všechny projekty</button>
+
+                        <div class="accordion mt-3" id="projectsAccordion">
+                            <!-- Dynamicky doplněno v JavaScriptu -->
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
 
-
+        <!-- Správa dat -->
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Správa dat hry</h5>
                         <button id="download-button" class="btn btn-primary mb-2">Stáhnout data hry</button>
-                        <button id="clear-button" class="btn btn-danger mb-2">Vymazat data hry</button>
+                        <button id="clear-button" class="btn btn-danger mb-2">Vymazat data hry (vše)</button>
                         <p class="card-text">Data hry jsou uložena v počítači: <strong>{{ config.ROOT_DIR }}/{{ config.DATAFILE }}</strong></p>
-                        <p class="card-text">Veškerý informace jsou logovány do souboru: <strong>{{ config.ROOT_DIR }}/{{ config.LOG_FOLDER }}</strong></p>
+                        <p class="card-text">Veškeré informace jsou logovány do složky: <strong>{{ config.ROOT_DIR }}/{{ config.LOG_FOLDER }}</strong></p>
                         <p class="card-text">Debug: <strong>{{ config.DEBUG }}</strong></p>
                         <p class="card-text">Root: <strong>{{ config.TEMP_DIR }}</strong></p>
                     </div>
@@ -107,55 +117,400 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Upravit data</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editForm">
-                        <div class="mb-3">
-                            <label for="editKey" class="form-label">Klíč</label>
-                            <input type="text" class="form-control" id="editKey" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editType" class="form-label">Typ</label>
-                            <select class="form-select" id="editType" onchange="updateEditForm()">
-                                <option value="value">Hodnota</option>
-                                <option value="list">Seznam</option>
-                                <option value="keyvalue">Páry klíč-hodnota</option>
-                            </select>
-                        </div>
-                        <div id="editValueContainer" class="mb-3">
-                            <label for="editValue" class="form-label">Hodnota</label>
-                            <input type="text" class="form-control" id="editValue">
-                        </div>
-                        <div id="editListContainer" class="mb-3 d-none">
-                            <label class="form-label">Seznam položek</label>
-                            <div id="listItems"></div>
-                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addListItem()">Přidat položku</button>
-                        </div>
-                        <div id="editKeyValueContainer" class="mb-3 d-none">
-                            <label class="form-label">Páry klíč-hodnota</label>
-                            <div id="keyValuePairs"></div>
-                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addKeyValuePair()">Přidat pár</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít <small>(bez uložení)</small></button>
-                    <button type="button" class="btn btn-primary" onclick="saveData()">Uložit</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </div><!-- /container -->
+
     <script>
         let ip_address = `http://{{ ip_address }}:${window.location.port}`;
         new QRCode(document.getElementById("qrcode"), ip_address);
+
+        if (!forrestHubLib) {
+            forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        }
+
+        forrestHubLib.setAdmin(true);
+        forrestHubLib.setGameMode(false);
+
+        // Ukládáme stav rozbalení projektů do URL (#hash)
+        // Příklad: #openProjects=ProjektA,ProjektB
+        let projectsExpanded = false; // pro "Zobrazit/Skrýt všechny"
+        let openProjects = new Set(); // Pojistka pro slučování s URL
+
+        // ====================================================================
+        // 1) Při první inicializaci zjistíme, zda je v URL (hash) definováno
+        //    openProjects=..., např. #openProjects=Project1,Project2
+        // ====================================================================
+        function loadOpenProjectsFromURL() {
+            const hash = window.location.hash;
+            if (!hash) return;
+
+            // Očekáváme formát #openProjects=Projekt1,Projekt2
+            // Můžeme použít regulár, nebo jednoduše "split"
+            const match = hash.match(/openProjects=([^&]+)/);
+            if (!match || !match[1]) return;
+
+            const projectsStr = match[1]; // např. "Projekt1,Projekt2"
+            projectsStr.split(',').forEach(name => {
+                if (name.trim()) {
+                    openProjects.add(decodeURIComponent(name.trim()));
+                }
+            });
+        }
+
+        // ====================================================================
+        // 2) Aktualizace URL při změně rozbalení
+        // ====================================================================
+        function updateURLHash() {
+            // Sestavíme řetězec openProjects=...
+            const projectList = Array.from(openProjects).map(p => encodeURIComponent(p)).join(',');
+            let newHash = '';
+
+            // Pokud existují i jiné parametry v hash, můžeme je zachovat,
+            // ale tady pro jednoduchost prostě nastavíme jen openProjects=...
+            if (projectList.length > 0) {
+                newHash = `#openProjects=${projectList}`;
+            }
+            // Pokud openProjects je prázdné, nebudeme to do URL vůbec dávat
+            window.history.replaceState(null, '', newHash || '#');
+        }
+
+        // Zavoláme na start
+        loadOpenProjectsFromURL();
+
+        // Po připojení k serveru
+        forrestHubLib.addEventListenerKey("connect", async () => {
+            forrestHubLib.showAlert('success', 'Připojeno k serveru.');
+            await loadAndDisplayData();
+            forrestHubLib.emit('game_status_get', null);
+            forrestHubLib.emit('edit_mode_get', null);
+        });
+
+        // Pravidelná obnova dat (každou vteřinu)
+        setInterval(loadAndDisplayData, 3000);
+
+        async function loadAndDisplayData() {
+            // Nejprve si uložíme stav DOM (co je skutečně otevřené)
+            storeCurrentAccordionStates();
+
+            try {
+                const gameData = await forrestHubLib.dbGetAllData();
+                displayData(gameData);
+            } catch (error) {
+                forrestHubLib.showAlert('danger', 'Error loading data: ' + error.message);
+            }
+        }
+
+        function storeCurrentAccordionStates() {
+            const collapses = document.querySelectorAll('#projectsAccordion .accordion-collapse');
+            collapses.forEach(collapseEl => {
+                const projectName = collapseEl.getAttribute('data-project-name');
+                if (!projectName) return;
+
+                // Pokud je panel aktuálně .show => je otevřen
+                if (collapseEl.classList.contains('show')) {
+                    openProjects.add(projectName);
+                } else {
+                    openProjects.delete(projectName);
+                }
+            });
+            // Po aktualizaci v paměti, upravíme URL
+            updateURLHash();
+        }
+
+        function displayData(gameData) {
+            const accordionContainer = document.getElementById('projectsAccordion');
+            accordionContainer.innerHTML = '';
+
+            if (Object.keys(gameData).length === 0) {
+                accordionContainer.innerHTML = '<p>Žádná data</p>';
+                return;
+            }
+
+            let index = 0;
+            for (const [projectName, projectData] of Object.entries(gameData)) {
+                index++;
+                const headingId = `heading-${index}`;
+                const collapseId = `collapse-${index}`;
+
+                // Accordion item
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item';
+
+                // Tělo itemu: Zobrazíme "projectName" jako název
+                accordionItem.innerHTML = `
+                <h2 class="accordion-header" id="${headingId}">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#${collapseId}"
+                            aria-expanded="false"
+                            aria-controls="${collapseId}">
+                        ${projectName}
+                    </button>
+                </h2>
+                <div id="${collapseId}"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="${headingId}"
+                     data-bs-parent="#projectsAccordion"
+                     data-project-name="${projectName}">
+
+                    <div class="accordion-body">
+                        <ul class="list-group" id="sublist-${projectName}"></ul>
+                    </div>
+                </div>
+            `;
+
+                accordionContainer.appendChild(accordionItem);
+
+                // Naplníme subList
+                const subList = accordionItem.querySelector(`#sublist-${projectName}`);
+
+                // Projedeme klíče projektu
+                for (const [subkey, subvalue] of Object.entries(projectData)) {
+                    // Odebereme prefixy, aby nebyly vidět
+                    const cleanSubkey = subkey.replace(/^ARR_/, '').replace(/^VAR_/, '');
+
+                    if (subkey.startsWith("ARR_")) {
+                        // Je to pole
+                        const arrLi = document.createElement('li');
+                        arrLi.className = 'list-group-item d-flex flex-column';
+
+                        // Řádek s názvem array a tlačítkem "Smazat celý array"
+                        const headerDiv = document.createElement('div');
+                        headerDiv.className = 'mb-2';
+                        headerDiv.innerHTML = `
+                        <strong>${cleanSubkey}</strong>
+                        <button class="btn btn-sm btn-danger float-end"
+                                onclick="clearArrayRecords('${projectName}', '${subkey}')">
+                            Smazat celý array
+                        </button>
+                    `;
+
+                        // Seznam záznamů v array
+                        const recordUl = document.createElement('ul');
+                        recordUl.className = 'mt-2';
+
+                        for (const [recordId, recordValue] of Object.entries(subvalue)) {
+                            const recordLi = document.createElement('li');
+                            recordLi.className = 'mb-1';
+
+                            const recordValueStr = typeof recordValue === 'object'
+                                ? JSON.stringify(recordValue)
+                                : recordValue;
+
+                            recordLi.innerHTML = `
+                            ${recordId}: ${recordValueStr}
+                            <button class="btn btn-sm btn-danger ms-2"
+                                    onclick="deleteArrayRecord('${projectName}', '${subkey}', '${recordId}')">
+                                Smazat
+                            </button>
+                        `;
+                            recordUl.appendChild(recordLi);
+                        }
+
+                        arrLi.appendChild(headerDiv);
+                        arrLi.appendChild(recordUl);
+                        subList.appendChild(arrLi);
+
+                    } else if (subkey.startsWith("VAR_")) {
+                        // Proměnná
+                        const varLi = document.createElement('li');
+                        varLi.className = 'list-group-item';
+                        varLi.innerHTML = `
+                        <strong>${cleanSubkey}</strong>: ${subvalue}
+                        <button class="btn btn-sm btn-danger ms-2"
+                                onclick="deleteSubkey('${projectName}', '${subkey}')">
+                            Smazat
+                        </button>
+                    `;
+                        subList.appendChild(varLi);
+
+                    } else {
+                        // Jiný klíč
+                        const unknownLi = document.createElement('li');
+                        unknownLi.className = 'list-group-item';
+                        unknownLi.innerHTML = `<strong>${cleanSubkey}</strong>: ${JSON.stringify(subvalue)}`;
+                        subList.appendChild(unknownLi);
+                    }
+                }
+
+                // --------------- Otevření panelu, pokud je v openProjects ----------------
+                const collapseEl = accordionItem.querySelector(`#${collapseId}`);
+                const buttonEl = accordionItem.querySelector('button.accordion-button');
+
+                if (openProjects.has(projectName)) {
+                    // Otevřít
+                    buttonEl.classList.remove('collapsed');
+                    collapseEl.classList.add('show');
+                    buttonEl.setAttribute('aria-expanded', 'true');
+                }
+
+                // Eventy pro pamatování si stavu
+                collapseEl.addEventListener('shown.bs.collapse', () => {
+                    openProjects.add(projectName);
+                    updateURLHash();
+                });
+                collapseEl.addEventListener('hidden.bs.collapse', () => {
+                    openProjects.delete(projectName);
+                    updateURLHash();
+                });
+            }
+        }
+
+        // ======= Funkce pro mazání celého array (subkey) =======
+        async function clearArrayRecords(projectName, arrKey) {
+            const arrayName = arrKey.replace(/^ARR_/, '');
+            if (!confirm(`Opravdu chcete smazat celý array '${arrayName}'?`)) return;
+
+            try {
+                await forrestHubLib.arrayClearRecords(arrayName, projectName);
+                await loadAndDisplayData();
+                forrestHubLib.showAlert('success', `Array '${arrayName}' smazán.`);
+            } catch (error) {
+                forrestHubLib.showAlert('danger', `Chyba při mazání: ${error}`);
+            }
+        }
+
+        // ======= Mazání jedné položky v ARR_ =======
+        async function deleteArrayRecord(project, arrKey, recordId) {
+            const arrayName = arrKey.replace(/^ARR_/, '');
+            if (!confirm(`Opravdu smazat záznam ${recordId}?`)) return;
+
+            try {
+                await forrestHubLib.arrayRemoveRecord(arrayName, recordId, project);
+                await loadAndDisplayData();
+                forrestHubLib.showAlert('success', `Záznam ${recordId} odstraněn z ${arrayName}.`);
+            } catch (error) {
+                forrestHubLib.showAlert('danger', `Chyba při mazání: ${error}`);
+            }
+        }
+
+        // ======= Mazání VAR_ klíče =======
+        async function deleteSubkey(project, subkey) {
+            const rawKey = subkey.replace(/^VAR_/, '').replace(/^ARR_/, '');
+            if (!confirm(`Opravdu smazat klíč ${rawKey}?`)) return;
+
+            try {
+                await forrestHubLib.deleteKey(rawKey, project);
+                await loadAndDisplayData();
+                forrestHubLib.showAlert('success', `Klíč ${rawKey} smazán.`);
+            } catch (error) {
+                forrestHubLib.showAlert('danger', `Chyba při mazání: ${error}`);
+            }
+        }
+
+        // ======= Tlačítko "Zobrazit/Skrýt všechny projekty" =======
+        document.getElementById('toggleAllProjectsBtn').addEventListener('click', function () {
+            // Před hromadnou akcí si uložíme stav
+            storeCurrentAccordionStates();
+
+            const collapses = document.querySelectorAll('#projectsAccordion .accordion-collapse');
+            projectsExpanded = !projectsExpanded;
+
+            collapses.forEach(collapseEl => {
+                if (projectsExpanded) {
+                    new bootstrap.Collapse(collapseEl, { show: true });
+                } else {
+                    new bootstrap.Collapse(collapseEl, { hide: true });
+                }
+            });
+
+            this.textContent = projectsExpanded
+                ? 'Skrýt všechny projekty'
+                : 'Zobrazit všechny projekty';
+        });
+
+        // ======= Počet připojených zařízení =======
+        forrestHubLib.addEventListenerKey('update_clients', (data) => {
+            document.getElementById('connected_clients').innerText = data.count;
+        });
+
+        // ======= Odeslání admin zprávy =======
+        function sendAdminMessage() {
+            const adminMessage = document.getElementById('adminMessage');
+            if (adminMessage.value.trim() !== '') {
+                forrestHubLib.socket.emit('send_admin_message', adminMessage.value);
+                document.getElementById('lastAdminMessage').innerText = adminMessage.value;
+                adminMessage.value = '';
+                forrestHubLib.showAlert('success', 'Zpráva odeslána.');
+            } else {
+                forrestHubLib.showAlert('warning', 'Napište nejprve zprávu.');
+            }
+        }
+
+        // ======= Ovládání stavu hry =======
+        document.getElementById("game_start").addEventListener("click", () => {
+            forrestHubLib.emit("game_status_set", forrestHubLib.RUNNING);
+        });
+        document.getElementById("game_pause").addEventListener("click", () => {
+            forrestHubLib.emit('game_status_set', forrestHubLib.PAUSED);
+        });
+        document.getElementById("game_stop").addEventListener("click", () => {
+            forrestHubLib.emit('game_status_set', forrestHubLib.STOPPED);
+        });
+
+
+        // ======= Ovládání Edit režimu =======
+
+        forrestHubLib.addEventListenerKey('edit_mode', (edit_mode) => {
+            document.getElementById('edit_mode').innerText = edit_mode ? 'ANO' : 'NE';
+        });
+
+        document.getElementById("edit_mode_on").addEventListener("click", () => {
+            forrestHubLib.emit("edit_mode_set", true);
+        });
+        document.getElementById("edit_mode_off").addEventListener("click", () => {
+            forrestHubLib.emit('edit_mode_set', false);
+        });
+
+
+        // ======= Stáhnout data =======
+        document.getElementById("download-button").addEventListener("click", function () {
+            window.location.href = "/download-data";
+        });
+
+        // ======= Vymazat všechna data =======
+        document.getElementById("clear-button").addEventListener("click", async function () {
+            if (confirm("Opravdu chcete smazat veškerá data? Tato akce je nevratná.")) {
+                // Zrušíme i openProjects
+                openProjects.clear();
+                updateURLHash();
+                await forrestHubLib.deleteAllDatabase();
+            }
+        });
+
+        // ======= Nahrát data =======
+        document.getElementById("upload-button").addEventListener("click", async function () {
+            const fileInput = document.getElementById("uploadFile");
+            const file = fileInput.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                try {
+                    const response = await fetch("/upload-data", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.status === "success") {
+                        forrestHubLib.showAlert('success', "Data úspěšně nahrána.");
+                        await loadAndDisplayData(); // Aktualizovat zobrazení
+                    } else {
+                        forrestHubLib.showAlert('danger', "Při nahrávání dat nastala chyba.");
+                    }
+                } catch (error) {
+                    console.error("Chyba při nahrávání souboru:", error);
+                    forrestHubLib.showAlert('danger', "Nastala chyba při nahrávání souboru.");
+                }
+            } else {
+                forrestHubLib.showAlert('warning', "Vyberte prosím soubor k nahrání.");
+            }
+        });
+
+        // Načneme data a zobrazíme po načtení stránky
+        // (dobré pro případ, že se nestihne setInterval hned)
+        loadAndDisplayData();
     </script>
 {% endblock %}

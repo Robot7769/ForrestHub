@@ -1,16 +1,13 @@
-from flask import Blueprint
+from pathlib import Path
+
 from flask_socketio import emit
+from app.database import VAR, ARR
 
 from app.init import socketio, db
 
 from flask import (
     Blueprint,
-    render_template,
-    abort,
-    send_from_directory,
     current_app,
-    jsonify,
-    request,
 )
 
 socketio_bp = Blueprint("socketio", __name__)
@@ -39,274 +36,79 @@ def handle_disconnect():
     emit("update_clients", {"count": connected_clients}, broadcast=True)
 
 
-@socketio.on("get_game_status")
+@socketio.on("game_status_get")
 def handle_game_status(demo):
     global game_status
     emit("game_status", game_status)
 
 
-@socketio.on("set_game_status")
-def handle_set_game_status(status: str):
+@socketio.on("game_status_set")
+def handle_game_status_set(status: str):
     global game_status
     game_status = status
     emit("game_status", game_status, broadcast=True)
 
+################## Edit mode ############################
+
+@socketio.on("edit_mode_get")
+def handle_game_status(demo):
+    emit("edit_mode", db.edit_mode_is_on())
+
+
+@socketio.on("edit_mode_set")
+def handle_game_status_set(edit_mode_on: bool):
+    db.set_edit_mode(edit_mode_on)
+    emit("edit_mode", edit_mode_on, broadcast=True)
+
 ################## Admin Access ############################
 
 
-@socketio.on("get_all_db")
+@socketio.on("db_get_all_data")
 def handle_get_all_data(data) -> dict:
     return {"status": "ok", "data": db.get_all_data()}
 
 
-@socketio.on("delete_all_db")
+@socketio.on("db_delete_all_data")
 def handle_delete_all_data(data) -> dict:
     db.clear_data()
     return {"status": "ok"}
 
-##############################################
 
-@socketio.on("set_key")
-def handle_set_key(json: dict):
+################## VAR ############################
+
+@socketio.on("var_key_set")
+def handle_key_set(json: dict):
     project = json.get("project")
     key = json.get("key")
     value = json.get("value")
-    db.db_var_set_key(project, key, value)
+    db.var_key_set(project, key, value)
     return {"status": "ok"}
 
 
-@socketio.on("has_key")
-def handle_exists_key(json: dict) -> dict:
+@socketio.on("var_key_exist")
+def handle_key_exists(json: dict) -> dict:
     project = json.get("project")
     key = json.get("key")
-    return {"status": "ok", "exists": db.db_var_exists_key(project, key)}
+    return {"status": "ok", "exists": db.var_key_exists(project, key)}
 
 
-@socketio.on("get_key")
-def handle_get_key(json: dict) -> dict:
+@socketio.on("var_key_get")
+def handle_key_get(json: dict) -> dict:
     project = json.get("project")
     key = json.get("key")
     default_value = json.get("defaultValue", "")
-    return {"status": "ok", "data": db.db_var_get_key(project, key, default_value)}
+    return {"status": "ok", "data": db.var_key_get(project, key, default_value)}
 
 
-@socketio.on("delete_key")
-def handle_delete_key(json: dict) -> dict:
+@socketio.on("var_key_delete")
+def handle_key_delete(json: dict) -> dict:
     project = json.get("project")
     key = json.get("key")
-    db.db_var_delete_key(project, key)
-    return {"status": "ok"}
-
-################## Basic Keys ############################
-
-# add_new_game - create folder with game name
-@socketio.on("add_new_game")
-def handle_add_new_game(game_name: str) -> dict:
-    game_folder = current_app.config.get("GAMES_FOLDER")
-    if not game_folder:
-        return {"status": "error", "message": "No live data folder"}
-
-    game_folder = game_folder / game_name
-
-    if game_folder.exists():
-        return {"status": "error", "message": "Game already exists"}
-    game_folder.mkdir()
-    return {"status": "ok"}
-@socketio.on("add_new_game")
-def handle_add_new_game(game_name: str) -> dict:
-    game_folder = current_app.config.get("GAMES_FOLDER")
-    if not game_folder:
-        return {"status": "error", "message": "No live data folder"}
-
-    game_folder = game_folder / game_name
-
-    if game_folder.exists():
-        return {"status": "error", "message": "Game already exists"}
-    game_folder.mkdir()
+    db.var_key_delete(project, key)
     return {"status": "ok"}
 
 
-
-# add_new_game_page - create new page in game folder
-@socketio.on("add_new_game_page")
-def handle_add_new_game_page(json: dict) -> dict:
-    game_name = json.get("game")
-    game_page = json.get("page")
-    page_content = json.get("content")
-
-
-    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
-    if not game_folder:
-        return {"status": "error", "message": "Nemám složku s hrami"}
-
-    game_folder = game_folder / game_name
-
-    if not game_folder.exists():
-        game_folder.mkdir()
-
-    page_path = game_folder / f"{game_page}.html"
-    if page_path.exists():
-        return {"status": "error", "message": "Stránka již existuje"}
-
-    try:
-        with open(page_path, "w") as f:
-            f.write(page_content)
-    except Exception:
-        return {"status": "error", "message": "Chyba zápisu do souboru"}
-
-    return {"status": "ok"}
-
-# get_page_html - get html content of page
-@socketio.on("get_page_html")
-def handle_get_page_html(json: dict) -> dict:
-    game_name = json.get("game")
-    game_page = json.get("page")
-
-    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
-    if not game_folder:
-        return {"status": "error", "message": "No live data folder"}
-
-    game_folder = game_folder / game_name
-
-    if not game_folder.exists():
-        return {"status": "error", "message": "Tuhle hru nemám k editaci"}
-
-    page_path = game_folder / f"{game_page}.html"
-    if not page_path.exists():
-        return {"status": "error", "message": "Tuhle stránku hry nemám k editaci"}
-
-    try:
-        with open(page_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        return {"status": "ok", "content": content}
-    except Exception:
-        return {"status": "error", "message": "Chyba čtení souboru"}
-
-# set_page_html - set html content of page
-@socketio.on("set_page_html")
-def handle_set_page_html(json: dict) -> dict:
-    game_name = json.get("game_name")
-    game_page = json.get("game_page")
-    page_content = json.get("content")
-
-    header = "{% extends"
-    if header not in page_content:
-        return {"status": "error", "message": f"Zapomněli jste přidat {header}... na začátek souboru - mrkni na příklady"}
-
-    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
-    if not game_folder:
-        return {"status": "error", "message": "S touto složkou nemohu pracovat"}
-
-    game_folder = game_folder / game_name
-
-    if not game_folder.exists():
-        return {"status": "error", "message": "Hra neexistuje, nebo jsem ji nenašel"}
-
-    # if contains .html, remove it
-    game_page = game_page.replace(".html", "")
-    print(f"Game page: {game_page}")
-
-    page_path = game_folder / f"{game_page}.html"
-    if not page_path.exists():
-        return {"status": "error", "message": "Page does not exist"}
-
-    with open(page_path, "w", encoding="utf-8") as f:
-        f.write(page_content.encode("utf-8"))
-
-    print("Page content updated")
-    return {"status": "ok"}
-
-
-# add_new_game_page - create new page in game folder
-@socketio.on("add_new_game_page")
-def handle_add_new_game_page(json: dict) -> dict:
-    game_name = json.get("game")
-    game_page = json.get("page")
-    page_content = json.get("content")
-
-
-    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
-    if not game_folder:
-        return {"status": "error", "message": "Nemám složku s hrami"}
-
-    game_folder = game_folder / game_name
-
-    if not game_folder.exists():
-        game_folder.mkdir()
-
-    page_path = game_folder / f"{game_page}.html"
-    if page_path.exists():
-        return {"status": "error", "message": "Stránka již existuje"}
-
-    try:
-        with open(page_path, "w") as f:
-            f.write(page_content)
-    except Exception:
-        return {"status": "error", "message": "Chyba zápisu do souboru"}
-
-    return {"status": "ok"}
-
-# get_page_html - get html content of page
-@socketio.on("get_page_html")
-def handle_get_page_html(json: dict) -> dict:
-    game_name = json.get("game")
-    game_page = json.get("page")
-
-    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
-    if not game_folder:
-        return {"status": "error", "message": "No live data folder"}
-
-    game_folder = game_folder / game_name
-
-    if not game_folder.exists():
-        return {"status": "error", "message": "Tuhle hru nemám k editaci"}
-
-    page_path = game_folder / f"{game_page}.html"
-    if not page_path.exists():
-        return {"status": "error", "message": "Tuhle stránku hry nemám k editaci"}
-
-    try:
-        with open(page_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        return {"status": "ok", "content": content}
-    except Exception:
-        return {"status": "error", "message": "Chyba čtení souboru"}
-
-# set_page_html - set html content of page
-@socketio.on("set_page_html")
-def handle_set_page_html(json: dict) -> dict:
-    game_name = json.get("game_name")
-    game_page = json.get("game_page")
-    page_content = json.get("content")
-
-    header = "{% extends"
-    if header not in page_content:
-        return {"status": "error", "message": f"Zapomněli jste přidat {header}... na začátek souboru - mrkni na příklady"}
-
-    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
-    if not game_folder:
-        return {"status": "error", "message": "S touto složkou nemohu pracovat"}
-
-    game_folder = game_folder / game_name
-
-    if not game_folder.exists():
-        return {"status": "error", "message": "Hra neexistuje, nebo jsem ji nenašel"}
-
-    # if contains .html, remove it
-    game_page = game_page.replace(".html", "")
-    print(f"Game page: {game_page}")
-
-    page_path = game_folder / f"{game_page}.html"
-    if not page_path.exists():
-        return {"status": "error", "message": "Page does not exist"}
-
-    with open(page_path, "w", encoding="utf-8") as f:
-        f.write(page_content.encode("utf-8"))
-
-    print("Page content updated")
-    return {"status": "ok"}
-
-
+################## Array ############################
 
 @socketio.on("array_add_record")
 def handle_array_add_record(json: dict) -> dict:
@@ -360,3 +162,69 @@ def handle_array_clear_records(json: dict) -> dict:
 @socketio.on("array_list_projects")
 def handle_get_all_projects(json: dict) -> dict:
     return {"status": "ok", "data": db.array_list_projects()}
+
+
+################## Edit game ############################
+
+@socketio.on("add_new_game")
+def handle_add_new_game(game_name: str) -> dict:
+    game_folder = Path(current_app.config.get("GAMES_FOLDER_LIVE"))
+    if not game_folder.exists():
+        return {"status": "error", "message": "Neexistuje složka s hrami"}
+
+    game_folder = game_folder / Path(game_name)
+
+    if game_folder.exists():
+        return {"status": "error", "message": f"Hra {game_name} již existuje"}
+    game_folder.mkdir()
+    return {"status": "ok"}
+
+
+def validate_game_folder(game_name: Path, page_name: str, check_page_exists: bool) -> tuple[bool, str, Path | None]:
+    game_folder_path = Path(current_app.config.get("GAMES_FOLDER_LIVE"))
+    if not game_folder_path or not game_folder_path.exists():
+        return False, "Neexistuje složka s hrami", None
+
+    game_folder = game_folder_path / game_name
+    if not game_folder.exists():
+        game_folder.mkdir()
+
+    page_path = game_folder / f"{page_name}.html"
+    if check_page_exists and not page_path.exists():
+        return False, f"Stránka '{page_name}' neexistuje", None
+
+    return True, "", page_path
+
+@socketio.on("page_html_set")
+def handle_page_html_set(json: dict) -> dict:
+    game_name = json.get("game_name")
+    game_page = json.get("game_page")
+    page_content = json.get("game_content")
+
+    if not page_content:
+        return {"status": "error", "message": "Obsah stránky nesmí být prázdný"}
+
+    is_valid, message, path = validate_game_folder(game_name, game_page, check_page_exists=False)
+    if not is_valid:
+        return {"status": "error", "message": message}
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(page_content)
+            return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "message": f"Chyba zápisu do souboru: {e}"}
+
+
+@socketio.on("page_html_get")
+def handle_page_html_get(json: dict) -> dict:
+    game_name = json.get("game_name")
+    game_page = json.get("game_page")
+
+    is_valid, message, path = validate_game_folder(game_name, game_page, check_page_exists=True)
+    if not is_valid:
+        return {"status": "error", "message": message}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return {"status": "ok", "content": f.read()}
+    except Exception as e:
+        return {"status": "error", "message": f"Chyba čtení souboru: {e}"}

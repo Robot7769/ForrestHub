@@ -43,8 +43,11 @@ class Database:
     def save_to_file(self):
         with open(self.path_to_data, 'w') as f:
             json.dump(self.data, f, indent=4)
-    def load_data(self):
-        if not os.path.exists(self.path_to_data):
+
+    def load_data(self, optional_path: str = None):
+        path_to_data = optional_path if optional_path else self.path_to_data
+
+        if not os.path.exists(path_to_data):
             self.save_to_file()
         with open(self.path_to_data, 'r') as f:
             self.data = json.load(f)
@@ -53,95 +56,94 @@ class Database:
         self.data = {}
         self.save_to_file()
 
+
+    def get_all_data(self):
+        return self.data
+
+    def set_data(self, data: dict):
+        self.data = data
+        self.save_to_file()
+
     def save_data_periodically(self):
         eventlet.sleep(1)
         while True:
             self.save_to_file()
             eventlet.sleep(5)
-            print('Saving data to file...')
 
-    def get_all_data(self):
-        return self.data
+    ##########################################
+    def edit_mode_is_on(self):
+        return self.var_key_get('global', 'edit_mode', False)
+
+    def set_edit_mode(self, value: bool):
+        self.var_key_set('global', 'edit_mode', value)
 
     ##########################################
 
-    def db_var_get_key(self, project: str, key: str, default_value=None):
-        project = VAR + project
+    def var_key_get(self, project: str, key: str, default_value=None):
+        key = VAR + key
         if project not in self.data:
             return default_value
         return self.data[project].get(key, default_value)
 
-    @save_data
-    def db_var_set_key(self, project: str, key: str, value):
-        project = VAR + project
+    def var_key_set(self, project: str, key: str, value):
+        key = VAR + key
         if project not in self.data:
             self.data[project] = {}
         self.data[project][key] = value
 
-    @save_data
-    def db_var_delete_key(self, project: str, key: str):
-        project = VAR + project
+    def var_key_delete(self, project: str, key: str):
+        key = VAR + key
         if project in self.data and key in self.data[project]:
             del self.data[project][key]
             return True
         return False
 
-    def db_var_exists_key(self, project: str, key: str):
-        project = VAR + project
+    def var_key_exists(self, project: str, key: str):
+        key = VAR + key
         return project in self.data and key in self.data[project]
 
     ##########################################
 
     # add record
-    @save_data
     def array_add_record(self, project: str, array_name: str, value):
-        project = ARR + project
+        array_name = ARR + array_name
         if project not in self.data:
             self.data[project] = {}
         if array_name not in self.data[project]:
             self.data[project][array_name] = {}
         self.data[project][array_name][generate(size=10)] = value
 
+    def _record_exists(self, project_prefix: str, array_name: str, record_id: str) -> bool:
+        return project_prefix in self.data and array_name in self.data[project_prefix] and record_id in self.data[project_prefix][array_name]
+
     # remove record
-    @save_data
     def array_remove_record(self, project: str, array_name: str, record_id: str):
-        project = ARR + project
+        array_name = ARR + array_name
         if self._record_exists(project, array_name, record_id):
             del self.data[project][array_name][record_id]
             return True
         return False
 
     # update record
-    @save_data
     def array_update_record(self, project: str, array_name: str, record_id: str, value):
-        project = ARR + project
+        array_name = ARR + array_name
         if self._record_exists(project, array_name, record_id):
             self.data[project][array_name][record_id] = value
             return True
         return False
 
-    def _record_exists(self, project_prefix: str, array_name: str, record_id: str) -> bool:
-        return project_prefix in self.data and array_name in self.data[project_prefix] and record_id in self.data[project_prefix][array_name]
-
-    def array_get_record_id(self, project: str, array_name: str, record_id: str):
-        project = ARR + project
-        return self.data[project][array_name].get(record_id, {}) if project in self.data and array_name in self.data[project] else {}
-
     def array_get_all_records(self, project: str, array_name: str):
-        project = ARR + project
-        return self.data[project].get(array_name, {}) if project in self.data else []
+        array_name = ARR + array_name
+        return self.data[project].get(array_name, {}) if project in self.data else {}
 
 
-    @save_data
     def array_clear_records(self, project: str, array_name: str):
-        project = ARR + project
+        array_name = ARR + array_name
         if project in self.data and array_name in self.data[project]:
-            self.data[project][array_name] = {}
+            del self.data[project][array_name]
             return True
         return False
 
 
     def array_list_projects(self):
-        # return only keys starting with ARR_
-        # return list(self.data.keys())
-        return [key[4:] for key in self.data.keys() if key.startswith(ARR)]
+        return list(self.data.keys())

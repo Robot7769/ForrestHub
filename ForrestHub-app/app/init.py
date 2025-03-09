@@ -15,6 +15,7 @@ def create_app(config_class="config.Config"):
     # Enable CORS
     CORS(app)
 
+
     # Initialize the database
     db.init(app.config["EXECUTABLE_DIR"], app.config["DATAFILE"])
 

@@ -28,7 +28,7 @@ class ForrestHubLib {
 
         this.addEventListenerKey('connect', () => {
             console.log('Connected to the server!');
-            this.socket.emit('get_game_status', null);
+            this.socket.emit('game_status_get', null);
             this.removeOverlay();
         });
 
@@ -131,57 +131,14 @@ class ForrestHubLib {
         }
     }
 
-    /**
-     * Set key with value and return response
-     * @param key {string} - key name
-     * @param value {any} - value to set
-     */
-    async setKey(key, value) {
-        const {project} = this;
-        await this.emitWithResponse('set_key', { project, key, value });
-    }
-
-    /**
-     * Get key value
-     * @param key {string} - key name
-     * @param defaultValue {any} - default value if key does not exist
-     * @returns {Promise<*>}
-     */
-    async getKey(key, defaultValue = null) {
-        const {project} = this;
-        const response = await this.emitWithResponse('get_key', { project, key, defaultValue });
-        return response.data;
-    }
-
-    /**
-     * Check if key exists
-     * @param key {string} - key name
-     * @returns {Promise<boolean>} - true if key exists
-     */
-    async hasKey(key) {
-        const {project} = this;
-        const response = await this.emitWithResponse('has_key', { project, key });
-        return !!response?.exists;
-    }
-
-    /**
-     * Delete key
-     * @param key {string} - key name
-     * @returns {Promise<void>}
-     */
-    async deleteKey(key) {
-        const {project} = this;
-        await this.emitWithResponse('delete_key', { project, key });
-    }
-
-    /////////////////////////// DATABASE ///////////////////////////
+    /////////////////////////// DATABASE OPERATIONS ///////////////////////////
 
     /**
      * Set database value
      * @returns {Promise<{}>}
      */
-    async getAllDatabase() {
-        const db = await this.emitWithResponse('get_all_db');
+    async dbGetAllData() {
+        const db = await this.emitWithResponse('db_get_all_data');
         return db.data || {};
     }
 
@@ -189,8 +146,63 @@ class ForrestHubLib {
      * Set database value
      * @returns {Promise<void>}
      */
-    async deleteAllDatabase() {
-        await this.emitWithResponse('delete_all_db');
+    async dbDeleteAllData() {
+        await this.emitWithResponse('db_delete_all_data');
+    }
+
+    /////////////////////////// DATABASE VAR ///////////////////////////
+
+    _getProject(projectOverride = null) {
+        if (projectOverride) {
+            return projectOverride;
+        }
+        return this.project;
+    }
+
+    /**
+     * Set key with value and return response
+     * @param key {string} - key name
+     * @param value {any} - value to set
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     */
+    async varKeySet(key, value, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('var_key_set', { project, key, value });
+    }
+
+    /**
+     * Get key value
+     * @param key {string} - key name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<*>}
+     */
+    async varKeyGet(key, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        const response = await this.emitWithResponse('var_key_get', { project, key, project });
+        return response.data;
+    }
+
+    /**
+     * Check if key exists
+     * @param key {string} - key name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<boolean>} - true if key exists
+     */
+    async varKeyExist(key, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        const response = await this.emitWithResponse('var_key_exist', { project, key });
+        return !!response?.exists;
+    }
+
+    /**
+     * Delete key
+     * @param key {string} - key name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<void>}
+     */
+    async varKeyDelete(key, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('var_key_delete', { project, key });
     }
 
     /////////////////////////// DATABASE ARRAY ///////////////////////////
@@ -201,10 +213,11 @@ class ForrestHubLib {
      * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
      * @param arrayName {string} - array name
      * @param value {any} - initial value
+     * @param projectOverride {string} - override project name if accessing from Admin page
      * @returns {Promise<void>}
      */
-    async arrayAddRecord(arrayName, value) {
-        const {project} = this;
+    async arrayAddRecord(arrayName, value, projectOverride = null) {
+        const project = this._getProject(projectOverride);
         await this.emitWithResponse('array_add_record', {project , arrayName, value });
     }
 
@@ -213,10 +226,11 @@ class ForrestHubLib {
      * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
      * @param arrayName {string} - array name
      * @param recordId {string} - record id
+     * @param projectOverride {string} - override project name if accessing from Admin page
      * @returns {Promise<void>}
      */
-    async arrayRemoveRecord(arrayName, recordId) {
-        const {project} = this;
+    async arrayRemoveRecord(arrayName, recordId, projectOverride = null) {
+        const project = this._getProject(projectOverride);
         await this.emitWithResponse('array_remove_record', { project, arrayName, recordId });
     }
 
@@ -225,43 +239,35 @@ class ForrestHubLib {
      * @param arrayName {string} - array name
      * @param recordId {string} - record id
      * @param value {any} - new value
+     * @param projectOverride {string} - override project name if accessing from Admin page
      * @returns {Promise<void>}
      */
-    async arrayUpdateRecord(arrayName, recordId, value) {
-        const {project} = this;
+    async arrayUpdateRecord(arrayName, recordId, value, projectOverride = null) {
+        const project = this._getProject(projectOverride);
         await this.emitWithResponse('array_update_record', { project, arrayName, recordId, value });
     }
 
     /**
      * Get all records from array by arrayName
+     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
      * @param arrayName {string} - array name
+     * @param projectOverride {string} - override project name if accessing from Admin page
      * @returns {Promise<*>} - record map {recordId: value, ...}
      */
-    async arrayGetAllRecords(arrayName) {
-        const {project} = this;
+    async arrayGetAllRecords(arrayName, projectOverride = null) {
+        const project = this._getProject(projectOverride);
         const response = await this.emitWithResponse('array_get_all_records', { project, arrayName });
-        return response.data;
-    }
-
-    /**
-     * Get record from array by recordId
-     * @param arrayName {string} - array name
-     * @param recordId {string} - record id
-     * @returns {Promise<*>} - record value
-     */
-    async arrayGetRecordId(arrayName, recordId) {
-        const {project} = this;
-        const response = await this.emitWithResponse('array_get_record_id', { project, arrayName, recordId });
         return response.data;
     }
 
     /**
      * Clear all records from array
      * @param arrayName {string} - array name
+     * @param projectOverride {string} - override project name if accessing from Admin page
      * @returns {Promise<void>}
      */
-    async arrayClearRecords(arrayName) {
-        const {project} = this;
+    async arrayClearRecords(arrayName, projectOverride = null) {
+        const project = this._getProject(projectOverride);
         await this.emitWithResponse('array_clear_records', { project, arrayName });
     }
 
@@ -270,7 +276,6 @@ class ForrestHubLib {
      * @returns {Promise<*>}
      */
     async arrayListProjects() {
-        const {project} = this;
         const response = await this.emitWithResponse('array_list_projects', {});
         return response.data;
     }
@@ -280,13 +285,13 @@ class ForrestHubLib {
         let statusText = "";
         switch (status) {
             case this.RUNNING:
-                statusText = "Běží";
+                statusText = "Hra běží";
                 break;
             case this.PAUSED:
-                statusText = "Pozastavena";
+                statusText = "Hra pozastavena";
                 break;
             case this.STOPPED:
-                statusText = "Ukončena";
+                statusText = "Hra ukončena";
                 break;
             default:
                 statusText = "?";

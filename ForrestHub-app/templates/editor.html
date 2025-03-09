@@ -1,4 +1,4 @@
-{% if debug == true %}
+{% if edit_mode %}
 <!-- Plovoucí tlačítko pro editaci -->
 <button id="editButton" class="btn btn-warning btn-floating">✎</button>
 
@@ -11,11 +11,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <textarea id="pageEditor" class="form-control" rows="20"></textarea>
+                <textarea id="pageEditor" class="form-control" rows="20">{{ page_html }}</textarea>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
-                <button type="button" class="btn btn-primary" id="saveChangesButton">Uložit změny</button>
+                <button type="button" class="btn btn-primary" id="saveChangesButton" {% if not is_editable %}disabled{% endif %}>
+                    {% if not is_editable %}
+                        Tato hra je zapečená do systému a není možné ji upravit
+                    {% else %}
+                        Uložit změny
+                    {% endif %}
+                </button>
+                {% if not is_editable %}
+                <div class="alert alert-warning mt-3" role="alert">
+                    Tuto hru nelze přímo upravit. Můžete si ji zkopírovat a poté upravit.
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -25,25 +36,13 @@
 
     forrestHubLib = window.forrestHubLib || new ForrestHubLib();
 
-    const gameName = "{{ folder }}"; // Dynamicky definovaný název složky
-    const gamePage = "{{ page }}";  // Dynamicky definovaná stránka
+    const gameName = "{{ folder }}";
+    const gamePage = "{{ page }}";
 
     // Zobrazí editor s aktuálním obsahem stránky
     document.getElementById('editButton').addEventListener('click', async () => {
-        try {
-            // Načti aktuální HTML obsah přímo z serveru
-            const response = await forrestHubLib.emitWithResponse('get_page_html', {
-                game: gameName,
-                page: gamePage
-            });
-            document.getElementById('pageEditor').value = response.content || ''; // Nastaví obsah do textarea
-
-            const editorModal = new bootstrap.Modal(document.getElementById('editorModal'));
-            editorModal.show();
-        } catch (error) {
-            console.error('Chyba při načítání obsahu stránky do editoru:', error);
-            alert('Tohle asi neumím editovat.');
-        }
+        const editorModal = new bootstrap.Modal(document.getElementById('editorModal'));
+        editorModal.show();
     });
 
     // Uložení změn
@@ -51,14 +50,12 @@
         const newContent = document.getElementById('pageEditor').value;
 
         try {
-            await forrestHubLib.emitWithResponse('set_page_html', {
-                game: gameName,
-                page: gamePage,
-                content: newContent
+            await forrestHubLib.emitWithResponse('page_html_set', {
+                game_name: gameName,
+                game_page: gamePage,
+                game_content: newContent
             });
             alert('Změny byly úspěšně uloženy.');
-
-            // Po uložení změn znovu načti stránku
             location.reload();
         } catch (error) {
             console.error('Chyba při ukládání stránky:', error);

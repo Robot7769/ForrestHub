@@ -1,96 +1,33 @@
 {
-    "ARR_generator": {
-        "generatedNumbers": {
-            "vevDySkjwz": 294,
-            "b6EDQvGaTI": 312
-        }
-    },
-    "VAR_Tester": {
-        "myValue": "Kuba"
-    },
-    "ARR_demo": {
-        "generator": {
-            "6PwmXR1pEK": "generatedNumbers",
-            "PpGS7_sZkA": "generatedNumbers",
-            "uiH-fk45ic": "generatedNumbers",
-            "oudSUYZrgb": "generatedNumbers"
-        }
-    },
-    "ARR_chat": {
-        "chatMessages": {
-            "DtKpM_owYn": {
-                "user": "Kuba",
-                "text": "Zdar",
-                "time": "9:33:01 AM"
-            },
-            "QfILBHNsoY": {
-                "user": "Kuba",
-                "text": "Cau",
-                "time": "9:33:28 AM"
-            },
-            "xE_sOyq7Y8": {
-                "user": "Adam",
-                "text": "Asd",
-                "time": "9:34:38 AM"
-            },
-            "Ioz9BYvh3Z": {
-                "user": "Kuba",
-                "text": "Cau",
-                "time": "9:36:28 AM"
-            },
-            "dBStjind-W": {
-                "user": "Adam",
-                "text": "Kam mame jit?",
-                "time": "9:36:58 AM"
-            },
-            "AI1285t3MO": {
-                "user": "Petr",
-                "text": "Cau",
-                "time": "11:25:12 AM"
-            },
-            "3e6yMkbvqK": {
-                "user": "Petr",
-                "text": "\ud83d\ude02",
-                "time": "11:25:42 AM"
-            },
-            "-25Jy2j2sG": {
-                "user": "Jitka",
-                "text": "Nazdaar!",
-                "time": "15:27:42"
-            },
-            "S3vjD4yxcw": {
-                "user": "Eliska",
-                "text": "U\u017e jdu",
-                "time": "15:29:48"
-            },
-            "r4ni3iQQX9": {
-                "user": "Kuba",
-                "text": "Ja uz asi za chvili taky pujdu",
-                "time": "3:33:13 PM"
-            },
-            "6E6bro3YqZ": {
-                "user": "Eliska",
-                "text": "J\u00e1 t\u011b kouk\u00e1m Jurovi na ruce",
-                "time": "15:33:28"
+    "chat": {
+        "ARR_chatMessages": {
+            "mJ4Q6Uo4wE": {
+                "user": "Pepa",
+                "text": "Jak se mas",
+                "time": "4:43:15 PM"
             }
         }
     },
-    "VAR_chat": {
-        "currentUserName": "Eliska"
-    },
-    "ARR_udavac": {
-        "numbersList": {
-            "8rCzCq4330": "1237"
+    "demo": {
+        "ARR_generatedNumbers": {
+            "gCwDtTes4u": 376,
+            "oHoihbK5H2": 677,
+            "vl4xHgi-Xo": 272,
+            "eQPFs_VO7v": 408
         }
     },
-    "ARR_posta": {
-        "queue_A": {},
-        "queue_C": {
-            "ugNjMzsu5I": "C231",
-            "0rltnBkPim": "C848"
-        },
-        "queue_B": {
-            "7dFo9mXQ4T": "B943"
+    "udavac": {
+        "ARR_numbersList": {
+            "Fn6bhbIf5N": "1234"
         }
+    },
+    "posta": {
+        "ARR_queue_C": {}
+    },
+    "Tester": {
+        "VAR_myValue": "Kuba"
+    },
+    "global": {
+        "VAR_edit_mode": true
     }
 }

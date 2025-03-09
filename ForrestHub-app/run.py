@@ -48,10 +48,8 @@ def run_flask(config="config.Config"):
         app,
         host="0.0.0.0",
         port=app.config["PORT"],
-        # use_reloader=app.config["USE_RELOADER"],
         use_reloader=False,
-        debug=True,
-        # debug=app.config["DEBUG"],
+        debug=False,
     )
 
 

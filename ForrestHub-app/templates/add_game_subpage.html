@@ -1,4 +1,4 @@
-{% if debug == true %}
+{% if edit_mode %}
 <div class="container">
     <h3>Správa her</h3>
     <button id="addGamePageButton" class="btn btn-primary">Vytvoř podstránku hry</button>
@@ -19,7 +19,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="pageContentInput" class="form-label">HTML obsah - od ChatGPT</label>
-                    <textarea id="pageContentInput" class="form-control" rows="6" placeholder="Zadej HTML obsah podstránky"></textarea>
+                    <textarea id="pageContentInput" class="form-control" rows="6" placeholder="Zadej HTML obsah podstránky">{{ page_html }}</textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -53,7 +53,7 @@
             pageName = pageName.toLowerCase().replace(/\//g, '-');
 
             // Uložení podstránky na server
-            forrestHubLib.emit('add_new_game_page', {
+            forrestHubLib.emit('page_html_set', {
                 game: '{{ folder }}',
                 page: pageName,
                 content: pageContent
