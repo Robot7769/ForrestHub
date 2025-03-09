@@ -1,11 +1,23 @@
 import json
 import os
-
-from werkzeug.datastructures import FileStorage
+from engineio.async_drivers import eventlet
+from nanoid import generate
 
 
 class DatabaseException(Exception):
     pass
+
+
+VAR = "VAR_"
+ARR = "ARR_"
+
+
+def save_data(func):
+    def wrapper(self, *args, **kwargs):
+        result = func(self, *args, **kwargs)
+        # self.save_to_file()
+        return result
+    return wrapper
 
 
 class Database:
@@ -24,60 +36,114 @@ class Database:
         self.directory = directory
         self.file = file_name
         self.path_to_data = os.path.join(directory, file_name)
-        if clear_data or not os.path.exists(self.path_to_data):
-            self._write_data({})
-        self.data = self._read_data()
+        if clear_data:
+            self.clear_data()
+        self.load_data()
 
-    def get_directory(self):
-        return self.directory
-
-    def get_file(self):
-        return self.file
-
-    def _write_data(self, data):
+    def save_to_file(self):
         with open(self.path_to_data, 'w') as f:
-            json.dump(data, f)
+            json.dump(self.data, f, indent=4)
 
-    def _read_data(self):
+    def load_data(self, optional_path: str = None):
+        path_to_data = optional_path if optional_path else self.path_to_data
+
+        if not os.path.exists(path_to_data):
+            self.save_to_file()
         with open(self.path_to_data, 'r') as f:
-            try:
-                data = json.load(f)
-            except json.decoder.JSONDecodeError:
-                data = {}
-        return data
+            self.data = json.load(f)
 
-    def overwrite_data_file(self, file: FileStorage):
-        file.save(self.path_to_data)
-        self.data = self._read_data()
+    def clear_data(self):
+        self.data = {}
+        self.save_to_file()
 
-    def overwrite_data_dict(self, new_data: dict):
-        self._write_data(new_data)
-        self.data = new_data
 
-    def get_data(self):
+    def get_all_data(self):
         return self.data
 
-    def get_data_key(self, key, default=None):
-        return self.data.get(key, default)
+    def set_data(self, data: dict):
+        self.data = data
+        self.save_to_file()
 
-    def set_data_key(self, key, value):
-        self.data[key] = value
-        self._write_data(self.data)
+    def save_data_periodically(self):
+        eventlet.sleep(1)
+        while True:
+            self.save_to_file()
+            eventlet.sleep(5)
 
-    def edit_data_key(self, key, value) -> bool:
-        if key not in self.data:
-            return False
-        self.data[key] = value
-        self._write_data(self.data)
-        return True
+    ##########################################
+    def edit_mode_is_on(self):
+        return self.var_key_get('global', 'edit_mode', False)
 
-    def delete_data_key(self, key):
-        """Delete a key from the database.
-        :param key: The key to delete
-        :return: True if the key was deleted, False if the key was not found
-        """
-        if key in self.data:
-            del self.data[key]
-            self._write_data(self.data)
+    def set_edit_mode(self, value: bool):
+        self.var_key_set('global', 'edit_mode', value)
+
+    ##########################################
+
+    def var_key_get(self, project: str, key: str, default_value=None):
+        key = VAR + key
+        if project not in self.data:
+            return default_value
+        return self.data[project].get(key, default_value)
+
+    def var_key_set(self, project: str, key: str, value):
+        key = VAR + key
+        if project not in self.data:
+            self.data[project] = {}
+        self.data[project][key] = value
+
+    def var_key_delete(self, project: str, key: str):
+        key = VAR + key
+        if project in self.data and key in self.data[project]:
+            del self.data[project][key]
             return True
         return False
+
+    def var_key_exists(self, project: str, key: str):
+        key = VAR + key
+        return project in self.data and key in self.data[project]
+
+    ##########################################
+
+    # add record
+    def array_add_record(self, project: str, array_name: str, value):
+        array_name = ARR + array_name
+        if project not in self.data:
+            self.data[project] = {}
+        if array_name not in self.data[project]:
+            self.data[project][array_name] = {}
+        self.data[project][array_name][generate(size=10)] = value
+
+    def _record_exists(self, project_prefix: str, array_name: str, record_id: str) -> bool:
+        return project_prefix in self.data and array_name in self.data[project_prefix] and record_id in self.data[project_prefix][array_name]
+
+    # remove record
+    def array_remove_record(self, project: str, array_name: str, record_id: str):
+        array_name = ARR + array_name
+        if self._record_exists(project, array_name, record_id):
+            del self.data[project][array_name][record_id]
+            return True
+        return False
+
+    # update record
+    def array_update_record(self, project: str, array_name: str, record_id: str, value):
+        array_name = ARR + array_name
+        if self._record_exists(project, array_name, record_id):
+            self.data[project][array_name][record_id] = value
+            return True
+        return False
+
+    def array_get_all_records(self, project: str, array_name: str):
+        array_name = ARR + array_name
+        return self.data[project].get(array_name, {}) if project in self.data else {}
+
+
+    def array_clear_records(self, project: str, array_name: str):
+        array_name = ARR + array_name
+        if project in self.data and array_name in self.data[project]:
+            del self.data[project][array_name]
+            return True
+        return False
+
+
+    def array_list_projects(self):
+        return list(self.data.keys())

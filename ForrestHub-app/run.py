@@ -2,6 +2,8 @@ import logging
 import os
 import sys
 import webbrowser
+import eventlet
+import eventlet.green.threading as threading
 from datetime import datetime
 
 from app.init import create_app, socketio
@@ -11,16 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 def setup_logging(root_dir: str, log_folder: str = "ForrestHubLogs"):
-    # Create a logs directory if it doesn't exist
     logs_dir = os.path.join(root_dir, log_folder)
     os.makedirs(logs_dir, exist_ok=True)
-
-    # Create a log file name with a timestamp
     log_file = os.path.join(
         logs_dir, f'ForrestHub_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
     )
-
-    # Set up logging to file
     logging.basicConfig(
         filename=log_file,
         level=logging.DEBUG,
@@ -28,7 +25,6 @@ def setup_logging(root_dir: str, log_folder: str = "ForrestHubLogs"):
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # Also log to console
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
     formatter = logging.Formatter("%(name)-12s: %(levelname)-8s %(message)s")
@@ -38,21 +34,28 @@ def setup_logging(root_dir: str, log_folder: str = "ForrestHubLogs"):
     return logging.getLogger(__name__)
 
 
+def save_data_periodically():
+    while True:
+        # Simulace ukládání dat každou vteřinu
+        logger.info("Ukládám data...")
+        eventlet.sleep(1)
+
+
 def run_flask(config="config.Config"):
     app = create_app(config)
+
     socketio.run(
         app,
         host="0.0.0.0",
         port=app.config["PORT"],
-        use_reloader=app.config["USE_RELOADER"],
-        debug=app.config["DEBUG"],
+        use_reloader=False,
+        debug=False,
     )
 
 
 if __name__ == "__main__":
     config = Config()
 
-    # if exist argument, use them as port of app
     if len(sys.argv) > 1:
         config.PORT = int(sys.argv[1])
 
@@ -68,6 +71,7 @@ if __name__ == "__main__":
         print(f"Server started at {local_ip}")
         logger.info(f"Server started at {local_ip}")
         logger.info("Press Ctrl-C to stop the server")
+
         run_flask(config=config)
     except KeyboardInterrupt:
         logger.info("Server stopped")

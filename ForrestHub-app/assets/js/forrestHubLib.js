@@ -3,14 +3,23 @@
  */
 
 class ForrestHubLib {
+    VERSION = '1.4.0';
+
     // RUNNING = 1;
     RUNNING = "running";
     PAUSED = "paused";
     STOPPED = "stopped";
 
+    /**
+     * @type {string}
+     */
+    project = "";
+
     constructor(isAdmin = false, url = `http://${window.location.hostname}:${window.location.port}`) {
-        this.isGameMode = true;
+        this.project = window.location.pathname.split('/')[1];
+        this.isGamePage = true;
         this.isAdmin = isAdmin;
+
 
         if (typeof io === 'undefined') {
             throw new Error('Socket.io is not loaded.');
@@ -19,7 +28,7 @@ class ForrestHubLib {
 
         this.addEventListenerKey('connect', () => {
             console.log('Connected to the server!');
-            this.socket.emit('get_game_status', null);
+            this.socket.emit('game_status_get', null);
             this.removeOverlay();
         });
 
@@ -35,7 +44,7 @@ class ForrestHubLib {
         this.addEventListenerKey('game_status', (status) => {
             if (status === this.RUNNING) {
                 this.removeOverlay();
-                if (this.isGameMode) {
+                if (this.isGamePage) {
                     this.showAlert('success', 'Hra spuštěna', 5000);
                 }
             } else if (status === this.PAUSED) {
@@ -45,21 +54,51 @@ class ForrestHubLib {
             } else {
                 this.showOverlay('Neznámý stav hry', null, 'warning');
             }
-        });
-
-        this.addEventListenerKey("game_status", (data) => {
-            this.updateGameStatusUI(data);
+            this.updateGameStatusUI(status);
         });
     }
 
+    /**
+     * Set if user is admin
+     * @param isAdmin {boolean} - true if user is admin
+     */
     setAdmin(isAdmin) {
         this.isAdmin = isAdmin;
     }
 
+    /**
+     * Set if user is on game page
+     * @param isGameMode {boolean} - true if user is on game page
+     */
     setGameMode(isGameMode) {
-        this.isGameMode = isGameMode;
+        this.isGamePage = isGameMode;
     }
 
+    /**
+     * Set project name (for database)
+     * @param project {string} - project name
+     */
+    setProject(project) {
+        this.project = project;
+    }
+
+    /**
+     * Add event listener for key
+     * @param eventKey
+     * @param callback
+     */
+    addEventListenerKey(eventKey, callback) {
+        this.socket.on(eventKey, (data) => {
+            callback(data);
+        });
+    }
+
+    /**
+     * Emit event with data and return response
+     * @param event - event name
+     * @param data - data to send
+     * @returns {Promise<unknown>}
+     */
     emitWithResponse(event, data) {
         return new Promise((resolve, reject) => {
             this.emit(event, data, (response) => {
@@ -92,60 +131,167 @@ class ForrestHubLib {
         }
     }
 
+    /////////////////////////// DATABASE OPERATIONS ///////////////////////////
+
     /**
-     * Set key with value and return response
-     * @param key
-     * @param value
-     * @returns {Promise<unknown>}
+     * Set database value
+     * @returns {Promise<{}>}
      */
-    async setKey(key, value) {
-        await this.emitWithResponse('set_key', { key, value });
-    }
-
-    async setKeyBroadcast(key, value) {
-        await this.emitWithResponse('set_key_broadcast', { key, value });
-    }
-
-    async getKey(key, defaultValue = null) {
-        const response = await this.emitWithResponse('get_key', { key, defaultValue });
-        return response.data;
-    }
-
-    async existKey(key) {
-        const response = await this.emitWithResponse('exist_key', key);
-        return !!response.exists;
-    }
-
-    async deleteKey(key) {
-        await this.emitWithResponse('delete_key', key);
-    }
-
-    addEventListenerKey(eventKey, callback) {
-        this.socket.on(eventKey, (data) => {
-            callback(data);
-        });
-    }
-
-    async getAllDatabase() {
-        const db = await this.emitWithResponse('get_all_db');
+    async dbGetAllData() {
+        const db = await this.emitWithResponse('db_get_all_data');
         return db.data || {};
     }
 
-    async deleteAllDatabase() {
-        await this.emitWithResponse('delete_all_db');
+    /**
+     * Set database value
+     * @returns {Promise<void>}
+     */
+    async dbDeleteAllData() {
+        await this.emitWithResponse('db_delete_all_data');
     }
+
+    /////////////////////////// DATABASE VAR ///////////////////////////
+
+    _getProject(projectOverride = null) {
+        if (projectOverride) {
+            return projectOverride;
+        }
+        return this.project;
+    }
+
+    /**
+     * Set key with value and return response
+     * @param key {string} - key name
+     * @param value {any} - value to set
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     */
+    async varKeySet(key, value, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('var_key_set', { project, key, value });
+    }
+
+    /**
+     * Get key value
+     * @param key {string} - key name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<*>}
+     */
+    async varKeyGet(key, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        const response = await this.emitWithResponse('var_key_get', { project, key, project });
+        return response.data;
+    }
+
+    /**
+     * Check if key exists
+     * @param key {string} - key name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<boolean>} - true if key exists
+     */
+    async varKeyExist(key, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        const response = await this.emitWithResponse('var_key_exist', { project, key });
+        return !!response?.exists;
+    }
+
+    /**
+     * Delete key
+     * @param key {string} - key name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<void>}
+     */
+    async varKeyDelete(key, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('var_key_delete', { project, key });
+    }
+
+    /////////////////////////// DATABASE ARRAY ///////////////////////////
+
+    /**
+     * Add record to array
+     * each record will have got unique id (recordId)
+     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
+     * @param arrayName {string} - array name
+     * @param value {any} - initial value
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<void>}
+     */
+    async arrayAddRecord(arrayName, value, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('array_add_record', {project , arrayName, value });
+    }
+
+    /**
+     * Remove record from array by recordId
+     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
+     * @param arrayName {string} - array name
+     * @param recordId {string} - record id
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<void>}
+     */
+    async arrayRemoveRecord(arrayName, recordId, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('array_remove_record', { project, arrayName, recordId });
+    }
+
+    /**
+     * Update record in array by recordId
+     * @param arrayName {string} - array name
+     * @param recordId {string} - record id
+     * @param value {any} - new value
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<void>}
+     */
+    async arrayUpdateRecord(arrayName, recordId, value, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('array_update_record', { project, arrayName, recordId, value });
+    }
+
+    /**
+     * Get all records from array by arrayName
+     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
+     * @param arrayName {string} - array name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<*>} - record map {recordId: value, ...}
+     */
+    async arrayGetAllRecords(arrayName, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        const response = await this.emitWithResponse('array_get_all_records', { project, arrayName });
+        return response.data;
+    }
+
+    /**
+     * Clear all records from array
+     * @param arrayName {string} - array name
+     * @param projectOverride {string} - override project name if accessing from Admin page
+     * @returns {Promise<void>}
+     */
+    async arrayClearRecords(arrayName, projectOverride = null) {
+        const project = this._getProject(projectOverride);
+        await this.emitWithResponse('array_clear_records', { project, arrayName });
+    }
+
+    /**
+     * List all projects stored in the database
+     * @returns {Promise<*>}
+     */
+    async arrayListProjects() {
+        const response = await this.emitWithResponse('array_list_projects', {});
+        return response.data;
+    }
+
 
     updateGameStatusUI(status) {
         let statusText = "";
         switch (status) {
             case this.RUNNING:
-                statusText = "Běží";
+                statusText = "Hra běží";
                 break;
             case this.PAUSED:
-                statusText = "Pozastavena";
+                statusText = "Hra pozastavena";
                 break;
             case this.STOPPED:
-                statusText = "Ukončena";
+                statusText = "Hra ukončena";
                 break;
             default:
                 statusText = "?";

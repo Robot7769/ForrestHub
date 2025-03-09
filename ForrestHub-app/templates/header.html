@@ -1,9 +1,51 @@
+<!-- Navbar with game status aligned right and QR code button using Font Awesome -->
 <nav class="navbar bg-body-tertiary bg-secondary">
-    <div class="container-fluid">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
         <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="/assets/img/ForrestHub-icon.svg" id="forrestHub" alt="Logo" width="50"  class="me-2">
+            <img src="/assets/img/ForrestHub-icon.svg" id="forrestHub" alt="Logo" width="50" class="me-2">
             {{ page | capitalize }}
         </a>
-        <span class="game_status badge bg-primary">?</span>
+
+        <div class="d-flex align-items-center">
+            <!-- Game status aligned to the right -->
+            <span class="game_status badge bg-primary me-2">?</span>
+
+            <!-- QR code button with bg-primary and Font Awesome icon -->
+            <button type="button" class="btn btn-primary p-2" data-bs-toggle="modal" data-bs-target="#qrCodeModal" aria-label="Zobrazit QR kód">
+                <i class="fas fa-qrcode"></i>
+            </button>
+        </div>
     </div>
 </nav>
+
+<!-- Modal for displaying the QR code -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">QR Kód s aktuální adresou</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center">
+                <div id="qrcode-page"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // share same iddres as is opened
+        const currentUrl = window.location.href;
+
+        // Generate QR code when modal is opened
+        const qrCodeModal = document.getElementById('qrCodeModal');
+        qrCodeModal.addEventListener('shown.bs.modal', () => {
+            document.getElementById('qrcode-page').innerHTML = ''; // Clear previous QR code
+            new QRCode(document.getElementById('qrcode-page'), currentUrl);
+        });
+    });
+</script>

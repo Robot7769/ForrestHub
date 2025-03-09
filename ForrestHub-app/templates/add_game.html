@@ -1,5 +1,4 @@
-
-{% if debug == true %}
+{% if edit_mode %}
 <div class="container">
     <h3>Správa her</h3>
     <button id="addGameButton" class="btn btn-primary">Přidej hru</button>
@@ -10,7 +9,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="gameModalLabel">Nastav jméno hry</h5>
+                <h5 class="modal-title" id="gameModalLabel">Jméno hry</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -25,7 +24,6 @@
 </div>
 
 <script>
-
     forrestHubLib = window.forrestHubLib || new ForrestHubLib();
     forrestHubLib.setAdmin(true);
     forrestHubLib.setGameMode(false);

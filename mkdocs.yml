@@ -1,0 +1,102 @@
+site_name: MkDoxy
+site_url: https://mkdoxy.kubaandrysek.cz/
+site_author: Jakub Andrýsek
+site_description: >-
+  MkDoxy -> MkDocs + Doxygen. Easy documentation generator with code snippets.
+
+# Repository
+repo_name: JakubAndrysek/MkDoxy/
+repo_url: https://github.com/JakubAndrysek/MkDoxy/
+
+
+
+theme:
+  name: material
+  language: en
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.top
+  icon:
+    repo: fontawesome/brands/github
+
+  palette:
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/JakubAndrysek
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/KubaAndrysek
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/jakub-andrysek/
+  # analytics:
+  #   provider: google
+  #   property: G-8WHJ2N4SHC
+
+use_directory_urls: True
+
+plugins:
+  - search
+  - open-in-new-tab
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - def_list
+  - toc:
+      permalink: True
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - markdown.extensions.md_in_html
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.blocks.admonition:
+      types:
+        - new
+        - settings
+        - note
+        - abstract
+        - info
+        - tip
+        - success
+        - question
+        - warning
+        - failure
+        - danger
+        - bug
+        - example
+        - quote
+  - pymdownx.blocks.details:
+  - pymdownx.blocks.html:
+  - pymdownx.blocks.definition:
+  - pymdownx.blocks.tab:
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
