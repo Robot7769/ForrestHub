@@ -63,6 +63,12 @@ jobs:
         with:
           python-version: '3.x'
 
+      # Install setuptools
+      - name: Install setuptools
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools
+
       # Načtení verze z ForrestHub-app/setup.py a zjištění data (bash)
       - name: Get version and date
         run: |
