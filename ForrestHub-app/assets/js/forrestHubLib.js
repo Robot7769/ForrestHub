@@ -15,7 +15,7 @@ class ForrestHubLib {
      */
     project = "";
 
-    constructor(isAdmin = false, url = `http://${window.location.hostname}:${window.location.port}`) {
+    constructor(isAdmin = false, url = "http://" + window.location.hostname + ":" + window.location.port) {
         this.project = window.location.pathname.split('/')[1];
         this.isGamePage = true;
         this.isAdmin = isAdmin;
@@ -45,7 +45,7 @@ class ForrestHubLib {
             if (status === this.RUNNING) {
                 this.removeOverlay();
                 if (this.isGamePage) {
-                    this.showAlert('success', 'Hra spuštěna', 5000);
+                    this.showAlert('success', 'Hra spuštěna', 2000);
                 }
             } else if (status === this.PAUSED) {
                 this.showOverlay('Hra je pozastavena', null, 'info');
@@ -301,23 +301,28 @@ class ForrestHubLib {
         });
     }
 
-    showAlert(type, message, duration = 5000) {
+    showAlert(type, message, duration = 4000) {
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow`;
         alertDiv.style.position = 'fixed';
-        alertDiv.style.top = '0';
-        alertDiv.style.left = '50%';
-        alertDiv.style.transform = 'translateX(-50%)';
-        alertDiv.style.width = '100%';
+        alertDiv.style.top = '10px';
+        alertDiv.style.left = '10px';
+        alertDiv.style.right = '10px';
+        alertDiv.style.margin = '0 auto';
+        alertDiv.style.maxWidth = '600px';
         alertDiv.style.zIndex = '9999';
         alertDiv.role = 'alert';
         alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>${message}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     `;
-        document.querySelector('.container').insertAdjacentElement('afterbegin', alertDiv);
+
+        document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), duration);
     }
+
 
     showOverlay(text, duration = null, status = 'info', forceShow = false) {
         if (this.isAdmin && !forceShow) {

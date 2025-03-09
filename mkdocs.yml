@@ -1,20 +1,20 @@
-site_name: MkDoxy
-site_url: https://mkdoxy.kubaandrysek.cz/
+site_name: ForrestHub
+site_url: https://forresthub.helceletka.cz
 site_author: Jakub Andrýsek
 site_description: >-
-  MkDoxy -> MkDocs + Doxygen. Easy documentation generator with code snippets.
+  🎮 ForrestHub je jednoduchá webová platforma umožňující navrhovat hry pro více hráčů které mezí sebou komunikují.
 
 # Repository
-repo_name: JakubAndrysek/MkDoxy/
-repo_url: https://github.com/JakubAndrysek/MkDoxy/
+repo_name: Helceletka/ForrestHub
+repo_url: https://github.com/Helceletka/ForrestHub
 
 
 
 theme:
   name: material
   language: en
-  logo: assets/logo.png
-  favicon: assets/logo.png
+  logo: graphics/ForrestHub-icon.svg
+  favicon: graphics/ForrestHub-icon.svg
   features:
     - navigation.tabs
     - navigation.indexes
@@ -45,19 +45,18 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/JakubAndrysek
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/KubaAndrysek
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/jakub-andrysek/
   # analytics:
   #   provider: google
-  #   property: G-8WHJ2N4SHC
+  #   property: UA-XXXXX-Y
 
 use_directory_urls: True
 
 plugins:
   - search
   - open-in-new-tab
+  - glightbox
 
 markdown_extensions:
   - pymdownx.highlight
@@ -65,10 +64,8 @@ markdown_extensions:
   - def_list
   - toc:
       permalink: True
-  - pymdownx.superfences
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
   - markdown.extensions.md_in_html
   - pymdownx.snippets:
       check_paths: true
@@ -99,4 +96,14 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
+nav:
+  - Home: index.md
+  - Instalace: install/index.md
+  - Generování her: game/index.md
+  - Propojení her: connection/index.md

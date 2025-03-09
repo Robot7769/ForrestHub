@@ -1,19 +1,20 @@
 {% extends "templates/base.html" %}
+{% set page = "Admin" %}
 
 {% block content %}
     <div class="container mt-4">
-        <h1 class="text-center mb-4">Admin Panel</h1>
+        <h1 class="text-center mb-4">Admin Panel <i class="fa-solid fa-toolbox"></i></h1>
 
         <nav class="nav justify-content-center mb-4">
-            <a class="nav-link" href="/">Domů - výběr hry</a>
+            <a href="/" class="btn btn-info btn-lg">Domů <i class="fa-solid fa-house"></i></a>
         </nav>
 
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Připojení do hry</h5>
-                        <p class="card-text">IP adresa serveru: <strong>{{ ip_address }}</strong></p>
+                        <h5 class="card-title"><i class="fa-solid fa-qrcode"></i> Připojení do hry</h5>
+                        <p class="card-text">IP adresa serveru: <strong>forresthub.helceletka.cz</strong></p>
                         <p class="card-text"><small>Tuto adresu zadejte do prohlížeče na zařízení, které chcete připojit do hry.</small></p>
                         <div id="qrcode" class="mt-3"></div>
                         <p><small>QR kód pro připojení do hry</small></p>
@@ -23,14 +24,14 @@
             <div class="col-md-6">
                 <div class="card p-3">
                     <div class="card-body">
-                        <h5 class="card-title">Připojená zařízení</h5>
+                        <h5 class="card-title"><i class="fa-solid fa-network-wired"></i> Připojená zařízení</h5>
                         <p class="card-text">Počet připojených zařízení: <span id="connected_clients" class="badge bg-primary">?</span></p>
                     </div>
                 </div>
 
                 <div class="card p-3">
                     <div class="card-body">
-                        <h5 class="card-title">Stav hry</h5>
+                        <h5 class="card-title"><i class="fa-solid fa-chart-simple"></i> Stav hry</h5>
                         <p class="card-text">Hra běží: <span class="game_status badge bg-primary">?</span></p>
                         <div class="mt-3 d-grid gap-2">
                             <button id="game_start" class="btn btn-success">Spustit hru na všech zařízeních</button>
@@ -42,7 +43,7 @@
 
                 <div class="card p-3">
                     <div class="card-body">
-                        <h5 class="card-title">Editační režim</h5>
+                        <h5 class="card-title"><i class="fa-solid fa-pen-to-square"></i> Editační režim</h5>
                         <p class="card-text">Je aktivní: <span class="badge bg-primary" id="edit_mode">?</span></p>
                         <div class="mt-3 d-grid gap-2">
                             <button id="edit_mode_on" class="btn btn-success">Zapnout editační režim</button>
@@ -58,7 +59,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Odeslat zprávu do všech zařízení</h5>
+                        <h5 class="card-title"><i class="fa-solid fa-message"></i> Odeslat zprávu do všech zařízení</h5>
                         <div class="input-group mb-3">
                             <input type="text" id="adminMessage" class="form-control" placeholder="Zpráva">
                             <button class="btn btn-primary" onclick="sendAdminMessage()">Odeslat</button>
@@ -76,7 +77,7 @@
                 <div class="card">
                     <div class="card-body">
 
-                        <h5 class="card-title">Data hry</h5>
+                        <h5 class="card-title"><i class="fa-solid fa-sliders"></i> Data hry</h5>
                         <!-- Tlačítko "Zobrazit všechny projekty" / "Skrýt všechny projekty" -->
                         <button class="btn btn-link" id="toggleAllProjectsBtn">Zobrazit všechny projekty</button>
 
@@ -94,7 +95,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Správa dat hry</h5>
+                        <h5 class="card-title"><i class="fa-solid fa-database"></i> Správa dat hry</h5>
                         <button id="download-button" class="btn btn-primary mb-2">Stáhnout data hry</button>
                         <button id="clear-button" class="btn btn-danger mb-2">Vymazat data hry (vše)</button>
                         <p class="card-text">Data hry jsou uložena v počítači: <strong>{{ config.ROOT_DIR }}/{{ config.DATAFILE }}</strong></p>
@@ -107,7 +108,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Nahrát data</h5>
+                        <h5 class="card-title"><i class="fa-solid fa-server"></i> Nahrát data</h5>
                         <p class="card-text">Nahraná data přepíšou stávající data hry.</p>
                         <div class="input-group mb-3">
                             <input type="file" id="uploadFile" class="form-control" accept=".json">
@@ -121,7 +122,8 @@
     </div><!-- /container -->
 
     <script>
-        let ip_address = `http://{{ ip_address }}:${window.location.port}`;
+        {#const ip_address = `http://{{ ip_address }}:${window.location.port}`;#}
+        let ip_address = "https://forresthub.helceletka.cz"
         new QRCode(document.getElementById("qrcode"), ip_address);
 
         if (!forrestHubLib) {
@@ -457,7 +459,11 @@
         });
 
         document.getElementById("edit_mode_on").addEventListener("click", () => {
-            forrestHubLib.emit("edit_mode_set", true);
+            try {
+                forrestHubLib.emit("edit_mode_set", true);
+            } catch (error) {
+                forrestHubLib.showAlert('danger', 'Chyba při zapínání editačního režimu: ' + error.message);
+            }
         });
         document.getElementById("edit_mode_off").addEventListener("click", () => {
             forrestHubLib.emit('edit_mode_set', false);

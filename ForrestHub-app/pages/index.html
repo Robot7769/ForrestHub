@@ -1,9 +1,14 @@
 {% extends "templates/base.html" %}
+{% set game_name = "Forrest Hub" %}
+
 {% block content %}
     <div class="container text-center">
-        <h2>Menu</h2>
-        <p class="mt-4">Verze aplikace: <span class="badge bg-primary">{{ config.VERSION }}</span></p>
+        <h2>Forrest Hub</h2>
         {% include "templates/author.html" %}
+
+        <div class="container">
+            <a href="/admin/" class="btn btn-warning btn-lg">Admin <i class="fa-solid fa-toolbox"></i></a>
+        </div>
 
         {% include "templates/list_folders.html" %}
 
@@ -14,5 +19,8 @@
                 <img src="/assets/img/ForrestHub-helceletka.png" width="400" alt="Helceletka" class="">
             </a>
         </div>
+
+
+        {% include "templates/floating_version.html" %}
     </div>
 {% endblock %}

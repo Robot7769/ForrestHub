@@ -1,36 +1,61 @@
+---
+title: ForrestHub
+---
+
+<a href="https://helceletka.cz/" target="_blank" rel="noopener">
+    <figure markdown="span">
+        ![Image title](graphics/ForrestHub-helceletka.svg){ width="500" }
+    </figure>
+</a>
+
+## Co je ForrestHub?
+
+
+!!! info ""
+
+    🎮 ForrestHub je jednoduchá webová platforma umožňující navrhovat hry pro více hráčů které mezí sebou komunikují.
+
+
 <div class="grid cards" markdown>
-
--   :material-clock-fast:{ .lg .middle } __Set up in 5 minutes__
-
-    ---
-
-    Install [`mkdocs-material`](#) with [`pip`](#) and get up
-    and running in minutes
-
-    [:octicons-arrow-right-24: Getting started](#)
-
--   :fontawesome-brands-markdown:{ .lg .middle } __It's just Markdown__
+-   :material-clock-fast:{ .lg .middle } __Hra je připravena do 2 minut__
 
     ---
 
-    Focus on your content and generate a responsive and searchable static site
+    Stáhni si [`ForrestHub.exe`](install) nebo [`ForrestHub-macOS`](install) a hraj!
 
-    [:octicons-arrow-right-24: Reference](#)
+    [:octicons-arrow-right-24: Stáhnout](install)
 
--   :material-format-font:{ .lg .middle } __Made to measure__
-
-    ---
-
-    Change the colors, fonts, language, icons, logo and more with a few lines
-
-    [:octicons-arrow-right-24: Customization](#)
-
--   :material-scale-balance:{ .lg .middle } __Open Source, MIT__
+-   :fontawesome-solid-robot:{ .lg .middle } __AI ti vygeneruje hry__
 
     ---
 
-    Material for MkDocs is licensed under MIT and available on [GitHub]
+    Využij náš předtrénovaný model a vygeneruj si hru na míru svým potřebám
 
-    [:octicons-arrow-right-24: License](#)
+    [:octicons-arrow-right-24: Generování her](game)
+
+
+-   :fontawesome-solid-gamepad:{ .lg .middle } __Užij si multiplayer s přáteli__
+
+    ---
+
+    Hra je primárně navržena pro hraní na více zařízeních
+
+    [:octicons-arrow-right-24: Multiplayer](connection)
+
+-   :material-scale-balance:{ .lg .middle } __Open Source__
+
+    ---
+
+    Celý projekt je open source a je dostupný pod ??? licencí
+
+    [:octicons-arrow-right-24: License](license)
 
 </div>
+
+
+
+## Ukázky
+![ForrestHub](./media/admin.png)
+![ForrestHub](./media/kontrolor.png)
+![ForrestHub](./media/universe.png)
+![ForrestHub](./media/chat.png)

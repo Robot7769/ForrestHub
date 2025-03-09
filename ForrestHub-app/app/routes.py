@@ -50,7 +50,9 @@ def get_selected_level_routes(folder: str):
     folders = current_app.config.get("GAMES_FOLDER", "") / folder
     if folders.exists():
         top_level_routes.extend(get_html_and_folders(folders))
-    # top_level_routes.sort(key=lambda x: x.lower())
+
+    # remove games starting with dot
+    top_level_routes = [route for route in top_level_routes if not route["name"].startswith(".")]
     return top_level_routes
 
 
@@ -58,8 +60,10 @@ def get_selected_level_routes(folder: str):
 def index():
     return render_template(
         "index.html",
-        title="Menu",
+        title="ForrestHub",
         same_level_routes=get_selected_level_routes("."),
+        is_editable=False,
+        edit_mode=db.edit_mode_is_on(),
         debug=current_app.config.get("DEBUG"),
     )
 
@@ -151,9 +155,9 @@ def render_page(folder: str, page: str):
             is_editable = False
             page_html = ""
             if path_to_file.exists():
-                page_html = path_to_file.read_text()
+                page_html = path_to_file.read_text(encoding='utf-8')
             elif path_to_file_live.exists():
-                page_html = path_to_file_live.read_text()
+                page_html = path_to_file_live.read_text(encoding='utf-8')
                 is_editable = True
 
             title = folder.capitalize()
@@ -165,7 +169,7 @@ def render_page(folder: str, page: str):
                 title=title,
                 folder=folder,
                 page=page,
-                is_editable=is_editable,
+                is_editable=page_html != "",
                 page_html=page_html,
                 config=current_app.config,
                 edit_mode=db.edit_mode_is_on(),

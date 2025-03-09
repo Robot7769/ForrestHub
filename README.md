@@ -1,15 +1,33 @@
 # ForrestHub
 
-![ForrestHub](https://github.com/Helceletka/ForrestHub/blob/main/ForrestHub-app/assets/img/forrestHub.png?raw=true)
+🎮 ForrestHub is a simple web platform allowing you to design multiplayer games that communicate over a local network.
+
+![ForrestHub](./docs/media/home.png)
+
 
 Download the latest version of the ForrestHub app:
 - [Windows](https://github.com/Helceletka/ForrestHub/releases/latest/download/ForrestHub-Windows.exe)
 - [Mac OS X](https://github.com/Helceletka/ForrestHub/releases/latest/download/ForrestHub-macOS)
 
-![image](https://github.com/Helceletka/ForrestHub/assets/33494544/b00d90b0-87e1-477d-8259-f51a1f5ecc26)
+## Screenshots
+![ForrestHub](./docs/media/admin.png)
+![ForrestHub](./docs/media/kontrolor.png)
+![ForrestHub](./docs/media/universe.png)
+![ForrestHub](./docs/media/chat.png)
 
-![image](https://github.com/Helceletka/ForrestHub/assets/33494544/84ab034a-d72e-4f1b-899e-2266c646ba0a)
 
-![image](https://github.com/Helceletka/ForrestHub/assets/33494544/0f8286d1-77e8-45a2-a837-ca0d641dcb21)
+## Features
+- AI fine-tuned model for generating games
+- Multiplayer support
+- Open Source
+- Easy to use
+- Fast game setup
+- Cross-platform
 
-![image](https://github.com/Helceletka/ForrestHub/assets/33494544/fa3f8c99-3afa-4453-8fd0-acf8e4a8a96d)
+## More information
+- [Website](https://forresthub.helceletka.cz/)
+- [Author - Jakub Andrýsek](https://kubaandrysek.cz/)
+- [Helceletka.cz](https://helceletka.cz/)
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

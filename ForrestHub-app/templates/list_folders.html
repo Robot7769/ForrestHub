@@ -1,16 +1,15 @@
 <div class="row">
-    <div class="col-md-6 mb-3">
-        <a href="/admin/" class="btn btn-warning btn-lg">Admin</a>
-    </div>
+    <div class="mb-3"></div>
+
 
     {% if same_level_routes|length == 0 %}
         <div class="col-12">
-            <p>Nic k zobrazení</p> <!-- 'Nothing to display' in Czech -->
+            <p>Nic k zobrazení</p>
         </div>
     {% else %}
-        <h4>Stránky herního adresáře</h4> <!-- 'Pages of the game directory' in Czech -->
+        <h4>Stránky herního adresáře</h4>
         {% for route in same_level_routes %}
-            <div class="col-md-6 mb-3"> <!-- Added mb-3 for margin between buttons -->
+            <div class="col-md-6 mb-3">
                 <a href="{{ route.name }}"
                    class="btn
                    {% if route.name == 'admin' %}btn-warning

@@ -2,6 +2,7 @@ from pathlib import Path
 
 from flask_socketio import emit
 from app.database import VAR, ARR
+from app.games import copy_default_game
 
 from app.init import socketio, db
 
@@ -59,6 +60,8 @@ def handle_game_status(demo):
 def handle_game_status_set(edit_mode_on: bool):
     db.set_edit_mode(edit_mode_on)
     emit("edit_mode", edit_mode_on, broadcast=True)
+    if edit_mode_on:
+        return copy_default_game()
 
 ################## Admin Access ############################
 

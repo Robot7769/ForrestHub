@@ -1,0 +1,113 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Chatovací aplikace" %}
+{% block content %}
+    <div class="container-fluid vh-100 d-flex flex-column">
+        <h1 class="mb-3">Chatovací aplikace</h1>
+
+        <div class="mb-3">
+            <input type="text" id="username" class="form-control" placeholder="Vaše jméno" autofocus>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" id="messageInput" class="form-control" placeholder="Napište zprávu" disabled>
+        </div>
+
+        <button id="sendButton" class="btn btn-primary mb-3" disabled>Odeslat</button>
+
+        <!-- Chat window taking almost the whole screen -->
+        <div class="chat-window border p-3 flex-grow-1 overflow-auto d-flex flex-column-reverse">
+            <ul id="messagesList" class="list-group"></ul>
+        </div>
+    </div>
+
+    <script>
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        const messagesList = document.getElementById('messagesList');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const usernameInput = document.getElementById('username');
+        const chatArrayName = 'chatMessages';
+        let currentUser = '';
+
+        // Načti uložené jméno z localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            currentUser = localStorage.getItem('currentUserName') || '';
+            if (currentUser) {
+                usernameInput.value = currentUser;
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+            }
+
+            // Načti všechny zprávy při spuštění
+            loadMessages();
+        });
+
+        // Povolit zadání zprávy až po zadání jména
+        usernameInput.addEventListener('input', () => {
+            currentUser = usernameInput.value.trim();
+            messageInput.disabled = !currentUser;
+            sendButton.disabled = !currentUser;
+
+            if (currentUser) {
+                localStorage.setItem('currentUserName', currentUser);
+            }
+        });
+
+        // Odeslat zprávu
+        sendButton.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
+
+            if (!currentUser || !message) return;
+
+            const chatMessage = {
+                user: currentUser,
+                text: message,
+                time: new Date().toLocaleTimeString()
+            };
+
+            await forrestHubLib.arrayAddRecord(chatArrayName, chatMessage);
+            messageInput.value = '';
+        });
+
+        // Načíst zprávy každou sekundu
+        setInterval(loadMessages, 1000);
+
+        // Funkce pro načítání zpráv
+        async function loadMessages() {
+            const messages = await forrestHubLib.arrayGetAllRecords(chatArrayName);
+            updateMessagesList(messages);
+        }
+
+        // Aktualizace při změně dat (přijetí zprávy)
+        forrestHubLib.addEventListenerKey(chatArrayName, (data) => {
+            updateMessagesList(data);
+        });
+
+        // Funkce pro aktualizaci zobrazení zpráv s obráceným pořadím
+        function updateMessagesList(messages) {
+            messagesList.innerHTML = '';
+            // Obrácení pořadí zpráv
+            Object.values(messages).reverse().forEach(({ user, text, time }) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+
+                if (user === currentUser) {
+                    listItem.classList.add('list-group-item-info', 'text-end');
+                    listItem.innerHTML = `<strong>${user}</strong> (${time}): <span class="fw-bold">${text}</span>`;
+                } else {
+                    listItem.classList.add('text-start');
+                    listItem.innerHTML = `<strong>${user}</strong> (${time}): ${text}`;
+                }
+
+                messagesList.appendChild(listItem);
+            });
+        }
+
+        // Možnost odeslání zprávy klávesou Enter
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+{% endblock %}
