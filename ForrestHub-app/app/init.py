@@ -1,27 +1,24 @@
-import asyncio
-
 from app.custom_loader import CustomLoader
 from app.database import Database
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
-socketio = SocketIO(cors_allowed_origins="*")
+socketio = SocketIO(cors_allowed_origins="*", async_mode="eventlet")
 db = Database()
 
 
-async def create_app(config_class="config.Config"):
+def create_app(config_class="config.Config"):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
     # Enable CORS
     CORS(app)
 
+    # Initialize the database
     db.init(app.config["EXECUTABLE_DIR"], app.config["DATAFILE"])
-    asyncio.create_task(db.save_data_loop())
 
     # Set custom Jinja loader
-
     loader_locations = [
         app.config.get("GAMES_FOLDER"),
         app.config.get("TEMPLATES_FOLDER"),
@@ -36,19 +33,19 @@ async def create_app(config_class="config.Config"):
 
     # Register Blueprints
     from app.routes import main as main_blueprint
-
     app.register_blueprint(main_blueprint)
 
     from app.errors import errors as errors_blueprint
-
     app.register_blueprint(errors_blueprint)
 
     # Import and register SocketIO events
     from app.socketio_events import socketio_bp as socketio_blueprint
-
     app.register_blueprint(socketio_blueprint)
 
-    # Initialize SocketIO
-    socketio.init_app(app)
+    # Initialize SocketIO with eventlet support
+    socketio.init_app(app, async_mode="eventlet")
+
+    # Spustit asynchronní úkol na pozadí
+    socketio.start_background_task(db.save_data_periodically)
 
     return app

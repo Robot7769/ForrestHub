@@ -1,6 +1,6 @@
 import json
 import os
-import asyncio
+from engineio.async_drivers import eventlet
 from nanoid import generate
 
 
@@ -15,7 +15,7 @@ ARR = "ARR_"
 def save_data(func):
     def wrapper(self, *args, **kwargs):
         result = func(self, *args, **kwargs)
-        self.save_to_file()
+        # self.save_to_file()
         return result
     return wrapper
 
@@ -53,11 +53,11 @@ class Database:
         self.data = {}
         self.save_to_file()
 
-    async def save_data_loop(self):
-        await asyncio.sleep(2)
+    def save_data_periodically(self):
+        eventlet.sleep(1)
         while True:
             self.save_to_file()
-            await asyncio.sleep(15)
+            eventlet.sleep(5)
             print('Saving data to file...')
 
     def get_all_data(self):

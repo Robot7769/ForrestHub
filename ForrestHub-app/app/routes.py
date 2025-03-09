@@ -112,12 +112,17 @@ def render_page(folder: str, page: str):
             path_to_file_live = Path(
                 f'{current_app.config.get("GAMES_FOLDER_LIVE")}/{folder}/{page}'
             )
+
+            path_to_file_page = Path(
+                f'{current_app.config.get("PAGES_FOLDER")}/{folder}/{page}'
+            )
+
             if path_to_file_live.exists():
-                return send_from_directory(
-                    path_to_file_live.parent, path_to_file_live.name
-                )
+                return send_from_directory(path_to_file_live.parent, path_to_file_live.name)
             elif path_to_file.exists():
                 return send_from_directory(path_to_file.parent, path_to_file.name)
+            elif path_to_file_page.exists():
+                return send_from_directory(path_to_file_page.parent, path_to_file_page.name)
             return abort(404)
         else:
             title = folder.capitalize()
@@ -129,7 +134,6 @@ def render_page(folder: str, page: str):
                 title=title,
                 folder=folder,
                 page=page,
-                data={},
                 ip_address=get_local_ip_address(),
                 config=current_app.config,
                 debug=current_app.config.get("DEBUG"),

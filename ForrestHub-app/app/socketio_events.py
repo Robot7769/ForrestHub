@@ -112,6 +112,18 @@ def handle_add_new_game(game_name: str) -> dict:
         return {"status": "error", "message": "Game already exists"}
     game_folder.mkdir()
     return {"status": "ok"}
+@socketio.on("add_new_game")
+def handle_add_new_game(game_name: str) -> dict:
+    game_folder = current_app.config.get("GAMES_FOLDER")
+    if not game_folder:
+        return {"status": "error", "message": "No live data folder"}
+
+    game_folder = game_folder / game_name
+
+    if game_folder.exists():
+        return {"status": "error", "message": "Game already exists"}
+    game_folder.mkdir()
+    return {"status": "ok"}
 
 
 
@@ -125,7 +137,7 @@ def handle_add_new_game_page(json: dict) -> dict:
 
     game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
     if not game_folder:
-        return {"status": "error", "message": "No live data folder"}
+        return {"status": "error", "message": "Nemám složku s hrami"}
 
     game_folder = game_folder / game_name
 
@@ -134,10 +146,14 @@ def handle_add_new_game_page(json: dict) -> dict:
 
     page_path = game_folder / f"{game_page}.html"
     if page_path.exists():
-        return {"status": "error", "message": "Page already exists"}
+        return {"status": "error", "message": "Stránka již existuje"}
 
-    with open(page_path, "w") as f:
-        f.write(page_content)
+    try:
+        with open(page_path, "w") as f:
+            f.write(page_content)
+    except Exception:
+        return {"status": "error", "message": "Chyba zápisu do souboru"}
+
     return {"status": "ok"}
 
 # get_page_html - get html content of page
@@ -159,9 +175,12 @@ def handle_get_page_html(json: dict) -> dict:
     if not page_path.exists():
         return {"status": "error", "message": "Tuhle stránku hry nemám k editaci"}
 
-    with open(page_path, "r", encoding="utf-8") as f:
-        content = f.read().decode("utf-8")
-    return {"status": "ok", "content": content}
+    try:
+        with open(page_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return {"status": "ok", "content": content}
+    except Exception:
+        return {"status": "error", "message": "Chyba čtení souboru"}
 
 # set_page_html - set html content of page
 @socketio.on("set_page_html")
@@ -185,6 +204,7 @@ def handle_set_page_html(json: dict) -> dict:
 
     # if contains .html, remove it
     game_page = game_page.replace(".html", "")
+    print(f"Game page: {game_page}")
 
     page_path = game_folder / f"{game_page}.html"
     if not page_path.exists():
@@ -192,6 +212,98 @@ def handle_set_page_html(json: dict) -> dict:
 
     with open(page_path, "w", encoding="utf-8") as f:
         f.write(page_content.encode("utf-8"))
+
+    print("Page content updated")
+    return {"status": "ok"}
+
+
+# add_new_game_page - create new page in game folder
+@socketio.on("add_new_game_page")
+def handle_add_new_game_page(json: dict) -> dict:
+    game_name = json.get("game")
+    game_page = json.get("page")
+    page_content = json.get("content")
+
+
+    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
+    if not game_folder:
+        return {"status": "error", "message": "Nemám složku s hrami"}
+
+    game_folder = game_folder / game_name
+
+    if not game_folder.exists():
+        game_folder.mkdir()
+
+    page_path = game_folder / f"{game_page}.html"
+    if page_path.exists():
+        return {"status": "error", "message": "Stránka již existuje"}
+
+    try:
+        with open(page_path, "w") as f:
+            f.write(page_content)
+    except Exception:
+        return {"status": "error", "message": "Chyba zápisu do souboru"}
+
+    return {"status": "ok"}
+
+# get_page_html - get html content of page
+@socketio.on("get_page_html")
+def handle_get_page_html(json: dict) -> dict:
+    game_name = json.get("game")
+    game_page = json.get("page")
+
+    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
+    if not game_folder:
+        return {"status": "error", "message": "No live data folder"}
+
+    game_folder = game_folder / game_name
+
+    if not game_folder.exists():
+        return {"status": "error", "message": "Tuhle hru nemám k editaci"}
+
+    page_path = game_folder / f"{game_page}.html"
+    if not page_path.exists():
+        return {"status": "error", "message": "Tuhle stránku hry nemám k editaci"}
+
+    try:
+        with open(page_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return {"status": "ok", "content": content}
+    except Exception:
+        return {"status": "error", "message": "Chyba čtení souboru"}
+
+# set_page_html - set html content of page
+@socketio.on("set_page_html")
+def handle_set_page_html(json: dict) -> dict:
+    game_name = json.get("game_name")
+    game_page = json.get("game_page")
+    page_content = json.get("content")
+
+    header = "{% extends"
+    if header not in page_content:
+        return {"status": "error", "message": f"Zapomněli jste přidat {header}... na začátek souboru - mrkni na příklady"}
+
+    game_folder = current_app.config.get("GAMES_FOLDER_LIVE")
+    if not game_folder:
+        return {"status": "error", "message": "S touto složkou nemohu pracovat"}
+
+    game_folder = game_folder / game_name
+
+    if not game_folder.exists():
+        return {"status": "error", "message": "Hra neexistuje, nebo jsem ji nenašel"}
+
+    # if contains .html, remove it
+    game_page = game_page.replace(".html", "")
+    print(f"Game page: {game_page}")
+
+    page_path = game_folder / f"{game_page}.html"
+    if not page_path.exists():
+        return {"status": "error", "message": "Page does not exist"}
+
+    with open(page_path, "w", encoding="utf-8") as f:
+        f.write(page_content.encode("utf-8"))
+
+    print("Page content updated")
     return {"status": "ok"}
 
 

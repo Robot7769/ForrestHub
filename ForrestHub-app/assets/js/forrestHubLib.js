@@ -381,4 +381,4 @@ class ForrestHubLib {
     }
 }
 
-window.forrestHubLib = new ForrestHubLib("fh");
+window.forrestHubLib = new ForrestHubLib();

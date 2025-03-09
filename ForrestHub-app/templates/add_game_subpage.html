@@ -18,7 +18,7 @@
                     <input type="text" id="pageNameInput" class="form-control" placeholder="Zadej jméno podstránky">
                 </div>
                 <div class="mb-3">
-                    <label for="pageContentInput" class="form-label">HTML obsah</label>
+                    <label for="pageContentInput" class="form-label">HTML obsah - od ChatGPT</label>
                     <textarea id="pageContentInput" class="form-control" rows="6" placeholder="Zadej HTML obsah podstránky"></textarea>
                 </div>
             </div>
@@ -51,8 +51,6 @@
         if (pageName && pageContent) {
             // Převod na malá písmena a nahrazení lomítek
             pageName = pageName.toLowerCase().replace(/\//g, '-');
-
-            const game = '{{ folder }}';
 
             // Uložení podstránky na server
             forrestHubLib.emit('add_new_game_page', {
