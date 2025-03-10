@@ -3,11 +3,16 @@ import sys
 from app.utils import get_local_ip_address
 from pathlib import Path
 from dotenv import load_dotenv
+from pathlib import Path
+
+__version__ = (Path(__file__).parent / "VERSION").read_text().strip()
+
 
 load_dotenv()
 
+
 class Config:
-    VERSION = "1.3.0"
+    VERSION = __version__
     DATAFILE = "ForrestHub-data.json"
     LOG_FOLDER = "ForrestHub-logs"
     ALLOWED_EXTENSIONS = ["json"]
