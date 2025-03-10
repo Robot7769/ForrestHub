@@ -2,7 +2,9 @@ import os
 import sys
 from app.utils import get_local_ip_address
 from pathlib import Path
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class Config:
     VERSION = "1.3.0"
@@ -15,21 +17,23 @@ class Config:
     ASSETS_DIR = "assets"
     PAGES_DIR = "pages"
 
-    IP_ADDRESS = get_local_ip_address()
+    # Load IP_ADDRESS from .env or fallback to get_local_ip_address()
+    IP_ADDRESS = os.getenv("IP_ADDRESS", get_local_ip_address())
 
     DEBUG = True
     USE_RELOADER = True
 
     if getattr(sys, "frozen", False):
         FROZEN = True
-        PORT = 80
+        PORT = os.getenv("PORT", 80)
         EXECUTABLE_DIR = Path(sys.executable).parent
         DATA_DIR = sys._MEIPASS
     else:
         FROZEN = False
-        PORT = 4444
+        PORT = os.getenv("PORT", 4444)
         EXECUTABLE_DIR = Path(__file__).parent
         DATA_DIR = EXECUTABLE_DIR
+
 
     # use live data if it exists
     TEMPLATES_FOLDER = Path(DATA_DIR) / TEMPLATES_DIR
