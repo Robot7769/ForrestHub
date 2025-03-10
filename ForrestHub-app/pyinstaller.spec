@@ -12,6 +12,7 @@ a = Analysis(
         ('games', 'games'),
         ('pages', 'pages'),
         ('config.py', '.'),
+        ('VERSION', '.'),
         ('app', 'app'),
     ],
     hiddenimports=[
