@@ -49,7 +49,7 @@ def run_flask(config="config.Config"):
         host="0.0.0.0",
         port=app.config["PORT"],
         use_reloader=False,
-        debug=False,
+        debug=True,
     )
 
 

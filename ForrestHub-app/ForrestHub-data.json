@@ -29,5 +29,14 @@
     },
     "global": {
         "VAR_edit_mode": true
+    },
+    "Semafor": {
+        "VAR_redMin": 1000,
+        "VAR_redMax": 1000,
+        "VAR_yellowMin": 2000,
+        "VAR_yellowMax": 3000,
+        "VAR_greenMin": 5000,
+        "VAR_greenMax": 6000,
+        "VAR_trafficLight": "auto"
     }
 }

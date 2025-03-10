@@ -37,6 +37,8 @@
     forrestHubLib.setAdmin(true);
     forrestHubLib.setGameMode(false);
 
+    const gameName = "{{ folder }}";
+
     // Otevři modal pro zadání jména podstránky a HTML obsahu
     document.getElementById('addGamePageButton').addEventListener('click', () => {
         const pageModal = new bootstrap.Modal(document.getElementById('pageModal'));
@@ -44,26 +46,29 @@
     });
 
     // Odeslání jména a HTML obsahu podstránky
-    document.getElementById('submitPage').addEventListener('click', () => {
-        let pageName = document.getElementById('pageNameInput').value.trim();
-        let pageContent = document.getElementById('pageContentInput').value.trim();
+    document.getElementById('submitPage').addEventListener('click', async () => {
+        let gamePage = document.getElementById('pageNameInput').value.trim();
+        let gameContent = document.getElementById('pageContentInput').value.trim();
 
-        if (pageName && pageContent) {
+        if (gamePage && gameContent) {
             // Převod na malá písmena a nahrazení lomítek
-            pageName = pageName.toLowerCase().replace(/\//g, '-');
+            gamePage = gamePage.toLowerCase().replace(/\//g, '-');
 
-            // Uložení podstránky na server
-            forrestHubLib.emit('page_html_set', {
-                game: '{{ folder }}',
-                page: pageName,
-                content: pageContent
-            });
+            try {
+                await forrestHubLib.emit('page_html_set', {
+                    game_name: gameName,
+                    game_page: gamePage,
+                    game_content: gameContent
+                });
+            } catch (error) {
+                forrestHubLib.showOverlay('Nepodařilo se vytvořit podstránku hry: ' + error, null, 'warning');
+            }
 
             const pageModal = bootstrap.Modal.getInstance(document.getElementById('pageModal'));
             pageModal.hide(); // Skrytí modalu po odeslání
 
             // Přesměrování na novou podstránku
-            window.location.href = `/{{ folder }}/${pageName}`;
+            window.location.href = `/{{ folder }}/${gamePage}`;
         } else {
             alert('Zadejte prosím jméno a obsah podstránky.');
         }

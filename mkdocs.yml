@@ -50,6 +50,11 @@ extra:
   analytics:
     provider: google
     property: G-FGPKM4ZKVP
+  consent:
+    title: Používáme cookies
+    description: >-
+      Cookies používáme pro zapamatování vašich preferencí a zlepšení naší dokumentace. Děkujeme za souhlas!
+
 
 use_directory_urls: True
 
