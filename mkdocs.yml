@@ -13,8 +13,8 @@ repo_url: https://github.com/Helceletka/ForrestHub
 theme:
   name: material
   language: en
-  logo: graphics/ForrestHub-icon.svg
-  favicon: graphics/ForrestHub-icon.svg
+  logo: graphics/ForrestHub-icon.png
+  favicon: graphics/ForrestHub-icon.png
   features:
     - navigation.tabs
     - navigation.indexes
@@ -63,6 +63,7 @@ plugins:
   - search
   - open-in-new-tab
   - glightbox
+  - social
 
 markdown_extensions:
   - pymdownx.highlight
