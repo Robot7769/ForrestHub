@@ -8,6 +8,7 @@ from datetime import datetime
 from app.init import create_app, socketio
 from config import Config
 from pathlib import Path
+from app.utils import is_port_free, find_free_port
 
 
 logger = logging.getLogger(__name__)
@@ -58,11 +59,14 @@ def run_flask(config="config.Config", host="0.0.0.0", port=4444):
 @click.option('--host', default='0.0.0.0', help='Host address to bind the server')
 @click.option('--version', is_flag=True, help='Show the version from setup.py')
 def main(port, host, version):
+    config = Config()
+    logger = setup_logging(config.EXECUTABLE_DIR, config.LOG_FOLDER)
+    logging.basicConfig(level=logging.INFO)
+
     if version:
         print(f"ForrestHub App {__version__}")
         sys.exit(0)
 
-    config = Config()
     config.PORT = port
     config.IP_ADDRESS = host
 
@@ -72,20 +76,22 @@ def main(port, host, version):
     if host:
         config.IP_ADDRESS = host
 
-    logger = setup_logging(config.EXECUTABLE_DIR, config.LOG_FOLDER)
-    logging.basicConfig(level=logging.INFO)
+    if not is_port_free(config.IP_ADDRESS, config.PORT):
+        new_port = find_free_port(config.IP_ADDRESS, 4444)
+        logger.error(f"Port {config.PORT} is already in use, switching to next available port: {new_port}")
+        config.PORT = new_port
 
     if config.FROZEN:
         webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}")
         webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}/admin")
 
     try:
-        local_ip = f"http://{host}:{port}"
+        local_ip = f"http://{config.IP_ADDRESS}:{config.PORT}"
         print(f"Server started at {local_ip}")
         logger.info(f"Server started at {local_ip}")
         logger.info("Press Ctrl-C to stop the server")
 
-        run_flask(config=config, host=host, port=port)
+        run_flask(config=config, host=config.IP_ADDRESS, port=config.PORT)
     except KeyboardInterrupt:
         logger.info("Server stopped")
         sys.exit(0)
