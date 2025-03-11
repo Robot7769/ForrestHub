@@ -4,7 +4,7 @@ title: ForrestHub
 
 <a href="https://helceletka.cz/" target="_blank" rel="noopener">
     <figure markdown="span">
-        ![Image title](graphics/ForrestHub-helceletka.svg){ width="500" }
+        ![Image title](graphics/ForrestHub-helceletka-bg.svg){ width="500" }
     </figure>
 </a>
 
@@ -53,7 +53,7 @@ title: ForrestHub
 
     ---
 
-    Celý projekt je open source a je dostupný pod ??? licencí
+    Celý projekt je open source a je dostupný pod licencemi GNU GPL v3.0 (pro zdrojový kód) a CC BY-SA 4.0 (pro herní materiály).
 
     [:octicons-arrow-right-24: License](license)
 
