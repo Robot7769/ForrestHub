@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://forresthub.helceletka.cz/" target="_blank" rel="noopener">
-		<img src="docs/graphics/ForrestHub-helceletka-bg.svg" width="500" alt="ForrestHub">
+		<img src="https://forresthub.helceletka.cz/graphics/ForrestHub-helceletka-bg.svg" width="500" alt="ForrestHub">
 	</a>
 </p>
 
