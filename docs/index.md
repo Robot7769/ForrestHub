@@ -8,6 +8,13 @@ title: ForrestHub
     </figure>
 </a>
 
+<p align="center">
+    <a target="_blank" href="https://hits.seeyoufarm.com/api/count/graph/dailyhits.svg?url=https://forresthub.helceletka.cz/">
+        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://forresthub.helceletka.cz/&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=👀&edge_flat=true"/>
+    </a>
+</p>
+
+
 ## Co je ForrestHub?
 
 
