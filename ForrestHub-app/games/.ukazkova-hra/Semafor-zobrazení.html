@@ -1,0 +1,128 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Hra - Semafor" %}
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center p-5">
+        <div class="traffic-light">
+            <div class="light red" id="red"></div>
+            <div class="light yellow" id="yellow"></div>
+            <div class="light green" id="green"></div>
+        </div>
+    </div>
+
+    <style>
+        .traffic-light {
+            width: 100px;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .light {
+            width: 60px;
+            height: 60px;
+            margin: 10px auto;
+            background-color: #555;
+            border-radius: 50%;
+            transition: background-color 0.5s;
+        }
+
+        .red.active { background-color: red; }
+        .yellow.active { background-color: yellow; }
+        .green.active { background-color: green; }
+    </style>
+
+    <script>
+        let currentLight = 0;
+        const lights = ["red", "yellow", "green"];
+        let autoMode = false;
+        let activeTimers = [];
+        const lightSettings = {};
+
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+
+        async function updateTrafficLight() {
+            const color = await forrestHubLib.varKeyGet('trafficLight');
+            await loadConfig();
+
+            if (color === 'auto') {
+                if (!autoMode) {
+                    autoMode = true;
+                    startAutomaticModeWithDelay();
+                }
+            } else {
+                autoMode = false;
+                clearAllTimers();
+                setLight(color);
+            }
+        }
+
+        async function loadConfig() {
+            const configKeys = [
+                'redMin', 'redMax',
+                'yellowMin', 'yellowMax',
+                'greenMin', 'greenMax'
+            ];
+
+            for (const key of configKeys) {
+                lightSettings[key] = await forrestHubLib.varKeyGet(key) || getDefaultConfig(key);
+            }
+
+            console.log('Načtená konfigurace:', lightSettings);
+        }
+
+        function getDefaultConfig(key) {
+            const defaultConfig = {
+                redMin: 1000, redMax: 3000,
+                yellowMin: 1000, yellowMax: 3000,
+                greenMin: 1000, greenMax: 3000,
+            };
+            return defaultConfig[key];
+        }
+
+        function setLight(color) {
+            lights.forEach(light => document.getElementById(light).classList.remove('active'));
+            if (lights.includes(color)) {
+                document.getElementById(color).classList.add('active');
+            }
+        }
+
+        function startAutomaticModeWithDelay() {
+            clearAllTimers();
+            const delay = getRandomDelayForCurrentLight();
+            console.log(`Initial delay: ${delay}ms before first light change`);
+
+            const timerId = setTimeout(startAutomaticMode, delay);
+            activeTimers.push(timerId);
+        }
+
+        function startAutomaticMode() {
+            if (autoMode) {
+                const currentColor = lights[currentLight];
+                setLight(currentColor);
+
+                const delay = getRandomDelayForCurrentLight(currentColor);
+                console.log(`Next light (${currentColor}) in ${delay}ms`);
+
+                // Následné přepnutí na další barvu až po výpočtu zpoždění
+                currentLight = (currentLight + 1) % lights.length;
+
+                const timerId = setTimeout(startAutomaticMode, delay);
+                activeTimers.push(timerId);
+            }
+        }
+
+        function getRandomDelayForCurrentLight(color) {
+            const min = lightSettings[`${color}Min`] || 1000;
+            const max = lightSettings[`${color}Max`] || 3000;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function clearAllTimers() {
+            activeTimers.forEach(timerId => clearTimeout(timerId));
+            activeTimers = [];
+        }
+
+        setInterval(updateTrafficLight, 1000);
+    </script>
+
+{% endblock %}

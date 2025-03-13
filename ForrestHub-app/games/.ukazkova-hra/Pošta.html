@@ -1,0 +1,130 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Pošta - Další okna" %}
+{% block content %}
+
+    <!-- Navigace mezi stránkami -->
+    <div class="container my-4 text-center">
+        <h1 class="mb-4">Pošta - Výběr stránky</h1>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="?page=generator" class="btn btn-primary btn-lg">Generátor lístků</a>
+            <a href="?page=tabule" class="btn btn-success btn-lg">Tabule s frontami</a>
+            <a href="?page=pobocka" class="btn btn-warning btn-lg">Pobočka - Obsluha</a>
+        </div>
+    </div>
+
+    <!-- Generátor lístků -->
+    <div class="container my-4" id="generator" style="display:none;">
+        <h2 class="text-center mb-4">Generátor lístků</h2>
+        <div class="d-flex justify-content-center gap-3">
+            <button class="btn btn-primary" onclick="generateTicket('A')">Kategorie A</button>
+            <button class="btn btn-success" onclick="generateTicket('B')">Kategorie B</button>
+            <button class="btn btn-warning" onclick="generateTicket('C')">Kategorie C</button>
+        </div>
+        <div class="text-center mt-4">
+            <h3>Váš lístek:</h3>
+            <h1 id="ticketDisplay" class="display-1">-</h1>
+        </div>
+    </div>
+
+    <!-- Tabule s frontami -->
+    <div class="container my-4" id="tabule" style="display:none;">
+        <h2 class="text-center mb-4">Tabule s frontami</h2>
+        <div class="row">
+            <div class="col">
+                <h4>Kategorie A</h4>
+                <ul id="queueA" class="list-group"></ul>
+            </div>
+            <div class="col">
+                <h4>Kategorie B</h4>
+                <ul id="queueB" class="list-group"></ul>
+            </div>
+            <div class="col">
+                <h4>Kategorie C</h4>
+                <ul id="queueC" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pobočka - Obsluha zákazníků -->
+    <div class="container my-4" id="pobocka" style="display:none;">
+        <h2 class="text-center mb-4">Pobočka - Obsluha zákazníků</h2>
+        <div class="d-flex flex-column gap-3">
+            <button class="btn btn-outline-primary" onclick="serveTicket('A')">Obsloužit kategorii A</button>
+            <button class="btn btn-outline-success" onclick="serveTicket('B')">Obsloužit kategorii B</button>
+            <button class="btn btn-outline-warning" onclick="serveTicket('C')">Obsloužit kategorii C</button>
+        </div>
+    </div>
+
+    <script>
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+
+        const queues = {
+            'A': 'queueA',
+            'B': 'queueB',
+            'C': 'queueC'
+        };
+
+        // Přepínání mezi stránkami
+        function showPage(page) {
+            document.getElementById('generator').style.display = page === 'generator' ? 'block' : 'none';
+            document.getElementById('tabule').style.display = page === 'tabule' ? 'block' : 'none';
+            document.getElementById('pobocka').style.display = page === 'pobocka' ? 'block' : 'none';
+        }
+
+        // Generování lístku
+        async function generateTicket(category) {
+            const ticketNumber = `${category}${Math.floor(Math.random() * 1000) + 1}`;
+            await forrestHubLib.arrayAddRecord(`queue_${category}`, ticketNumber);
+            document.getElementById('ticketDisplay').innerText = ticketNumber;
+            forrestHubLib.showAlert('success', `Vygenerován lístek: ${ticketNumber}`);
+        }
+
+        // Načítání fronty z databáze
+        async function loadQueues() {
+            for (const [category, elementId] of Object.entries(queues)) {
+                const queue = await forrestHubLib.arrayGetAllRecords(`queue_${category}`);
+                const listElement = document.getElementById(elementId);
+                listElement.innerHTML = '';
+
+                Object.entries(queue).forEach(([key, value]) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    listItem.innerText = value;
+
+                    const removeButton = document.createElement('button');
+                    removeButton.className = 'btn btn-sm btn-danger';
+                    removeButton.innerText = 'Smazat';
+                    removeButton.onclick = () => serveTicket(category, key);
+
+                    listItem.appendChild(removeButton);
+                    listElement.appendChild(listItem);
+                });
+            }
+        }
+
+        // Obsluha zákazníka (smazání lístku z fronty)
+        async function serveTicket(category, key = null) {
+            const queue = await forrestHubLib.arrayGetAllRecords(`queue_${category}`);
+            const ticketKey = key || Object.keys(queue)[0];
+
+            if (ticketKey) {
+                await forrestHubLib.arrayRemoveRecord(`queue_${category}`, ticketKey);
+                forrestHubLib.showAlert('info', `Obslouženo číslo: ${queue[ticketKey]}`);
+            } else {
+                forrestHubLib.showAlert('warning', 'Fronta je prázdná');
+            }
+        }
+
+        // Pravidelné načítání dat
+        setInterval(loadQueues, 1000);
+
+        // Načtení stránky podle URL parametru
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const page = params.get('page') || 'generator';
+            showPage(page);
+            loadQueues();
+        });
+    </script>
+
+{% endblock %}

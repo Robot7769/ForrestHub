@@ -1,0 +1,77 @@
+{% extends "templates/base.html" %}
+{% set game_name = "Ovládání Semaforu" %}
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center p-5">
+        <div class="text-center">
+            <h1>Ovládání Semaforu</h1>
+
+            <!-- Manuální ovládání barev -->
+            <div class="btn-group mb-3" role="group" aria-label="Ovládání semaforu">
+                <button class="btn btn-danger" onclick="setLight('red')">Červená</button>
+                <button class="btn btn-warning" onclick="setLight('yellow')">Žlutá</button>
+                <button class="btn btn-success" onclick="setLight('green')">Zelená</button>
+            </div>
+            <br>
+            <button class="btn btn-secondary mb-3" onclick="setLight('auto')">Automatický režim</button>
+
+            <!-- Nastavení pro automatický režim -->
+            <h3>Nastavení automatického režimu</h3>
+            <div class="mb-2">
+                <h4>Červená</h4>
+                <label for="redMin" class="form-label">Min. čas (s):</label>
+                <input type="number" id="redMin" class="form-control" placeholder="1" value="5" min="0.5" step="0.5">
+                <label for="redMax" class="form-label">Max. čas (s):</label>
+                <input type="number" id="redMax" class="form-control" placeholder="3" value="6" min="0.5" step="0.5">
+            </div>
+
+            <div class="mb-2">
+                <h4>Žlutá</h4>
+                <label for="yellowMin" class="form-label">Min. čas (s):</label>
+                <input type="number" id="yellowMin" class="form-control" placeholder="1" value="5" min="0.5" step="0.5">
+                <label for="yellowMax" class="form-label">Max. čas (s):</label>
+                <input type="number" id="yellowMax" class="form-control" placeholder="3" value="6" min="0.5" step="0.5">
+            </div>
+
+            <div class="mb-2">
+                <h4>Zelená</h4>
+                <label for="greenMin" class="form-label">Min. čas (s):</label>
+                <input type="number" id="greenMin" class="form-control" placeholder="1" value="5" min="0.5" step="0.5">
+                <label for="greenMax" class="form-label">Max. čas (s):</label>
+                <input type="number" id="greenMax" class="form-control" placeholder="3" value="6" min="0.5" step="0.5">
+            </div>
+
+            <button class="btn btn-primary" onclick="setAutoSettings()">Uložit nastavení</button>
+        </div>
+    </div>
+
+    <script>
+        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+
+        async function setLight(color) {
+            await forrestHubLib.varKeySet('trafficLight', color);
+            forrestHubLib.showAlert('info', `Nastavena barva: ${color}`);
+        }
+
+        async function setAutoSettings() {
+            const settings = {
+                redMin: parseFloat(document.getElementById('redMin').value) * 1000 || 1000,
+                redMax: parseFloat(document.getElementById('redMax').value) * 1000 || 3000,
+                yellowMin: parseFloat(document.getElementById('yellowMin').value) * 1000 || 1000,
+                yellowMax: parseFloat(document.getElementById('yellowMax').value) * 1000 || 3000,
+                greenMin: parseFloat(document.getElementById('greenMin').value) * 1000 || 1000,
+                greenMax: parseFloat(document.getElementById('greenMax').value) * 1000 || 3000
+            };
+
+            if (Object.values(settings).some(val => isNaN(val) || val < 500)) {
+                forrestHubLib.showAlert('danger', 'Nastavení musí být v rozmezí 0.5s a více.');
+                return;
+            }
+
+            for (const [key, value] of Object.entries(settings)) {
+                await forrestHubLib.varKeySet(key, value);
+            }
+
+            forrestHubLib.showAlert('success', 'Nastavení automatického režimu uloženo.');
+        }
+    </script>
+{% endblock %}

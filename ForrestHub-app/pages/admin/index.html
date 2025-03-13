@@ -16,7 +16,7 @@
                         <h5 class="card-title"><i class="fa-solid fa-qrcode"></i> Připojení do hry</h5>
                         <p class="card-text">IP adresa serveru:
                             <strong>
-                                <a href="{{ config.HOST_QR_READABLE }}" target="_blank">
+                                <a href="http://{{ config.HOST_QR_READABLE }}" target="_blank">
                                     {{ config.HOST_QR_READABLE }}
                                 </a>
                             </strong>
@@ -128,15 +128,12 @@
     </div><!-- /container -->
 
     <script>
-        const ip_address = `{{ config.HOST_QR_READABLE }}`;
+        const ip_address = `http://{{ config.HOST_QR_READABLE }}`;
         new QRCode(document.getElementById("qrcode"), ip_address);
 
         if (!forrestHubLib) {
-            forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+            forrestHubLib = window.forrestHubLib || new ForrestHubLib(false);
         }
-
-        forrestHubLib.setAdmin(true);
-        forrestHubLib.setGameMode(false);
 
         // Ukládáme stav rozbalení projektů do URL (#hash)
         // Příklad: #openProjects=ProjektA,ProjektB

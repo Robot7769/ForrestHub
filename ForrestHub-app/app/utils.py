@@ -29,7 +29,7 @@ def find_free_port(ip: str, port: int) -> int:
 def get_readable_ip(host: str, port: int, host_qr: str | None) -> str:
     if host_qr:
         return host_qr
-    return f"http://{host}" + (f":{port}" if port not in [80, 443] else "")
+    return host + (f":{port}" if port not in [80, 443] else "")
 
 
 def setup_logging(root_dir: str, log_folder: str = "ForrestHubLogs"):

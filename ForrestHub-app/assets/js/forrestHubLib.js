@@ -3,23 +3,13 @@
  */
 
 class ForrestHubLib {
-    VERSION = '1.4.0';
-
-    // RUNNING = 1;
     RUNNING = "running";
     PAUSED = "paused";
     STOPPED = "stopped";
 
-    /**
-     * @type {string}
-     */
-    project = "";
-
-    constructor(isAdmin = false, url = "http://" + window.location.hostname + ":" + window.location.port) {
+    constructor(isGame = true, url = "http://" + window.location.hostname + ":" + window.location.port) {
         this.project = window.location.pathname.split('/')[1];
-        this.isGamePage = true;
-        this.isAdmin = isAdmin;
-
+        this.isGamePage = isGame;
 
         if (typeof io === 'undefined') {
             throw new Error('Socket.io is not loaded.');
@@ -56,14 +46,6 @@ class ForrestHubLib {
             }
             this.updateGameStatusUI(status);
         });
-    }
-
-    /**
-     * Set if user is admin
-     * @param isAdmin {boolean} - true if user is admin
-     */
-    setAdmin(isAdmin) {
-        this.isAdmin = isAdmin;
     }
 
     /**
@@ -325,7 +307,10 @@ class ForrestHubLib {
 
 
     showOverlay(text, duration = null, status = 'info', forceShow = false) {
-        if (this.isAdmin && !forceShow) {
+        if (!forceShow && !this.isGamePage) {
+            console.log('Overlay not shown on non-game page');
+            console.log("forceShow: " + forceShow);
+            console.log("isGamePage: " + this.isGamePage);
             this.showAlert('info', `Zpráva: ${text}`, 5000);
             return;
         }
@@ -391,4 +376,4 @@ class ForrestHubLib {
     }
 }
 
-window.forrestHubLib = new ForrestHubLib();
+window.forrestHubLib = null;

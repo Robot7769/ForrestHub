@@ -58,5 +58,5 @@ class Config:
 
     # Load HOST from .env or fallback to get_local_ip_address()
     HOST = get_local_ip_address()
-    HOST_QR = os.getenv("HOST_QR", HOST)
+    HOST_QR = os.getenv("HOST_QR")
     HOST_QR_READABLE = get_readable_ip(HOST, PORT, HOST_QR)
