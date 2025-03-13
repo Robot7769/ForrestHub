@@ -36,9 +36,6 @@
 
     forrestHubLib = window.forrestHubLib || new ForrestHubLib();
 
-    const gameName = "{{ folder }}";
-    const gamePage = "{{ page }}";
-
     // Zobrazí editor s aktuálním obsahem stránky
     document.getElementById('editButton').addEventListener('click', async () => {
         const editorModal = new bootstrap.Modal(document.getElementById('editorModal'));
@@ -51,8 +48,8 @@
 
         try {
             await forrestHubLib.emitWithResponse('page_html_set', {
-                game_name: gameName,
-                game_page: gamePage,
+                game_name: "{{ folder }}",
+                game_page: "{{ page }}",
                 game_content: newContent
             });
             alert('Změny byly úspěšně uloženy.');
