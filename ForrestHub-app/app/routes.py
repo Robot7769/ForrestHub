@@ -173,7 +173,6 @@ def render_page(folder: str, page: str):
                 page_html=page_html,
                 config=current_app.config,
                 edit_mode=db.edit_mode_is_on(),
-                host_qr_readable=current_app.config.get("HOST_QR") + ":" + str(current_app.config.get("PORT")),
                 same_level_routes=get_selected_level_routes(folder),
             )
 

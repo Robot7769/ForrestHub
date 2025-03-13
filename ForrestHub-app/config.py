@@ -4,6 +4,7 @@ from app.utils import get_local_ip_address
 from pathlib import Path
 from dotenv import load_dotenv
 from pathlib import Path
+from app.utils import get_readable_ip
 
 __version__ = (Path(__file__).parent / "VERSION").read_text().strip()
 
@@ -21,10 +22,6 @@ class Config:
     GAMES_DIR_LIVE = "ForrestHub-games"
     ASSETS_DIR = "assets"
     PAGES_DIR = "pages"
-
-    # Load HOST from .env or fallback to get_local_ip_address()
-    HOST = get_local_ip_address()
-    HOST_QR = os.getenv("HOST_QR", HOST)
 
     DEBUG = True
     USE_RELOADER = True
@@ -57,3 +54,9 @@ class Config:
     if not LIVE_GAMES_MODE and FROZEN:
         DEBUG = False
         USE_RELOADER = False
+
+
+    # Load HOST from .env or fallback to get_local_ip_address()
+    HOST = get_local_ip_address()
+    HOST_QR = os.getenv("HOST_QR", HOST)
+    HOST_QR_READABLE = get_readable_ip(HOST, PORT, HOST_QR)

@@ -2,15 +2,17 @@ import json
 import os
 from engineio.async_drivers import eventlet
 from nanoid import generate
-
+from enum import Enum
 
 class DatabaseException(Exception):
     pass
 
+class DatabaseKeys(Enum):
+    VAR = "VAR_"
+    ARR = "ARR_"
 
-VAR = "VAR_"
-ARR = "ARR_"
-
+    def __add__(self, other):
+        return self.value + other
 
 def save_data(func):
     def wrapper(self, *args, **kwargs):
@@ -29,9 +31,9 @@ class Database:
 
     def init(self, directory: str, file_name: str, clear_data: bool = False):
         if not directory or not os.path.exists(directory):
-            raise DatabaseException('Path is not provided or does not exist - Database.init()')
+            raise DatabaseException('Cesta není poskytnuta nebo neexistuje - Database.init()')
         if not file_name or not file_name.endswith('.json'):
-            raise DatabaseException('File name is not provided or is not a JSON file - Database.init()')
+            raise DatabaseException('Soubor nebyl poskytnut nebo není JSON soubor - Database.init()')
 
         self.directory = directory
         self.file = file_name
@@ -45,7 +47,7 @@ class Database:
             json.dump(self.data, f, indent=4)
 
     def load_data(self, optional_path: str = None):
-        path_to_data = optional_path if optional_path else self.path_to_data
+        path_to_data = optional_path or self.path_to_data
 
         if not os.path.exists(path_to_data):
             self.save_to_file()
@@ -80,33 +82,33 @@ class Database:
     ##########################################
 
     def var_key_get(self, project: str, key: str, default_value=None):
-        key = VAR + key
+        key = DatabaseKeys.VAR + key
         if project not in self.data:
             return default_value
         return self.data[project].get(key, default_value)
 
     def var_key_set(self, project: str, key: str, value):
-        key = VAR + key
+        key = DatabaseKeys.VAR + key
         if project not in self.data:
             self.data[project] = {}
         self.data[project][key] = value
 
     def var_key_delete(self, project: str, key: str):
-        key = VAR + key
+        key = DatabaseKeys.VAR + key
         if project in self.data and key in self.data[project]:
             del self.data[project][key]
             return True
         return False
 
     def var_key_exists(self, project: str, key: str):
-        key = VAR + key
+        key = DatabaseKeys.VAR + key
         return project in self.data and key in self.data[project]
 
     ##########################################
 
     # add record
     def array_add_record(self, project: str, array_name: str, value):
-        array_name = ARR + array_name
+        array_name = DatabaseKeys.ARR + array_name
         if project not in self.data:
             self.data[project] = {}
         if array_name not in self.data[project]:
@@ -118,7 +120,7 @@ class Database:
 
     # remove record
     def array_remove_record(self, project: str, array_name: str, record_id: str):
-        array_name = ARR + array_name
+        array_name = DatabaseKeys.ARR + array_name
         if self._record_exists(project, array_name, record_id):
             del self.data[project][array_name][record_id]
             return True
@@ -126,19 +128,19 @@ class Database:
 
     # update record
     def array_update_record(self, project: str, array_name: str, record_id: str, value):
-        array_name = ARR + array_name
+        array_name = DatabaseKeys.ARR + array_name
         if self._record_exists(project, array_name, record_id):
             self.data[project][array_name][record_id] = value
             return True
         return False
 
     def array_get_all_records(self, project: str, array_name: str):
-        array_name = ARR + array_name
+        array_name = DatabaseKeys.ARR + array_name
         return self.data[project].get(array_name, {}) if project in self.data else {}
 
 
     def array_clear_records(self, project: str, array_name: str):
-        array_name = ARR + array_name
+        array_name = DatabaseKeys.ARR + array_name
         if project in self.data and array_name in self.data[project]:
             del self.data[project][array_name]
             return True

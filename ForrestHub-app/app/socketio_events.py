@@ -1,9 +1,6 @@
 from pathlib import Path
-
 from flask_socketio import emit
-from app.database import VAR, ARR
 from app.games import copy_default_game
-
 from app.init import socketio, db
 
 from flask import (
