@@ -22,8 +22,9 @@ class Config:
     ASSETS_DIR = "assets"
     PAGES_DIR = "pages"
 
-    # Load IP_ADDRESS from .env or fallback to get_local_ip_address()
-    IP_ADDRESS = os.getenv("IP_ADDRESS", get_local_ip_address())
+    # Load HOST from .env or fallback to get_local_ip_address()
+    HOST = get_local_ip_address()
+    HOST_QR = os.getenv("HOST_QR", HOST)
 
     DEBUG = True
     USE_RELOADER = True

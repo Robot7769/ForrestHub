@@ -55,10 +55,11 @@ def run_flask(config="config.Config", host="0.0.0.0", port=4444):
 
 
 @click.command()
-@click.option('--port', default=4444, help='Port to run the server on')
-@click.option('--host', default='0.0.0.0', help='Host address to bind the server')
+@click.option('--port', help='Port to run the server on')
+@click.option('--host', help='Host address to bind the server')
+@click.option('--host-qr', help='Host address shown in QR code in Admin panel')
 @click.option('--version', is_flag=True, help='Show the version from setup.py')
-def main(port, host, version):
+def main(port, host, host_qr, version):
     config = Config()
     logger = setup_logging(config.EXECUTABLE_DIR, config.LOG_FOLDER)
     logging.basicConfig(level=logging.INFO)
@@ -67,31 +68,31 @@ def main(port, host, version):
         print(f"ForrestHub App {__version__}")
         sys.exit(0)
 
-    config.PORT = port
-    config.IP_ADDRESS = host
-
     if port:
         config.PORT = port
 
     if host:
-        config.IP_ADDRESS = host
+        config.HOST = host
+        
+    if host_qr:
+        config.HOST_QR = host_qr
 
-    if not is_port_free(config.IP_ADDRESS, config.PORT):
-        new_port = find_free_port(config.IP_ADDRESS, 4444)
+    if not is_port_free(config.HOST, config.PORT):
+        new_port = find_free_port(config.HOST, 4444)
         logger.error(f"Port {config.PORT} is already in use, switching to next available port: {new_port}")
         config.PORT = new_port
 
     if config.FROZEN:
-        webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}")
-        webbrowser.open(f"http://{config.IP_ADDRESS}:{config.PORT}/admin")
+        webbrowser.open(f"http://{config.HOST}:{config.PORT}")
+        webbrowser.open(f"http://{config.HOST}:{config.PORT}/admin")
 
     try:
-        local_ip = f"http://{config.IP_ADDRESS}:{config.PORT}"
+        local_ip = f"http://{config.HOST}:{config.PORT}"
         print(f"Server started at {local_ip}")
         logger.info(f"Server started at {local_ip}")
         logger.info("Press Ctrl-C to stop the server")
 
-        run_flask(config=config, host=config.IP_ADDRESS, port=config.PORT)
+        run_flask(config=config, host=config.HOST, port=config.PORT)
     except KeyboardInterrupt:
         logger.info("Server stopped")
         sys.exit(0)
