@@ -19,7 +19,7 @@
     </div>
 
     <script>
-        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        forrestHubLib = ForrestHubLib.getInstance();
         const inputs = [...document.querySelectorAll('.form-control')];
         const resultDiv = document.getElementById('result');
         const arrayName = 'numbersList';
@@ -32,12 +32,12 @@
                 return;
             }
 
-            const allNumbers = await forrestHubLib.arrayGetAllRecords(arrayName) || {};
+            const allNumbers = await forrestHubLib.dbArrayFetchAllRecords(arrayName) || {};
 
             if (Object.values(allNumbers).includes(number)) {
                 showResult('Číslo již existuje', 'alert alert-warning');
             } else {
-                await forrestHubLib.arrayAddRecord(arrayName, number);
+                await forrestHubLib.dbArrayAddRecord(arrayName, number);
                 showResult('Číslo bylo přidáno', 'alert alert-success');
             }
         }

@@ -38,10 +38,10 @@
         let activeTimers = [];
         const lightSettings = {};
 
-        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        forrestHubLib = ForrestHubLib.getInstance();
 
         async function updateTrafficLight() {
-            const color = await forrestHubLib.varKeyGet('trafficLight');
+            const color = await forrestHubLib.dbVarGetKey('trafficLight');
             await loadConfig();
 
             if (color === 'auto') {
@@ -64,7 +64,7 @@
             ];
 
             for (const key of configKeys) {
-                lightSettings[key] = await forrestHubLib.varKeyGet(key) || getDefaultConfig(key);
+                lightSettings[key] = await forrestHubLib.dbVarGetKey(key) || getDefaultConfig(key);
             }
 
             console.log('Načtená konfigurace:', lightSettings);

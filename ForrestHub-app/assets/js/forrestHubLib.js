@@ -1,89 +1,178 @@
 /**
- * ForrestHubLib - Library for communication with the server
- */
+ * ForrestHubLib - Knihovna pro komunikaci se serverem
+ **/
 
 class ForrestHubLib {
+    // Definice možných stavů hry
     RUNNING = "running";
     PAUSED = "paused";
     STOPPED = "stopped";
 
+    /**
+     * Konstruktor knihovny
+     * @param isGame {boolean} - zda se jedná o stránku hry
+     * @param url {string} - URL serveru pro Socket.io (pokud není zadáno, použije se hostname + port)
+     */
     constructor(isGame = true, url = "http://" + window.location.hostname + ":" + window.location.port) {
-        this.project = window.location.pathname.split('/')[1];
+        // Singleton kontrola (pokud už instance existuje)
+        if (ForrestHubLib.instance) {
+            console.warn("ForrestHubLib instance již existuje. Bude použita stávající instance.");
+            return ForrestHubLib.instance;
+        }
+
+        // Nastavení projektu (podle URL cesty)
+        this.project = decodeURIComponent(window.location.pathname.split('/')[1]);
+
+        // Určení, jestli je stránka herní
         this.isGamePage = isGame;
 
+        // Kontrola, zda je načten socket.io
         if (typeof io === 'undefined') {
-            throw new Error('Socket.io is not loaded.');
+            throw new Error('Socket.io není načteno.');
         }
+
+        // Vytvoření socketu
         this.socket = io.connect(url);
 
-        this.addEventListenerKey('connect', () => {
-            console.log('Connected to the server!');
-            this.socket.emit('game_status_get', null);
-            this.removeOverlay();
+        // Přidání základních event listenerů
+        this.eventAddListener('connect', () => {
+            this.logDebug('Připojeno k serveru!');
+            // Získání stavu hry
+            this.socketEmit('game_status_get', null);
+            // Skrytí overlaye, pokud byl zobrazen
+            this.uiHideOverlay();
         });
 
-        this.addEventListenerKey('disconnect', () => {
-            console.log('Disconnected from the server.');
-            this.showOverlay('Byl jsi odpojen od serveru. <br/>Hra nejspíš skončila nebo nastala neočekávaná chyba.', null, "danger", true);
+        this.eventAddListener('disconnect', () => {
+            this.logDebug('Odpojeno od serveru.');
+            this.uiShowOverlay(
+                'Byl jsi odpojen od serveru. <br/>Hra nejspíš skončila nebo nastala neočekávaná chyba.',
+                null,
+                "danger",
+                true
+            );
         });
 
-        this.addEventListenerKey('admin_messages', (message) => {
-            this.showOverlay(message, 5000, 'warning'); // Show for 5 seconds
+        this.eventAddListener('admin_messages', (message) => {
+            // Zobrazení overlaye na 5 sekund
+            this.uiShowOverlay(message, 5000, 'warning');
         });
 
-        this.addEventListenerKey('game_status', (status) => {
+        this.eventAddListener('game_status', (status) => {
             if (status === this.RUNNING) {
-                this.removeOverlay();
+                this.uiHideOverlay();
                 if (this.isGamePage) {
-                    this.showAlert('success', 'Hra spuštěna', 2000);
+                    this.uiShowAlert('success', 'Hra spuštěna', 2000);
                 }
             } else if (status === this.PAUSED) {
-                this.showOverlay('Hra je pozastavena', null, 'info');
+                this.uiShowOverlay('Hra je pozastavena', null, 'info');
             } else if (status === this.STOPPED) {
-                this.showOverlay('Hra byla ukončena', null, 'danger');
+                this.uiShowOverlay('Hra byla ukončena', null, 'danger');
             } else {
-                this.showOverlay('Neznámý stav hry', null, 'warning');
+                this.uiShowOverlay('Neznámý stav hry', null, 'warning');
             }
-            this.updateGameStatusUI(status);
+            this.uiUpdateGameStatus(status);
         });
+
+        // Uložení instance do singletonu
+        ForrestHubLib.instance = this;
     }
 
     /**
-     * Set if user is on game page
-     * @param isGameMode {boolean} - true if user is on game page
+     * Získání instance, případně vytvoření nové
+     * @param isGame {boolean}
+     * @param url {string}
+     * @returns {ForrestHubLib}
      */
-    setGameMode(isGameMode) {
+    static getInstance(isGame = true, url) {
+        if (!ForrestHubLib.instance) {
+            ForrestHubLib.instance = new ForrestHubLib(isGame, url);
+        }
+        return ForrestHubLib.instance;
+    }
+
+
+    //////////////////////////////////////////////////
+    //                   HERNÍ REŽIM                //
+    //////////////////////////////////////////////////
+
+    /**
+     * Nastaví, jestli uživatel je (nebo není) na stránce hry
+     * @param isGameMode {boolean} - true = stránka hry
+     */
+    gameSetMode(isGameMode) {
         this.isGamePage = isGameMode;
     }
 
     /**
-     * Set project name (for database)
-     * @param project {string} - project name
+     * Získání aktuálního stavu hry (async - čeká na odpověď)
+     * @returns {Promise<string|null>}
      */
-    setProject(project) {
-        this.project = project;
+    async gameGetStatus() {
+        try {
+            const response = await this.socketEmitWithResponse("game_status_get", null);
+            return response?.data || null;
+        } catch (e) {
+            console.error("Chyba při získávání stavu hry:", e);
+            return null;
+        }
+    }
+
+    //////////////////////////////////////////////////
+    //                   NASTAVENÍ DB               //
+    //////////////////////////////////////////////////
+
+    /**
+     * Změní používaný projekt (např. databázový kontext)
+     * @param project {string} - název projektu
+     */
+    dbSetProject(project) {
+        this.project = decodeURIComponent(project);
     }
 
     /**
-     * Add event listener for key
-     * @param eventKey
-     * @param callback
+     * Vnitřní metoda pro vyřešení názvu projektu (dekódování)
+     * @param projectOverride {string|null}
+     * @returns {string} - dekódovaný název
      */
-    addEventListenerKey(eventKey, callback) {
+    dbResolveProjectName(projectOverride = null) {
+        return decodeURIComponent(projectOverride || this.project);
+    }
+
+    //////////////////////////////////////////////////
+    //                 EVENTY / SOCKET              //
+    //////////////////////////////////////////////////
+
+    /**
+     * Přidá listener pro konkrétní event
+     * @param eventKey {string}
+     * @param callback {function}
+     */
+    eventAddListener(eventKey, callback) {
         this.socket.on(eventKey, (data) => {
             callback(data);
         });
     }
 
     /**
-     * Emit event with data and return response
-     * @param event - event name
-     * @param data - data to send
+     * Přidá více listenerů najednou
+     * @param eventCallbacks {object} - { eventKey1: callback1, eventKey2: callback2, ... }
+     */
+    eventAddListeners(eventCallbacks) {
+        Object.entries(eventCallbacks).forEach(([eventKey, callback]) => {
+            this.socket.on(eventKey, callback);
+        });
+    }
+
+    /**
+     * Emituje event s daty a čeká na odpověď
+     * @param event {string}
+     * @param data {any}
      * @returns {Promise<unknown>}
      */
-    emitWithResponse(event, data) {
+    socketEmitWithResponse(event, data) {
         return new Promise((resolve, reject) => {
-            this.emit(event, data, (response) => {
+            this.socketEmit(event, data, (response) => {
                 if (response && response.status === 'ok') {
                     resolve(response);
                 } else {
@@ -92,7 +181,7 @@ class ForrestHubLib {
                         message = response.message;
                     }
                     console.error(message);
-                    this.showOverlay(message, null);
+                    this.uiShowOverlay(message, null);
                     reject(new Error(message));
                 }
             });
@@ -100,12 +189,12 @@ class ForrestHubLib {
     }
 
     /**
-     * Emit event with data and optional callback
-     * @param event
-     * @param data
-     * @param callback
+     * Emituje event s daty a volitelnou callback funkcí
+     * @param event {string}
+     * @param data {any|null}
+     * @param callback {function|null}
      */
-    emit(event, data=null, callback = null) {
+    socketEmit(event, data = null, callback = null) {
         if (callback) {
             this.socket.emit(event, data, callback);
         } else {
@@ -113,157 +202,226 @@ class ForrestHubLib {
         }
     }
 
-    /////////////////////////// DATABASE OPERATIONS ///////////////////////////
-
     /**
-     * Set database value
-     * @returns {Promise<{}>}
+     * Odpojení od serveru ručně
      */
-    async dbGetAllData() {
-        const db = await this.emitWithResponse('db_get_all_data');
-        return db.data || {};
+    socketDisconnect() {
+        this.socket.disconnect();
+        this.logDebug("Odpojeno od serveru ručně.");
     }
 
     /**
-     * Set database value
+     * Změna serverové URL a vytvoření nového socketu
+     * @param url {string} - nová adresa serveru
+     */
+    socketSetServerUrl(url) {
+        this.logDebug(`Měním serverové URL na: ${url}`);
+        this.socketDisconnect();
+        this.socket = io.connect(url);
+        this.logDebug(`Připojeno k novému serveru: ${url}`);
+    }
+
+    //////////////////////////////////////////////////
+    //                 DB OPERACE                   //
+    //////////////////////////////////////////////////
+
+    /**
+     * Načte všechna data z databáze
+     * @returns {Promise<object>}
+     */
+    async dbFetchAllData() {
+        const db = await this.socketEmitWithResponse('db_get_all_data');
+        return db?.data || {};
+    }
+
+    /**
+     * Smaže všechna data z databáze
      * @returns {Promise<void>}
      */
-    async dbDeleteAllData() {
-        await this.emitWithResponse('db_delete_all_data');
+    async dbClearAllData() {
+        await this.socketEmitWithResponse('db_delete_all_data');
     }
 
-    /////////////////////////// DATABASE VAR ///////////////////////////
+    //////////////////////////////////////////////////
+    //               DB: PROMĚNNÉ (VAR)             //
+    //////////////////////////////////////////////////
 
-    _getProject(projectOverride = null) {
-        if (projectOverride) {
-            return projectOverride;
+    /**
+     * Nastaví proměnnou v DB (key, value)
+     * @param key {string}
+     * @param value {any}
+     * @param projectOverride {string|null}
+     */
+    async dbVarSetKey(key, value, projectOverride = null) {
+        if (!key || typeof key !== "string") {
+            throw new Error("dbVarSetKey: Key musí být neprázdný string.");
         }
-        return this.project;
+
+        const project = this.dbResolveProjectName(projectOverride);
+        await this.socketEmitWithResponse('var_key_set', { project, key, value });
     }
 
     /**
-     * Set key with value and return response
-     * @param key {string} - key name
-     * @param value {any} - value to set
-     * @param projectOverride {string} - override project name if accessing from Admin page
+     * Získá hodnotu proměnné (key)
+     * @param key {string}
+     * @param projectOverride {string|null}
+     * @returns {Promise<any>}
      */
-    async varKeySet(key, value, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        await this.emitWithResponse('var_key_set', { project, key, value });
-    }
+    async dbVarGetKey(key, projectOverride = null) {
+        if (!key || typeof key !== "string") {
+            throw new Error("dbVarGetKey: Key musí být neprázdný string.");
+        }
 
-    /**
-     * Get key value
-     * @param key {string} - key name
-     * @param projectOverride {string} - override project name if accessing from Admin page
-     * @returns {Promise<*>}
-     */
-    async varKeyGet(key, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        const response = await this.emitWithResponse('var_key_get', { project, key, project });
+        const project = this.dbResolveProjectName(projectOverride);
+        const response = await this.socketEmitWithResponse('var_key_get', { project, key, project });
+        if (!response) {
+            throw new Error(`dbVarGetKey: Neplatná odpověď od serveru pro key=${key}.`);
+        }
         return response.data;
     }
 
     /**
-     * Check if key exists
-     * @param key {string} - key name
-     * @param projectOverride {string} - override project name if accessing from Admin page
-     * @returns {Promise<boolean>} - true if key exists
+     * Ověří, zda klíč existuje
+     * @param key {string}
+     * @param projectOverride {string|null}
+     * @returns {Promise<boolean>}
      */
-    async varKeyExist(key, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        const response = await this.emitWithResponse('var_key_exist', { project, key });
+    async dbVarKeyExists(key, projectOverride = null) {
+        if (!key || typeof key !== "string") {
+            throw new Error("dbVarKeyExists: Key musí být neprázdný string.");
+        }
+
+        const project = this.dbResolveProjectName(projectOverride);
+        const response = await this.socketEmitWithResponse('var_key_exist', { project, key });
         return !!response?.exists;
     }
 
     /**
-     * Delete key
-     * @param key {string} - key name
-     * @param projectOverride {string} - override project name if accessing from Admin page
+     * Smaže klíč
+     * @param key {string}
+     * @param projectOverride {string|null}
      * @returns {Promise<void>}
      */
-    async varKeyDelete(key, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        await this.emitWithResponse('var_key_delete', { project, key });
+    async dbVarDeleteKey(key, projectOverride = null) {
+        if (!key || typeof key !== "string") {
+            throw new Error("dbVarDeleteKey: Key musí být neprázdný string.");
+        }
+
+        const project = this.dbResolveProjectName(projectOverride);
+        await this.socketEmitWithResponse('var_key_delete', { project, key });
     }
 
-    /////////////////////////// DATABASE ARRAY ///////////////////////////
+    //////////////////////////////////////////////////
+    //               DB: POLE (ARRAY)               //
+    //////////////////////////////////////////////////
 
     /**
-     * Add record to array
-     * each record will have got unique id (recordId)
-     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
-     * @param arrayName {string} - array name
-     * @param value {any} - initial value
-     * @param projectOverride {string} - override project name if accessing from Admin page
+     * Přidá nový záznam do pole (DB). Každý záznam získá unikátní recordId.
+     * @param arrayName {string}
+     * @param value {any}
+     * @param projectOverride {string|null}
      * @returns {Promise<void>}
      */
-    async arrayAddRecord(arrayName, value, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        await this.emitWithResponse('array_add_record', {project , arrayName, value });
-    }
+    async dbArrayAddRecord(arrayName, value, projectOverride = null) {
+        if (!arrayName || typeof arrayName !== "string") {
+            throw new Error("dbArrayAddRecord: arrayName musí být neprázdný string.");
+        }
 
-    /**
-     * Remove record from array by recordId
-     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
-     * @param arrayName {string} - array name
-     * @param recordId {string} - record id
-     * @param projectOverride {string} - override project name if accessing from Admin page
-     * @returns {Promise<void>}
-     */
-    async arrayRemoveRecord(arrayName, recordId, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        await this.emitWithResponse('array_remove_record', { project, arrayName, recordId });
+        const project = this.dbResolveProjectName(projectOverride);
+        await this.socketEmitWithResponse('array_add_record', { project, arrayName, value });
     }
 
     /**
-     * Update record in array by recordId
-     * @param arrayName {string} - array name
-     * @param recordId {string} - record id
-     * @param value {any} - new value
-     * @param projectOverride {string} - override project name if accessing from Admin page
+     * Smaže záznam z pole podle recordId
+     * @param arrayName {string}
+     * @param recordId {string}
+     * @param projectOverride {string|null}
      * @returns {Promise<void>}
      */
-    async arrayUpdateRecord(arrayName, recordId, value, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        await this.emitWithResponse('array_update_record', { project, arrayName, recordId, value });
+    async dbArrayRemoveRecord(arrayName, recordId, projectOverride = null) {
+        if (!arrayName || typeof arrayName !== "string") {
+            throw new Error("dbArrayRemoveRecord: arrayName musí být neprázdný string.");
+        }
+        if (!recordId || typeof recordId !== "string") {
+            throw new Error("dbArrayRemoveRecord: recordId musí být neprázdný string.");
+        }
+
+        const project = this.dbResolveProjectName(projectOverride);
+        await this.socketEmitWithResponse('array_remove_record', { project, arrayName, recordId });
     }
 
     /**
-     * Get all records from array by arrayName
-     * Store format: {y3XX50fxYK: <value>, 0U_dTy3IKg: <value>, ...}
-     * @param arrayName {string} - array name
-     * @param projectOverride {string} - override project name if accessing from Admin page
-     * @returns {Promise<*>} - record map {recordId: value, ...}
+     * Aktualizuje záznam v poli
+     * @param arrayName {string}
+     * @param recordId {string}
+     * @param value {any}
+     * @param projectOverride {string|null}
+     * @returns {Promise<void>}
      */
-    async arrayGetAllRecords(arrayName, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        const response = await this.emitWithResponse('array_get_all_records', { project, arrayName });
+    async dbArrayUpdateRecord(arrayName, recordId, value, projectOverride = null) {
+        if (!arrayName || typeof arrayName !== "string") {
+            throw new Error("dbArrayUpdateRecord: arrayName musí být neprázdný string.");
+        }
+        if (!recordId || typeof recordId !== "string") {
+            throw new Error("dbArrayUpdateRecord: recordId musí být neprázdný string.");
+        }
+
+        const project = this.dbResolveProjectName(projectOverride);
+        await this.socketEmitWithResponse('array_update_record', { project, arrayName, recordId, value });
+    }
+
+    /**
+     * Získá všechny záznamy z pole podle názvu
+     * @param arrayName {string}
+     * @param projectOverride {string|null}
+     * @returns {Promise<object>}
+     */
+    async dbArrayFetchAllRecords(arrayName, projectOverride = null) {
+        if (!arrayName || typeof arrayName !== "string") {
+            throw new Error("dbArrayFetchAllRecords: arrayName musí být neprázdný string.");
+        }
+
+        const project = this.dbResolveProjectName(projectOverride);
+        const response = await this.socketEmitWithResponse('array_get_all_records', { project, arrayName });
+        if (!response) {
+            throw new Error("dbArrayFetchAllRecords: Neplatná odpověď od serveru.");
+        }
         return response.data;
     }
 
     /**
-     * Clear all records from array
-     * @param arrayName {string} - array name
-     * @param projectOverride {string} - override project name if accessing from Admin page
+     * Smaže všechny záznamy z daného pole
+     * @param arrayName {string}
+     * @param projectOverride {string|null}
      * @returns {Promise<void>}
      */
-    async arrayClearRecords(arrayName, projectOverride = null) {
-        const project = this._getProject(projectOverride);
-        await this.emitWithResponse('array_clear_records', { project, arrayName });
+    async dbArrayClearRecords(arrayName, projectOverride = null) {
+        if (!arrayName || typeof arrayName !== "string") {
+            throw new Error("dbArrayClearRecords: arrayName musí být neprázdný string.");
+        }
+
+        const project = this.dbResolveProjectName(projectOverride);
+        await this.socketEmitWithResponse('array_clear_records', { project, arrayName });
     }
 
     /**
-     * List all projects stored in the database
-     * @returns {Promise<*>}
+     * Získá seznam všech projektů uložených v databázi
+     * @returns {Promise<any>}
      */
-    async arrayListProjects() {
-        const response = await this.emitWithResponse('array_list_projects', {});
+    async dbArrayFetchProjects() {
+        const response = await this.socketEmitWithResponse('array_list_projects', {});
         return response.data;
     }
 
+    //////////////////////////////////////////////////
+    //                   UI / ALERTY                //
+    //////////////////////////////////////////////////
 
-    updateGameStatusUI(status) {
+    /**
+     * Aktualizuje UI prvky podle stavu hry
+     * @param status {string}
+     */
+    uiUpdateGameStatus(status) {
         let statusText = "";
         switch (status) {
             case this.RUNNING:
@@ -283,7 +441,13 @@ class ForrestHubLib {
         });
     }
 
-    showAlert(type, message, duration = 4000) {
+    /**
+     * Zobrazí alert typu bootstrap na pár sekund
+     * @param type {string} - např. 'success', 'warning', 'danger'
+     * @param message {string} - zpráva
+     * @param duration {number} - doba zobrazení v ms (výchozí 4000)
+     */
+    uiShowAlert(type, message, duration = 4000) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow`;
         alertDiv.style.position = 'fixed';
@@ -305,13 +469,18 @@ class ForrestHubLib {
         setTimeout(() => alertDiv.remove(), duration);
     }
 
-
-    showOverlay(text, duration = null, status = 'info', forceShow = false) {
+    /**
+     * Zobrazí overlay (celoplošnou vrstvu) s textem a volitelným odpočtem
+     * @param text {string} - zpráva, která se zobrazí
+     * @param duration {number|null} - čas v ms, po kterém se overlay skryje
+     * @param status {string} - styl overlaye (např. 'info', 'warning')
+     * @param forceShow {boolean} - jestli se má ukázat i na ne-herní stránce
+     */
+    uiShowOverlay(text, duration = null, status = 'info', forceShow = false) {
+        // Pokud nejde o herní stránku a není vynuceno zobrazení, zobrazíme jen alert
         if (!forceShow && !this.isGamePage) {
-            console.log('Overlay not shown on non-game page');
-            console.log("forceShow: " + forceShow);
-            console.log("isGamePage: " + this.isGamePage);
-            this.showAlert('info', `Zpráva: ${text}`, 5000);
+            this.logDebug('Overlay se nezobrazí, protože není herní stránka (pokud není forceShow).');
+            this.uiShowAlert('info', `Zpráva: ${text}`, 5000);
             return;
         }
 
@@ -352,7 +521,8 @@ class ForrestHubLib {
         overlay.appendChild(countdown);
         document.body.appendChild(overlay);
 
-        if (duration) { // duration in ms
+        // Pokud máme duration, zobrazíme odpočet
+        if (duration) {
             let remainingTime = duration / 1000;
             countdown.innerText = `Zbývá ${remainingTime}s`;
 
@@ -362,16 +532,32 @@ class ForrestHubLib {
 
                 if (remainingTime <= 0) {
                     clearInterval(countdownInterval);
-                    this.removeOverlay();
+                    this.uiHideOverlay();
                 }
             }, 1000);
         }
     }
 
-    removeOverlay() {
+    /**
+     * Skryje overlay, pokud je na obrazovce
+     */
+    uiHideOverlay() {
         let overlay = document.getElementById('overlay');
         if (overlay) {
             document.body.removeChild(overlay);
         }
     }
+
+    /**
+     * Vytvoří nový element s textem a zobrazí ho na obrazovce
+     * @param message {string} - zpráva
+     */
+    logDebug(message) {
+        console.log(`[ForrestHubLib] ${message}`);
+    }
+}
+
+// Zajištění, že existuje alespoň jedna výchozí instance
+if (!window.forrestHubLib) {
+    window.forrestHubLib = ForrestHubLib.getInstance(false);
 }

@@ -19,7 +19,7 @@
     </div>
 
     <script>
-        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        forrestHubLib = ForrestHubLib.getInstance();
         const resultDiv = document.getElementById('result');
         const inputs = [...document.querySelectorAll('.form-control')];
         const arrayName = 'numbersList';
@@ -32,7 +32,7 @@
                 return;
             }
 
-            const allNumbers = await forrestHubLib.arrayGetAllRecords(arrayName) || {};
+            const allNumbers = await forrestHubLib.dbArrayFetchAllRecords(arrayName) || {};
 
             if (Object.values(allNumbers).includes(number)) {
                 showResult('Stůj', 'alert alert-danger');

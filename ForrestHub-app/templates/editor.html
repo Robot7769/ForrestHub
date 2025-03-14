@@ -34,7 +34,7 @@
 
 <script>
 
-    forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+    forrestHubLib = ForrestHubLib.getInstance();
 
     // Zobrazí editor s aktuálním obsahem stránky
     document.getElementById('editButton').addEventListener('click', async () => {
@@ -47,7 +47,7 @@
         const newContent = document.getElementById('pageEditor').value;
 
         try {
-            await forrestHubLib.emitWithResponse('page_html_set', {
+            await forrestHubLib.socketEmitWithResponse('page_html_set', {
                 game_name: "{{ folder }}",
                 game_page: "{{ page }}",
                 game_content: newContent

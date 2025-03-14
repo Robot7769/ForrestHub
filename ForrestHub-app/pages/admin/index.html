@@ -111,7 +111,7 @@
                         <p class="card-text">Veškeré informace jsou logovány do složky: <strong>{{ config.LOG_FOLDER }}</strong></p>
                         <p class="card-text">Live verze hry: <strong>{{ config.DATA_DIR }}</strong></p>
                         <p class="card-text">Název složky s Live hrami: <strong>{{ config.GAMES_DIR_LIVE }}</strong></p>
-                        {% if not config.GAMES_FOLDER_LIVE and config.GAMES_FOLDER_LIVE | path_exists %}
+                        {% if config.GAMES_FOLDER_LIVE and config.GAMES_FOLDER_LIVE | path_exists %}
                             <p class="card-text">Cesta k Live hrám: <strong>{{ config.GAMES_FOLDER_LIVE }}</strong></p>
                         {% else %}
                             <ul >
@@ -121,7 +121,7 @@
                         {% endif %}
 
                         <div class="alert alert-warning mt-3" role="alert">
-                            Pro více informací o hře a jejím nastavení navštivte <a href="https://forresthub.helceletka.cz/" class="alert-link" target="_blank">ForrestHub dokumentaci</a>.
+                            Pro více informací o hře a jejím nastavení nastavení navštivte <a href="https://forresthub.helceletka.cz/" class="alert-link" target="_blank">ForrestHub dokumentaci</a>.
                         </div>
                     </div>
                 </div>
@@ -147,9 +147,8 @@
         const ip_address = `http://{{ config.HOST_QR_READABLE }}`;
         new QRCode(document.getElementById("qrcode"), ip_address);
 
-        if (!forrestHubLib) {
-            forrestHubLib = window.forrestHubLib || new ForrestHubLib(false);
-        }
+        forrestHubLib = ForrestHubLib.getInstance();
+
 
         // Ukládáme stav rozbalení projektů do URL (#hash)
         // Příklad: #openProjects=ProjektA,ProjektB
@@ -198,11 +197,11 @@
         loadOpenProjectsFromURL();
 
         // Po připojení k serveru
-        forrestHubLib.addEventListenerKey("connect", async () => {
-            forrestHubLib.showAlert('success', 'Připojeno k serveru.');
+        forrestHubLib.eventAddListener("connect", async () => {
+            forrestHubLib.uiShowAlert('success', 'Připojeno k serveru.');
             await loadAndDisplayData();
-            forrestHubLib.emit('game_status_get', null);
-            forrestHubLib.emit('edit_mode_get', null);
+            forrestHubLib.socketEmit('game_status_get', null);
+            forrestHubLib.socketEmit('edit_mode_get', null);
         });
 
         // Pravidelná obnova dat (každou vteřinu)
@@ -213,10 +212,10 @@
             storeCurrentAccordionStates();
 
             try {
-                const gameData = await forrestHubLib.dbGetAllData();
+                const gameData = await forrestHubLib.dbFetchAllData();
                 displayData(gameData);
             } catch (error) {
-                forrestHubLib.showAlert('danger', 'Error loading data: ' + error.message);
+                forrestHubLib.uiShowAlert('danger', 'Error loading data: ' + error.message);
             }
         }
 
@@ -383,11 +382,11 @@
             if (!confirm(`Opravdu chcete smazat celý array '${arrayName}'?`)) return;
 
             try {
-                await forrestHubLib.arrayClearRecords(arrayName, projectName);
+                await forrestHubLib.dbArrayClearRecords(arrayName, projectName);
                 await loadAndDisplayData();
-                forrestHubLib.showAlert('success', `Array '${arrayName}' smazán.`);
+                forrestHubLib.uiShowAlert('success', `Array '${arrayName}' smazán.`);
             } catch (error) {
-                forrestHubLib.showAlert('danger', `Chyba při mazání: ${error}`);
+                forrestHubLib.uiShowAlert('danger', `Chyba při mazání: ${error}`);
             }
         }
 
@@ -397,11 +396,11 @@
             if (!confirm(`Opravdu smazat záznam ${recordId}?`)) return;
 
             try {
-                await forrestHubLib.arrayRemoveRecord(arrayName, recordId, project);
+                await forrestHubLib.dbArrayRemoveRecord(arrayName, recordId, project);
                 await loadAndDisplayData();
-                forrestHubLib.showAlert('success', `Záznam ${recordId} odstraněn z ${arrayName}.`);
+                forrestHubLib.uiShowAlert('success', `Záznam ${recordId} odstraněn z ${arrayName}.`);
             } catch (error) {
-                forrestHubLib.showAlert('danger', `Chyba při mazání: ${error}`);
+                forrestHubLib.uiShowAlert('danger', `Chyba při mazání: ${error}`);
             }
         }
 
@@ -411,11 +410,11 @@
             if (!confirm(`Opravdu smazat klíč ${rawKey}?`)) return;
 
             try {
-                await forrestHubLib.varKeyDelete(rawKey, project);
+                await forrestHubLib.dbVarDeleteKey(rawKey, project);
                 await loadAndDisplayData();
-                forrestHubLib.showAlert('success', `Klíč ${rawKey} smazán.`);
+                forrestHubLib.uiShowAlert('success', `Klíč ${rawKey} smazán.`);
             } catch (error) {
-                forrestHubLib.showAlert('danger', `Chyba při mazání: ${error}`);
+                forrestHubLib.uiShowAlert('danger', `Chyba při mazání: ${error}`);
             }
         }
 
@@ -441,7 +440,7 @@
         });
 
         // ======= Počet připojených zařízení =======
-        forrestHubLib.addEventListenerKey('update_clients', (data) => {
+        forrestHubLib.eventAddListener('update_clients', (data) => {
             document.getElementById('connected_clients').innerText = data.count;
         });
 
@@ -449,42 +448,42 @@
         function sendAdminMessage() {
             const adminMessage = document.getElementById('adminMessage');
             if (adminMessage.value.trim() !== '') {
-                forrestHubLib.emit('send_admin_message', adminMessage.value);
+                forrestHubLib.socketEmit('send_admin_message', adminMessage.value);
                 document.getElementById('lastAdminMessage').innerText = adminMessage.value;
                 adminMessage.value = '';
-                forrestHubLib.showAlert('success', 'Zpráva odeslána.');
+                forrestHubLib.uiShowAlert('success', 'Zpráva odeslána.');
             } else {
-                forrestHubLib.showAlert('warning', 'Napište nejprve zprávu.');
+                forrestHubLib.uiShowAlert('warning', 'Napište nejprve zprávu.');
             }
         }
 
         // ======= Ovládání stavu hry =======
         document.getElementById("game_start").addEventListener("click", () => {
-            forrestHubLib.emit("game_status_set", forrestHubLib.RUNNING);
+            forrestHubLib.socketEmit("game_status_set", forrestHubLib.RUNNING);
         });
         document.getElementById("game_pause").addEventListener("click", () => {
-            forrestHubLib.emit('game_status_set', forrestHubLib.PAUSED);
+            forrestHubLib.socketEmit('game_status_set', forrestHubLib.PAUSED);
         });
         document.getElementById("game_stop").addEventListener("click", () => {
-            forrestHubLib.emit('game_status_set', forrestHubLib.STOPPED);
+            forrestHubLib.socketEmit('game_status_set', forrestHubLib.STOPPED);
         });
 
 
         // ======= Ovládání Edit režimu =======
 
-        forrestHubLib.addEventListenerKey('edit_mode', (edit_mode) => {
+        forrestHubLib.eventAddListener('edit_mode', (edit_mode) => {
             document.getElementById('edit_mode').innerText = edit_mode ? 'ANO' : 'NE';
         });
 
         document.getElementById("edit_mode_on").addEventListener("click", () => {
             try {
-                forrestHubLib.emit("edit_mode_set", true);
+                forrestHubLib.socketEmit("edit_mode_set", true);
             } catch (error) {
-                forrestHubLib.showAlert('danger', 'Chyba při zapínání editačního režimu: ' + error.message);
+                forrestHubLib.uiShowAlert('danger', 'Chyba při zapínání editačního režimu: ' + error.message);
             }
         });
         document.getElementById("edit_mode_off").addEventListener("click", () => {
-            forrestHubLib.emit('edit_mode_set', false);
+            forrestHubLib.socketEmit('edit_mode_set', false);
         });
 
 
@@ -499,7 +498,7 @@
                 // Zrušíme i openProjects
                 openProjects.clear();
                 updateURLHash();
-                await forrestHubLib.dbDeleteAllData();
+                await forrestHubLib.dbClearAllData();
             }
         });
 
@@ -519,17 +518,17 @@
                     });
                     const data = await response.json();
                     if (data.status === "success") {
-                        forrestHubLib.showAlert('success', "Data úspěšně nahrána.");
+                        forrestHubLib.uiShowAlert('success', "Data úspěšně nahrána.");
                         await loadAndDisplayData(); // Aktualizovat zobrazení
                     } else {
-                        forrestHubLib.showAlert('danger', "Při nahrávání dat nastala chyba.");
+                        forrestHubLib.uiShowAlert('danger', "Při nahrávání dat nastala chyba.");
                     }
                 } catch (error) {
                     console.error("Chyba při nahrávání souboru:", error);
-                    forrestHubLib.showAlert('danger', "Nastala chyba při nahrávání souboru.");
+                    forrestHubLib.uiShowAlert('danger', "Nastala chyba při nahrávání souboru.");
                 }
             } else {
-                forrestHubLib.showAlert('warning', "Vyberte prosím soubor k nahrání.");
+                forrestHubLib.uiShowAlert('warning', "Vyberte prosím soubor k nahrání.");
             }
         });
 

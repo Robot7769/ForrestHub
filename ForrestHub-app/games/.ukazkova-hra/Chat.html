@@ -21,7 +21,7 @@
     </div>
 
     <script>
-        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        forrestHubLib = ForrestHubLib.getInstance();
         const messagesList = document.getElementById('messagesList');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
@@ -65,7 +65,7 @@
                 time: new Date().toLocaleTimeString()
             };
 
-            await forrestHubLib.arrayAddRecord(chatArrayName, chatMessage);
+            await forrestHubLib.dbArrayAddRecord(chatArrayName, chatMessage);
             messageInput.value = '';
         });
 
@@ -74,12 +74,12 @@
 
         // Funkce pro načítání zpráv
         async function loadMessages() {
-            const messages = await forrestHubLib.arrayGetAllRecords(chatArrayName);
+            const messages = await forrestHubLib.dbArrayFetchAllRecords(chatArrayName);
             updateMessagesList(messages);
         }
 
         // Aktualizace při změně dat (přijetí zprávy)
-        forrestHubLib.addEventListenerKey(chatArrayName, (data) => {
+        forrestHubLib.eventAddListener(chatArrayName, (data) => {
             updateMessagesList(data);
         });
 

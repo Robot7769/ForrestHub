@@ -45,11 +45,11 @@
     </div>
 
     <script>
-        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        forrestHubLib = ForrestHubLib.getInstance();
 
         async function setLight(color) {
-            await forrestHubLib.varKeySet('trafficLight', color);
-            forrestHubLib.showAlert('info', `Nastavena barva: ${color}`);
+            await forrestHubLib.dbVarSetKey('trafficLight', color);
+            forrestHubLib.uiShowAlert('info', `Nastavena barva: ${color}`);
         }
 
         async function setAutoSettings() {
@@ -63,15 +63,15 @@
             };
 
             if (Object.values(settings).some(val => isNaN(val) || val < 500)) {
-                forrestHubLib.showAlert('danger', 'Nastavení musí být v rozmezí 0.5s a více.');
+                forrestHubLib.uiShowAlert('danger', 'Nastavení musí být v rozmezí 0.5s a více.');
                 return;
             }
 
             for (const [key, value] of Object.entries(settings)) {
-                await forrestHubLib.varKeySet(key, value);
+                await forrestHubLib.dbVarSetKey(key, value);
             }
 
-            forrestHubLib.showAlert('success', 'Nastavení automatického režimu uloženo.');
+            forrestHubLib.uiShowAlert('success', 'Nastavení automatického režimu uloženo.');
         }
     </script>
 {% endblock %}

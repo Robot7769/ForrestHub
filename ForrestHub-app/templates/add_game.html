@@ -24,8 +24,8 @@
 </div>
 
 <script>
-    forrestHubLib = window.forrestHubLib || new ForrestHubLib();
-    forrestHubLib.setGameMode(false);
+    forrestHubLib = ForrestHubLib.getInstance();
+    forrestHubLib.gameSetMode(false);
 
     // Otevři modal pro zadání jména hry
     document.getElementById('addGameButton').addEventListener('click', () => {
@@ -43,7 +43,7 @@
             {#if constains /  replace with -#}
             gameName = gameName.replace(/\//g, '-');
 
-            forrestHubLib.emit('add_new_game', gameName);
+            forrestHubLib.socketEmit('add_new_game', gameName);
             const gameModal = bootstrap.Modal.getInstance(document.getElementById('gameModal'));
             gameModal.hide(); // Skrytí modalu po odeslání
 

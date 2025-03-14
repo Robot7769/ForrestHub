@@ -56,7 +56,7 @@
     </div>
 
     <script>
-        forrestHubLib = window.forrestHubLib || new ForrestHubLib();
+        forrestHubLib = ForrestHubLib.getInstance();
 
         const queues = {
             'A': 'queueA',
@@ -74,15 +74,15 @@
         // Generování lístku
         async function generateTicket(category) {
             const ticketNumber = `${category}${Math.floor(Math.random() * 1000) + 1}`;
-            await forrestHubLib.arrayAddRecord(`queue_${category}`, ticketNumber);
+            await forrestHubLib.dbArrayAddRecord(`queue_${category}`, ticketNumber);
             document.getElementById('ticketDisplay').innerText = ticketNumber;
-            forrestHubLib.showAlert('success', `Vygenerován lístek: ${ticketNumber}`);
+            forrestHubLib.uiShowAlert('success', `Vygenerován lístek: ${ticketNumber}`);
         }
 
         // Načítání fronty z databáze
         async function loadQueues() {
             for (const [category, elementId] of Object.entries(queues)) {
-                const queue = await forrestHubLib.arrayGetAllRecords(`queue_${category}`);
+                const queue = await forrestHubLib.dbArrayFetchAllRecords(`queue_${category}`);
                 const listElement = document.getElementById(elementId);
                 listElement.innerHTML = '';
 
@@ -104,14 +104,14 @@
 
         // Obsluha zákazníka (smazání lístku z fronty)
         async function serveTicket(category, key = null) {
-            const queue = await forrestHubLib.arrayGetAllRecords(`queue_${category}`);
+            const queue = await forrestHubLib.dbArrayFetchAllRecords(`queue_${category}`);
             const ticketKey = key || Object.keys(queue)[0];
 
             if (ticketKey) {
-                await forrestHubLib.arrayRemoveRecord(`queue_${category}`, ticketKey);
-                forrestHubLib.showAlert('info', `Obslouženo číslo: ${queue[ticketKey]}`);
+                await forrestHubLib.dbArrayRemoveRecord(`queue_${category}`, ticketKey);
+                forrestHubLib.uiShowAlert('info', `Obslouženo číslo: ${queue[ticketKey]}`);
             } else {
-                forrestHubLib.showAlert('warning', 'Fronta je prázdná');
+                forrestHubLib.uiShowAlert('warning', 'Fronta je prázdná');
             }
         }
 
