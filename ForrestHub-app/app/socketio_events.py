@@ -170,7 +170,7 @@ def handle_get_all_projects(json: dict) -> dict:
 def handle_add_new_game(game_name: str) -> dict:
     game_folder = Path(current_app.config.get("GAMES_FOLDER_LIVE"))
     if not game_folder.exists():
-        return {"status": "error", "message": "Neexistuje složka s hrami"}
+        game_folder.mkdir()
 
     game_folder = game_folder / Path(game_name)
 
@@ -182,7 +182,7 @@ def handle_add_new_game(game_name: str) -> dict:
 
 def validate_game_folder(game_name: Path, page_name: str, check_page_exists: bool) -> tuple[bool, str, Path | None]:
     game_folder_path = Path(current_app.config.get("GAMES_FOLDER_LIVE"))
-    if not game_folder_path or not game_folder_path.exists():
+    if check_page_exists and not game_folder_path or not game_folder_path.exists():
         return False, "Neexistuje složka s hrami", None
 
     game_folder = game_folder_path / game_name

@@ -1,4 +1,5 @@
-
 <script>
-    window.forrestHubLib = new ForrestHubLib(false);
+    if (typeof window.forrestHubLib === 'undefined') {
+        window.forrestHubLib = new ForrestHubLib(false);
+    }
 </script>

@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from http.cookiejar import debug
 from pathlib import Path
 
@@ -70,12 +71,18 @@ def index():
 
 @main.route("/download-data")
 def download_data():
+    # Získání aktuálního času ve formátu "DD-MM-YYYY_HH-MM-SS"
+    timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+
+    # Construct the new filename
+    new_filename = f"{current_app.config['DATAFILE']}-{timestamp}.json"
+
     return send_from_directory(
         current_app.config["EXECUTABLE_DIR"],
-        current_app.config["DATAFILE"],
+        current_app.config["DATAFILE"] + ".json",
         as_attachment=True,
+        download_name=new_filename  # Flask 2.0+ supports setting a custom filename
     )
-
 
 @main.route("/clear-data")
 def clear_data():
@@ -190,3 +197,10 @@ def not_allowed(filename):
 def static_files(filename):
     static_path = current_app.config.get("ASSETS_FOLDER")
     return send_from_directory(static_path, filename)
+
+
+@main.route("/reload-templates")
+def reload_templates():
+    with current_app.app_context():
+        current_app.jinja_env.cache = {}  # Clear Jinja template cache
+    return jsonify({"status": "success", "message": "Templates reloaded!"})

@@ -375,5 +375,3 @@ class ForrestHubLib {
         }
     }
 }
-
-window.forrestHubLib = null;

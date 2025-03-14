@@ -98,24 +98,40 @@
 
         <!-- Správa dat -->
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title"><i class="fa-solid fa-database"></i> Správa dat hry</h5>
                         <button id="download-button" class="btn btn-primary mb-2">Stáhnout data hry</button>
                         <button id="clear-button" class="btn btn-danger mb-2">Vymazat data hry (vše)</button>
-                        <p class="card-text">Data hry jsou uložena v počítači: <strong>{{ config.ROOT_DIR }}/{{ config.DATAFILE }}</strong></p>
-                        <p class="card-text">Veškeré informace jsou logovány do složky: <strong>{{ config.ROOT_DIR }}/{{ config.LOG_FOLDER }}</strong></p>
-                        <p class="card-text">Debug: <strong>{{ config.DEBUG }}</strong></p>
-                        <p class="card-text">Root: <strong>{{ config.TEMP_DIR }}</strong></p>
+
+                        <p class="card-text">Hra je spuštěna v adresáři: <strong>{{ config.EXECUTABLE_DIR }}</strong></p>
+
+                        <p class="card-text">Data hry jsou uložena v podadresáři: <strong>{{ config.DATAFILE }}</strong></p>
+                        <p class="card-text">Veškeré informace jsou logovány do složky: <strong>{{ config.LOG_FOLDER }}</strong></p>
+                        <p class="card-text">Live verze hry: <strong>{{ config.DATA_DIR }}</strong></p>
+                        <p class="card-text">Název složky s Live hrami: <strong>{{ config.GAMES_DIR_LIVE }}</strong></p>
+                        {% if not config.GAMES_FOLDER_LIVE and config.GAMES_FOLDER_LIVE | path_exists %}
+                            <p class="card-text">Cesta k Live hrám: <strong>{{ config.GAMES_FOLDER_LIVE }}</strong></p>
+                        {% else %}
+                            <ul >
+                                    <li><p class="card-text text-info">Složka s Live hrami zatím nebyla vytvořena.</p>
+                                    <li><p class="card-text">Je možné si ji nechat vytvořit zmáčknutím tlačítka <code>Zapnout editační režim</code>.</p>
+                            </ul>
+                        {% endif %}
+
+                        <div class="alert alert-warning mt-3" role="alert">
+                            Pro více informací o hře a jejím nastavení navštivte <a href="https://forresthub.helceletka.cz/" class="alert-link" target="_blank">ForrestHub dokumentaci</a>.
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title"><i class="fa-solid fa-server"></i> Nahrát data</h5>
                         <p class="card-text">Nahraná data přepíšou stávající data hry.</p>
+                        <p class="card-text">Před nahráním dat je vhodné stáhnout aktuální data.</p>
                         <div class="input-group mb-3">
                             <input type="file" id="uploadFile" class="form-control" accept=".json">
                             <button id="upload-button" class="btn btn-primary">Nahrát data</button>
@@ -125,7 +141,7 @@
             </div>
         </div>
 
-    </div><!-- /container -->
+    </div>
 
     <script>
         const ip_address = `http://{{ config.HOST_QR_READABLE }}`;

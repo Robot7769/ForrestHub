@@ -18,8 +18,8 @@ def run_flask(config: object | str, host="0.0.0.0", port=4444):
         app,
         host=host,
         port=port,
-        use_reloader=False,
-        debug=True,
+        use_reloader=config.USE_RELOADER,
+        debug=config.DEBUG,
     )
 
 @click.command(name="ForrestHub")

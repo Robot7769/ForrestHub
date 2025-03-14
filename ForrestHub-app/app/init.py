@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from app.custom_loader import CustomLoader
 from app.database import Database
 from flask import Flask
@@ -6,6 +8,11 @@ from flask_socketio import SocketIO
 
 socketio = SocketIO(cors_allowed_origins="*", async_mode="eventlet")
 db = Database()
+
+
+def path_exists(path):
+    """Vrací True, pokud cesta existuje, jinak False."""
+    return Path(path).exists()
 
 
 def create_app(config_class: object | str):
@@ -17,7 +24,7 @@ def create_app(config_class: object | str):
 
 
     # Initialize the database
-    db.init(app.config["EXECUTABLE_DIR"], app.config["DATAFILE"])
+    db.init(app.config["EXECUTABLE_DIR"], app.config["DATAFILE"] + ".json")
 
     # Set custom Jinja loader
     loader_locations = [
@@ -25,12 +32,13 @@ def create_app(config_class: object | str):
         app.config.get("TEMPLATES_FOLDER"),
         app.config.get("ASSETS_FOLDER"),
         app.config.get("PAGES_FOLDER"),
+        app.config.get("GAMES_FOLDER_LIVE"),
     ]
 
-    if app.config.get("LIVE_GAMES_MODE"):
-        loader_locations.append(app.config.get("GAMES_FOLDER_LIVE"))
-
     app.jinja_loader = CustomLoader(loader_locations)
+
+    # Add custom Jinja filter
+    app.jinja_env.filters["path_exists"] = path_exists
 
     # Register Blueprints
     from app.routes import main as main_blueprint
