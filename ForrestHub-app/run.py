@@ -33,8 +33,8 @@ def main(port, host, host_qr, version):
     logging.basicConfig(level=logging.INFO)
 
     if version:
-        logger.info(f"ForrestHub App {__version__}")
-        logger.info("Pro více informací navštivte https://forresthub.helceletka.cz")
+        print(f"ForrestHub App {__version__}")
+        print("Pro více informací navštivte https://forresthub.helceletka.cz")
         sys.exit(0)
 
     if port:
