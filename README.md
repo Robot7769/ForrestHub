@@ -23,7 +23,7 @@ Podporuji vývoj **outdoorových her s technickými prvky**, které propojují r
 
 ### 🤖 AI ti vygeneruje hry
 - Využij náš předtrénovaný model a vygeneruj si **hru na míru**.
-- [:arrow_forward: Generování her](https://forresthub.helceletka.cz/game)
+- [:arrow_forward: Generování her](https://forresthub.helceletka.cz/generate)
 
 ### 🎮 Užij si multiplayer s přáteli
 - Hra je primárně navržena pro **hraní na více zařízeních**.
@@ -58,12 +58,12 @@ Players can interact with each other and the system in real-time.
 My focus is on supporting the development of **outdoor games with technical elements**, connecting the physical and digital worlds.
 
 ### 🚀 Game Ready in 2 Minutes
-- Download [`ForrestHub.exe`](install) or [`ForrestHub-macOS`](install) and start playing!
+- Download [`ForrestHub.exe`](https://forresthub.helceletka.cz/install) or [`ForrestHub-macOS`](https://forresthub.helceletka.cz/install) and start playing!
 - [:arrow_forward: Download](https://forresthub.helceletka.cz/install)
 
 ### 🤖 AI Generates Games for You
 - Use our pre-trained model to generate a **custom game**.
-- [:arrow_forward: Generate a Game](https://forresthub.helceletka.cz/game)
+- [:arrow_forward: Generate a Game](https://forresthub.helceletka.cz/generate)
 
 ### 🎮 Enjoy Multiplayer with Friends
 - Designed primarily for **multi-device play**.

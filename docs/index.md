@@ -38,7 +38,7 @@ title: ForrestHub
 
     Využij náš předtrénovaný model a vygeneruj si hru na míru svým potřebám
 
-    [:octicons-arrow-right-24: Generování her](game)
+    [:octicons-arrow-right-24: Generování her](generate)
 
 
 -   :fontawesome-solid-gamepad:{ .lg .middle } __Užij si multiplayer s přáteli__
