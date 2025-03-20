@@ -62,6 +62,12 @@
             });
         });
 
+        inputs[inputs.length - 1].addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                checkNumber();
+            }
+        });
+
         document.getElementById('checkNumberButton').addEventListener('click', checkNumber);
     </script>
 {% endblock %}
