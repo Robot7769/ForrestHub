@@ -556,8 +556,3 @@ class ForrestHubLib {
         console.log(`[ForrestHubLib] ${message}`);
     }
 }
-
-// Zajištění, že existuje alespoň jedna výchozí instance
-if (!window.forrestHubLib) {
-    window.forrestHubLib = ForrestHubLib.getInstance(false);
-}

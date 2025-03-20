@@ -68,6 +68,12 @@
             });
         });
 
+        inputs[inputs.length - 1].addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                addNumber();
+            }
+        });
+
         document.getElementById('addNumberButton').addEventListener('click', addNumber);
     </script>
 {% endblock %}
