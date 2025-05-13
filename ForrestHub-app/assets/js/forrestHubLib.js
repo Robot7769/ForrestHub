@@ -16,7 +16,6 @@ class ForrestHubLib {
     constructor(isGame = true, url = "http://" + window.location.hostname + ":" + window.location.port) {
         // Singleton kontrola (pokud už instance existuje)
         if (ForrestHubLib.instance) {
-            console.warn("ForrestHubLib instance již existuje. Bude použita stávající instance.");
             return ForrestHubLib.instance;
         }
 
@@ -253,9 +252,7 @@ class ForrestHubLib {
      * @param projectOverride {string|null}
      */
     async dbVarSetKey(key, value, projectOverride = null) {
-        if (!key || typeof key !== "string") {
-            throw new Error("dbVarSetKey: Key musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('key', key, 'dbVarDeleteKey');
 
         const project = this.dbResolveProjectName(projectOverride);
         await this.socketEmitWithResponse('var_key_set', { project, key, value });
@@ -268,9 +265,7 @@ class ForrestHubLib {
      * @returns {Promise<any>}
      */
     async dbVarGetKey(key, projectOverride = null) {
-        if (!key || typeof key !== "string") {
-            throw new Error("dbVarGetKey: Key musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('key', key, 'dbVarDeleteKey');
 
         const project = this.dbResolveProjectName(projectOverride);
         const response = await this.socketEmitWithResponse('var_key_get', { project, key, project });
@@ -287,9 +282,7 @@ class ForrestHubLib {
      * @returns {Promise<boolean>}
      */
     async dbVarKeyExists(key, projectOverride = null) {
-        if (!key || typeof key !== "string") {
-            throw new Error("dbVarKeyExists: Key musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('key', key, 'dbVarDeleteKey');
 
         const project = this.dbResolveProjectName(projectOverride);
         const response = await this.socketEmitWithResponse('var_key_exist', { project, key });
@@ -300,12 +293,10 @@ class ForrestHubLib {
      * Smaže klíč
      * @param key {string}
      * @param projectOverride {string|null}
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async dbVarDeleteKey(key, projectOverride = null) {
-        if (!key || typeof key !== "string") {
-            throw new Error("dbVarDeleteKey: Key musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('key', key, 'dbVarDeleteKey');
 
         const project = this.dbResolveProjectName(projectOverride);
         await this.socketEmitWithResponse('var_key_delete', { project, key });
@@ -319,16 +310,15 @@ class ForrestHubLib {
      * Přidá nový záznam do pole (DB). Každý záznam získá unikátní recordId.
      * @param arrayName {string}
      * @param value {any}
+     * @param recordId {string|null} - nechej prázdné pro automatické generování (doporučeno)
      * @param projectOverride {string|null}
-     * @returns {Promise<void>}
+     * @returns {Promise<string>} - recordId
      */
-    async dbArrayAddRecord(arrayName, value, projectOverride = null) {
-        if (!arrayName || typeof arrayName !== "string") {
-            throw new Error("dbArrayAddRecord: arrayName musí být neprázdný string.");
-        }
+    async dbArrayAddRecord(arrayName, value, recordId = null, projectOverride = null, ) {
+        this.ensureNonEmptyString('arrayName', arrayName, 'dbArrayAddRecord');
 
         const project = this.dbResolveProjectName(projectOverride);
-        await this.socketEmitWithResponse('array_add_record', { project, arrayName, value });
+        await this.socketEmitWithResponse('array_add_record', { project, arrayName, value, recordId });
     }
 
     /**
@@ -336,15 +326,11 @@ class ForrestHubLib {
      * @param arrayName {string}
      * @param recordId {string}
      * @param projectOverride {string|null}
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async dbArrayRemoveRecord(arrayName, recordId, projectOverride = null) {
-        if (!arrayName || typeof arrayName !== "string") {
-            throw new Error("dbArrayRemoveRecord: arrayName musí být neprázdný string.");
-        }
-        if (!recordId || typeof recordId !== "string") {
-            throw new Error("dbArrayRemoveRecord: recordId musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('arrayName', arrayName, 'dbArrayRemoveRecord');
+        this.ensureNonEmptyString('recordId', recordId, 'dbArrayRemoveRecord');
 
         const project = this.dbResolveProjectName(projectOverride);
         await this.socketEmitWithResponse('array_remove_record', { project, arrayName, recordId });
@@ -356,19 +342,35 @@ class ForrestHubLib {
      * @param recordId {string}
      * @param value {any}
      * @param projectOverride {string|null}
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async dbArrayUpdateRecord(arrayName, recordId, value, projectOverride = null) {
-        if (!arrayName || typeof arrayName !== "string") {
-            throw new Error("dbArrayUpdateRecord: arrayName musí být neprázdný string.");
-        }
-        if (!recordId || typeof recordId !== "string") {
-            throw new Error("dbArrayUpdateRecord: recordId musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('arrayName', arrayName, 'dbArrayUpdateRecord');
+        this.ensureNonEmptyString('recordId', recordId, 'dbArrayUpdateRecord');
 
         const project = this.dbResolveProjectName(projectOverride);
         await this.socketEmitWithResponse('array_update_record', { project, arrayName, recordId, value });
     }
+
+    /**
+     * Získá záznam z pole podle recordId
+     * @param arrayName {string}
+     * @param recordId {string}
+     * @param projectOverride {string|null}
+     * @returns {Promise<object>}
+     */
+    async dbArrayFetchRecord(arrayName, recordId, projectOverride = null) {
+        this.ensureNonEmptyString('arrayName', arrayName, 'dbArrayFetchRecord');
+        this.ensureNonEmptyString('recordId', recordId, 'dbArrayFetchRecord');
+
+        const project = this.dbResolveProjectName(projectOverride);
+        const response = await this.socketEmitWithResponse('array_get_record', { project, arrayName, recordId });
+        if (!response) {
+            throw new Error("dbArrayFetchRecord: Neplatná odpověď od serveru.");
+        }
+        return response.data;
+    }
+
 
     /**
      * Získá všechny záznamy z pole podle názvu
@@ -377,9 +379,7 @@ class ForrestHubLib {
      * @returns {Promise<object>}
      */
     async dbArrayFetchAllRecords(arrayName, projectOverride = null) {
-        if (!arrayName || typeof arrayName !== "string") {
-            throw new Error("dbArrayFetchAllRecords: arrayName musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('arrayName', arrayName, 'dbArrayFetchAllRecords');
 
         const project = this.dbResolveProjectName(projectOverride);
         const response = await this.socketEmitWithResponse('array_get_all_records', { project, arrayName });
@@ -390,15 +390,30 @@ class ForrestHubLib {
     }
 
     /**
+     * Zjistí existenci pole
+     * @param arrayName {string}
+     * @param recordId {string}
+     * @param value {any}
+     * @param projectOverride {string|null}
+     * @returns {Promise<boolean>}
+     */
+    async dbArrayRecordExists(arrayName, recordId, projectOverride = null) {
+        this.ensureNonEmptyString('arrayName', arrayName, 'dbArrayUpdateRecord');
+        this.ensureNonEmptyString('recordId', recordId, 'dbArrayUpdateRecord');
+
+        const project = this.dbResolveProjectName(projectOverride);
+        const resp = await this.socketEmitWithResponse('array_record_exists', { project, arrayName, recordId });
+        return !!resp?.exists;
+    }
+
+    /**
      * Smaže všechny záznamy z daného pole
      * @param arrayName {string}
      * @param projectOverride {string|null}
      * @returns {Promise<void>}
      */
     async dbArrayClearRecords(arrayName, projectOverride = null) {
-        if (!arrayName || typeof arrayName !== "string") {
-            throw new Error("dbArrayClearRecords: arrayName musí být neprázdný string.");
-        }
+        this.ensureNonEmptyString('arrayName', arrayName, 'dbArrayClearRecords');
 
         const project = this.dbResolveProjectName(projectOverride);
         await this.socketEmitWithResponse('array_clear_records', { project, arrayName });
@@ -412,6 +427,78 @@ class ForrestHubLib {
         const response = await this.socketEmitWithResponse('array_list_projects', {});
         return response.data;
     }
+
+    //////////////////////////////////////////////////
+    //                   KEYBOARD                   //
+    //////////////////////////////////////////////////
+
+
+    /**
+     * Nastaví event listener pro čtení vstupu z klávesnice (barcode, NFC)
+     * @param minLength {number} - minimální délka vstupu
+     * @param onRead {function} - callback funkce pro přečtený vstup (data) => { ... }
+     */
+    handleBarcodeOrNfcInput(minLength = 5, onRead) {
+        let inputBuffer = '';
+        let lastCharTime = 0;
+        let firstCharTime = 0;
+        let scanButtonCounter = 0;
+        let testTimer = null;
+
+        const scannerDetectionTest = (s) => {
+            if (s) {
+                firstCharTime = 0;
+                lastCharTime = 0;
+                inputBuffer = s;
+            }
+
+            if (inputBuffer.length >= minLength && (lastCharTime - firstCharTime) < inputBuffer.length * 30) {
+                onRead(inputBuffer, scanButtonCounter);
+                resetScannerDetection();
+                return true;
+            }
+
+            resetScannerDetection();
+            return false;
+        };
+
+        const handleKeyPress = (e) => {
+            const charCode = e.which || e.keyCode;
+            if (!firstCharTime) {
+                firstCharTime = Date.now();
+            }
+
+            if (inputBuffer.length === 0 || charCode !== 13) {
+                inputBuffer += String.fromCharCode(charCode);
+            }
+
+            lastCharTime = Date.now();
+
+            if (testTimer) clearTimeout(testTimer);
+            testTimer = setTimeout(() => scannerDetectionTest(), 100);
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        };
+
+        document.addEventListener('keypress', handleKeyPress);
+
+        const resetScannerDetection = () => {
+            inputBuffer = '';
+            firstCharTime = 0;
+            lastCharTime = 0;
+            scanButtonCounter = 0;
+        };
+
+        // Timeout pro chybu při nedostatku dat
+        setTimeout(() => {
+            if (inputBuffer.length < minLength) {
+                resetScannerDetection();
+            }
+        }, 5000); // Čekání 5 sekund na dokončení čtení
+    }
+
+
 
     //////////////////////////////////////////////////
     //                   UI / ALERTY                //
@@ -548,11 +635,21 @@ class ForrestHubLib {
         }
     }
 
+    //////////////////////////////////////////////////
+    //               Utility metody                 //
+    //////////////////////////////////////////////////
+
     /**
      * Vytvoří nový element s textem a zobrazí ho na obrazovce
      * @param message {string} - zpráva
      */
     logDebug(message) {
         console.log(`[ForrestHubLib] ${message}`);
+    }
+
+    ensureNonEmptyString(paramName, value, methodName = "N/A") {
+        if (!value || typeof value !== "string") {
+            throw new Error(`Parametr '${paramName}' musí být neprázdný string. (Metoda: ${methodName})`);
+        }
     }
 }

@@ -34,7 +34,9 @@
 
 <script>
 
-    forrestHubLib = ForrestHubLib.getInstance();
+    if (!window.forrestHubLib) {
+        window.forrestHubLib = new ForrestHubLib(false);
+    }
 
     // Zobrazí editor s aktuálním obsahem stránky
     document.getElementById('editButton').addEventListener('click', async () => {

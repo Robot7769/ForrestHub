@@ -81,8 +81,7 @@ def handle_key_set(json: dict):
     project = json.get("project")
     key = json.get("key")
     value = json.get("value")
-    db.var_key_set(project, key, value)
-    return {"status": "ok"}
+    return {"status": "ok", "data": db.var_key_get(project, key, value)}
 
 
 @socketio.on("var_key_exist")
@@ -104,9 +103,7 @@ def handle_key_get(json: dict) -> dict:
 def handle_key_delete(json: dict) -> dict:
     project = json.get("project")
     key = json.get("key")
-    db.var_key_delete(project, key)
-    return {"status": "ok"}
-
+    return {"status": "ok", "data": db.var_key_delete(project, key)}
 
 ################## Array ############################
 
@@ -115,8 +112,8 @@ def handle_array_add_record(json: dict) -> dict:
     project = json.get("project")
     array_name = json.get("arrayName")
     value = json.get("value")
-    db.array_add_record(project, array_name, value)
-    return {"status": "ok"}
+    record_id = json.get("recordId")
+    return {"status": "ok", "data": db.array_add_record(project, array_name, value, record_id)}
 
 
 @socketio.on("array_remove_record")
@@ -124,9 +121,15 @@ def handle_array_remove_record(json: dict) -> dict:
     project = json.get("project")
     array_name = json.get("arrayName")
     record_id = json.get("recordId")
-    db.array_remove_record(project, array_name, record_id)
-    return {"status": "ok"}
+    return {"status": "ok", "data": db.array_remove_record(project, array_name, record_id)}
 
+
+@socketio.on("array_get_record")
+def handle_array_get_record(json: dict) -> dict:
+    project = json.get("project")
+    array_name = json.get("arrayName")
+    record_id = json.get("recordId")
+    return {"status": "ok", "data": db.array_get_record(project, array_name, record_id)}
 
 @socketio.on("array_update_record")
 def handle_array_update_record(json: dict) -> dict:
@@ -134,8 +137,7 @@ def handle_array_update_record(json: dict) -> dict:
     array_name = json.get("arrayName")
     record_id = json.get("recordId")
     value = json.get("value")
-    db.array_update_record(project, array_name, record_id, value)
-    return {"status": "ok"}
+    return {"status": "ok", "data": db.array_update_record(project, array_name, record_id, value)}
 
 @socketio.on("array_get_all_records")
 def handle_array_get_all_records(json: dict) -> dict:
@@ -143,13 +145,14 @@ def handle_array_get_all_records(json: dict) -> dict:
     array_name = json.get("arrayName")
     return {"status": "ok", "data": db.array_get_all_records(project, array_name)}
 
-
-@socketio.on("array_get_record_id")
-def handle_array_get_record(json: dict) -> dict:
+# exists
+@socketio.on("array_record_exists")
+def handle_array_record_exists(json: dict) -> dict:
     project = json.get("project")
     array_name = json.get("arrayName")
     record_id = json.get("recordId")
-    return {"status": "ok", "data": db.array_get_record_id(project, array_name, record_id)}
+    return {"status": "ok", "exists": db.array_record_exists(project, array_name, record_id)}
+
 
 @socketio.on("array_clear_records")
 def handle_array_clear_records(json: dict) -> dict:

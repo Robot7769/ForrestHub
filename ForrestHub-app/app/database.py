@@ -107,45 +107,61 @@ class Database:
     ##########################################
 
     # add record
-    def array_add_record(self, project: str, array_name: str, value):
+    def array_add_record(self, project: str, array_name: str, value: str, record_id: str = None) -> str:
         array_name = DatabaseKeys.ARR + array_name
         if project not in self.data:
             self.data[project] = {}
         if array_name not in self.data[project]:
             self.data[project][array_name] = {}
-        self.data[project][array_name][generate(size=10)] = value
+
+        record_id = record_id or generate(size=10)
+        self.data[project][array_name][record_id] = value
+        return record_id
 
     def _record_exists(self, project_prefix: str, array_name: str, record_id: str) -> bool:
         return project_prefix in self.data and array_name in self.data[project_prefix] and record_id in self.data[project_prefix][array_name]
 
     # remove record
-    def array_remove_record(self, project: str, array_name: str, record_id: str):
+    def array_remove_record(self, project: str, array_name: str, record_id: str) -> bool:
         array_name = DatabaseKeys.ARR + array_name
         if self._record_exists(project, array_name, record_id):
             del self.data[project][array_name][record_id]
             return True
         return False
 
-    # update record
-    def array_update_record(self, project: str, array_name: str, record_id: str, value):
+    # get record
+    def array_get_record(self, project: str, array_name: str, record_id: str):
         array_name = DatabaseKeys.ARR + array_name
         if self._record_exists(project, array_name, record_id):
-            self.data[project][array_name][record_id] = value
-            return True
-        return False
+            return self.data[project][array_name][record_id]
+        return None
 
-    def array_get_all_records(self, project: str, array_name: str):
+    # update record
+    def array_update_record(self, project: str, array_name: str, record_id: str, value) -> bool:
+        array_name = DatabaseKeys.ARR + array_name
+        if project not in self.data:
+            self.data[project] = {}
+        if array_name not in self.data[project]:
+            self.data[project][array_name] = {}
+
+        existed = self._record_exists(project, array_name, record_id)
+        self.data[project][array_name][record_id] = value
+        return existed
+
+    def array_get_all_records(self, project: str, array_name: str) -> dict:
         array_name = DatabaseKeys.ARR + array_name
         return self.data[project].get(array_name, {}) if project in self.data else {}
 
+    def array_record_exists(self, project: str, array_name: str, record_id: str) -> bool:
+        array_name = DatabaseKeys.ARR + array_name
+        return self._record_exists(project, array_name, record_id)
 
-    def array_clear_records(self, project: str, array_name: str):
+    def array_clear_records(self, project: str, array_name: str) -> bool:
         array_name = DatabaseKeys.ARR + array_name
         if project in self.data and array_name in self.data[project]:
             del self.data[project][array_name]
             return True
         return False
-
 
     def array_list_projects(self):
         return list(self.data.keys())
