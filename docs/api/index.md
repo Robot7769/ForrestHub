@@ -11,14 +11,14 @@ Provides a basic health check or welcome message for the API.
 
 **Curl Example:**
 ```bash
-curl http://localhost:5000/api/
+curl http://localhost:4444/api/
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/"
+url = "http://localhost:4444/api/"
 response = requests.get(url)
 print(response.json())
 # Expected output might be: {"status": "ok", "message": "ForrestHub API is running"}
@@ -41,7 +41,7 @@ Sends a message to all connected admin clients via SocketIO.
 
 **Curl Example:**
 ```bash
-curl -X POST -H "Content-Type: application/json" -d \'\'\'{"message": "Hello Admins"}\'\'\' http://localhost:5000/api/admin/message
+curl -X POST -H "Content-Type: application/json" -d \'\'\'{"message": "Hello Admins"}\'\'\' http://localhost:4444/api/admin/message
 ```
 
 **Python Example:**
@@ -49,7 +49,7 @@ curl -X POST -H "Content-Type: application/json" -d \'\'\'{"message": "Hello Adm
 import requests
 import json
 
-url = "http://localhost:5000/api/admin/message"
+url = "http://localhost:4444/api/admin/message"
 payload = {"message": "Hello Admins"}
 headers = {"Content-Type": "application/json"}
 
@@ -65,14 +65,14 @@ Gets the current count of connected SocketIO clients.
 
 **Curl Example:**
 ```bash
-curl http://localhost:5000/api/clients/count
+curl http://localhost:4444/api/clients/count
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/clients/count"
+url = "http://localhost:4444/api/clients/count"
 response = requests.get(url)
 print(response.json())
 ```
@@ -85,14 +85,14 @@ Gets the current game status.
 
 **Curl Example:**
 ```bash
-curl http://localhost:5000/api/game/status
+curl http://localhost:4444/api/game/status
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/game/status"
+url = "http://localhost:4444/api/game/status"
 response = requests.get(url)
 print(response.json())
 ```
@@ -112,7 +112,7 @@ Sets the game status. The new status is broadcasted to connected clients via Soc
 
 **Curl Example:**
 ```bash
-curl -X POST -H "Content-Type: application/json" -d \'\'\'{"status": "paused"}\'\'\' http://localhost:5000/api/game/status
+curl -X POST -H "Content-Type: application/json" -d \'\'\'{"status": "paused"}\'\'\' http://localhost:4444/api/game/status
 ```
 
 **Python Example:**
@@ -120,7 +120,7 @@ curl -X POST -H "Content-Type: application/json" -d \'\'\'{"status": "paused"}\'
 import requests
 import json
 
-url = "http://localhost:5000/api/game/status"
+url = "http://localhost:4444/api/game/status"
 payload = {"status": "paused"}
 headers = {"Content-Type": "application/json"}
 
@@ -138,14 +138,14 @@ Gets the current state of the edit mode (on/off).
 
 **Curl Example:**
 ```bash
-curl http://localhost:5000/api/edit_mode
+curl http://localhost:4444/api/edit_mode
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/edit_mode"
+url = "http://localhost:4444/api/edit_mode"
 response = requests.get(url)
 print(response.json())
 ```
@@ -165,7 +165,7 @@ Sets the edit mode. If turned on, it may trigger actions like copying a default 
 
 **Curl Example:**
 ```bash
-curl -X POST -H "Content-Type: application/json" -d \'\'\'{"edit_mode_on": true}\'\'\' http://localhost:5000/api/edit_mode
+curl -X POST -H "Content-Type: application/json" -d \'\'\'{"edit_mode_on": true}\'\'\' http://localhost:4444/api/edit_mode
 ```
 
 **Python Example:**
@@ -173,7 +173,7 @@ curl -X POST -H "Content-Type: application/json" -d \'\'\'{"edit_mode_on": true}
 import requests
 import json
 
-url = "http://localhost:5000/api/edit_mode"
+url = "http://localhost:4444/api/edit_mode"
 payload = {"edit_mode_on": True} # Or False
 headers = {"Content-Type": "application/json"}
 
@@ -191,14 +191,14 @@ Retrieves all data from the database.
 
 **Curl Example:**
 ```bash
-curl http://localhost:5000/api/db/all_data
+curl http://localhost:4444/api/db/all_data
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/db/all_data"
+url = "http://localhost:4444/api/db/all_data"
 response = requests.get(url)
 print(response.json())
 # Note: The actual data structure will depend on your db.get_all_data() implementation.
@@ -212,14 +212,14 @@ Clears all data from the database. (Note: Uses POST, but a DELETE method might b
 
 **Curl Example:**
 ```bash
-curl -X POST http://localhost:5000/api/db/delete_all_data
+curl -X POST http://localhost:4444/api/db/delete_all_data
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/db/delete_all_data"
+url = "http://localhost:4444/api/db/delete_all_data"
 response = requests.post(url)
 print(response.json())
 ```
@@ -245,7 +245,7 @@ Sets or updates a key-value pair for a given project. This corresponds to the `v
 ```bash
 curl -X POST -H "Content-Type: application/json" \
   -d \'\'\'{"project": "game1", "key": "score", "value": 100}\'\'\' \
-  http://localhost:5000/api/var
+  http://localhost:4444/api/var
 ```
 
 **Python Example:**
@@ -253,7 +253,7 @@ curl -X POST -H "Content-Type: application/json" \
 import requests
 import json
 
-url = "http://localhost:5000/api/var"
+url = "http://localhost:4444/api/var"
 payload = {"project": "game1", "key": "score", "value": 100}
 headers = {"Content-Type": "application/json"}
 
@@ -273,14 +273,14 @@ Checks if a specific key exists for a given project.
 
 **Curl Example:**
 ```bash
-curl "http://localhost:5000/api/var/exists?project=game1&key=score"
+curl "http://localhost:4444/api/var/exists?project=game1&key=score"
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/var/exists"
+url = "http://localhost:4444/api/var/exists"
 params = {"project": "game1", "key": "score"}
 
 response = requests.get(url, params=params)
@@ -300,14 +300,14 @@ Gets the value of a key for a given project. A default value can be provided if 
 
 **Curl Example:**
 ```bash
-curl "http://localhost:5000/api/var?project=game1&key=playerName&defaultValue=Guest"
+curl "http://localhost:4444/api/var?project=game1&key=playerName&defaultValue=Guest"
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/var"
+url = "http://localhost:4444/api/var"
 params = {"project": "game1", "key": "playerName", "defaultValue": "Guest"}
 
 response = requests.get(url, params=params)
@@ -326,21 +326,21 @@ Deletes a key-value pair for a given project.
 
 **Curl Example (using query parameters):**
 ```bash
-curl -X DELETE "http://localhost:5000/api/var?project=game1&key=score"
+curl -X DELETE "http://localhost:4444/api/var?project=game1&key=score"
 ```
 
 **Curl Example (using JSON body):**
 ```bash
 curl -X DELETE -H "Content-Type: application/json" \
   -d \'\'\'{"project": "game1", "key": "score"}\'\'\' \
-  http://localhost:5000/api/var
+  http://localhost:4444/api/var
 ```
 
 **Python Example (using query parameters):**
 ```python
 import requests
 
-url = "http://localhost:5000/api/var"
+url = "http://localhost:4444/api/var"
 params = {"project": "game1", "key": "score"}
 
 response = requests.delete(url, params=params)
@@ -352,7 +352,7 @@ print(response.json())
 import requests
 import json
 
-url = "http://localhost:5000/api/var"
+url = "http://localhost:4444/api/var"
 payload = {"project": "game1", "key": "score"}
 headers = {"Content-Type": "application/json"}
 
@@ -382,7 +382,7 @@ Adds a record to an array within a specific project. A `recordId` can optionally
 ```bash
 curl -X POST -H "Content-Type: application/json" \
   -d \'\'\'{"project": "leaderboard", "arrayName": "scores", "value": {"user": "player1", "points": 1500}, "recordId": "player1_score"}\'\'\' \
-  http://localhost:5000/api/array/record
+  http://localhost:4444/api/array/record
 ```
 
 **Python Example:**
@@ -390,7 +390,7 @@ curl -X POST -H "Content-Type: application/json" \
 import requests
 import json
 
-url = "http://localhost:5000/api/array/record"
+url = "http://localhost:4444/api/array/record"
 payload = {
     "project": "leaderboard",
     "arrayName": "scores",
@@ -416,14 +416,14 @@ Removes a record from an array within a specific project using its `recordId`.
 
 **Curl Example (using query parameters):**
 ```bash
-curl -X DELETE "http://localhost:5000/api/array/record?project=leaderboard&arrayName=scores&recordId=player1_score"
+curl -X DELETE "http://localhost:4444/api/array/record?project=leaderboard&arrayName=scores&recordId=player1_score"
 ```
 
 **Python Example (using query parameters):**
 ```python
 import requests
 
-url = "http://localhost:5000/api/array/record"
+url = "http://localhost:4444/api/array/record"
 params = {
     "project": "leaderboard",
     "arrayName": "scores",
@@ -446,14 +446,14 @@ Retrieves a specific record from an array within a project using its `recordId`.
 
 **Curl Example:**
 ```bash
-curl "http://localhost:5000/api/array/record?project=leaderboard&arrayName=scores&recordId=player1_score"
+curl "http://localhost:4444/api/array/record?project=leaderboard&arrayName=scores&recordId=player1_score"
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/array/record"
+url = "http://localhost:4444/api/array/record"
 params = {
     "project": "leaderboard",
     "arrayName": "scores",
@@ -483,7 +483,7 @@ Updates an existing record in an array within a project.
 ```bash
 curl -X PUT -H "Content-Type: application/json" \
   -d \'\'\'{"project": "leaderboard", "arrayName": "scores", "recordId": "player1_score", "value": {"user": "player1", "points": 1600}}\'\'\' \
-  http://localhost:5000/api/array/record
+  http://localhost:4444/api/array/record
 ```
 
 **Python Example:**
@@ -491,7 +491,7 @@ curl -X PUT -H "Content-Type: application/json" \
 import requests
 import json
 
-url = "http://localhost:5000/api/array/record"
+url = "http://localhost:4444/api/array/record"
 payload = {
     "project": "leaderboard",
     "arrayName": "scores",
@@ -516,14 +516,14 @@ Retrieves all records from a specific array within a project.
 
 **Curl Example:**
 ```bash
-curl "http://localhost:5000/api/array/all_records?project=leaderboard&arrayName=scores"
+curl "http://localhost:4444/api/array/all_records?project=leaderboard&arrayName=scores"
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/array/all_records"
+url = "http://localhost:4444/api/array/all_records"
 params = {"project": "leaderboard", "arrayName": "scores"}
 response = requests.get(url, params=params)
 print(response.json())
@@ -542,14 +542,14 @@ Checks if a specific record exists in an array within a project.
 
 **Curl Example:**
 ```bash
-curl "http://localhost:5000/api/array/record/exists?project=leaderboard&arrayName=scores&recordId=player1_score"
+curl "http://localhost:4444/api/array/record/exists?project=leaderboard&arrayName=scores&recordId=player1_score"
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/array/record/exists"
+url = "http://localhost:4444/api/array/record/exists"
 params = {
     "project": "leaderboard",
     "arrayName": "scores",
@@ -577,7 +577,7 @@ Clears all records from a specific array within a project.
 ```bash
 curl -X POST -H "Content-Type: application/json" \
   -d \'\'\'{"project": "leaderboard", "arrayName": "scores"}\'\'\' \
-  http://localhost:5000/api/array/clear_records
+  http://localhost:4444/api/array/clear_records
 ```
 
 **Python Example:**
@@ -585,7 +585,7 @@ curl -X POST -H "Content-Type: application/json" \
 import requests
 import json
 
-url = "http://localhost:5000/api/array/clear_records"
+url = "http://localhost:4444/api/array/clear_records"
 payload = {"project": "leaderboard", "arrayName": "scores"}
 headers = {"Content-Type": "application/json"}
 
@@ -601,14 +601,14 @@ Lists all projects that have arrays.
 
 **Curl Example:**
 ```bash
-curl http://localhost:5000/api/array/projects
+curl http://localhost:4444/api/array/projects
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/array/projects"
+url = "http://localhost:4444/api/array/projects"
 response = requests.get(url)
 print(response.json())
 ```
@@ -632,7 +632,7 @@ Creates a new game folder.
 ```bash
 curl -X POST -H "Content-Type: application/json" \
   -d \'\'\'{"game_name": "MyAwesomeGame"}\'\'\' \
-  http://localhost:5000/api/game/new
+  http://localhost:4444/api/game/new
 ```
 
 **Python Example:**
@@ -640,7 +640,7 @@ curl -X POST -H "Content-Type: application/json" \
 import requests
 import json
 
-url = "http://localhost:5000/api/game/new"
+url = "http://localhost:4444/api/game/new"
 payload = {"game_name": "MyAwesomeGame"}
 headers = {"Content-Type": "application/json"}
 
@@ -668,7 +668,7 @@ Sets the HTML content of a specific page within a game. Creates the game folder 
 ```bash
 curl -X POST -H "Content-Type: application/json" \
   -d \'\'\'{"game_name": "MyAwesomeGame", "game_page": "index", "game_content": "<html><body><h1>Welcome!</h1></body></html>"}\'\'\' \
-  http://localhost:5000/api/game/page_html
+  http://localhost:4444/api/game/page_html
 ```
 
 **Python Example:**
@@ -676,7 +676,7 @@ curl -X POST -H "Content-Type: application/json" \
 import requests
 import json
 
-url = "http://localhost:5000/api/game/page_html"
+url = "http://localhost:4444/api/game/page_html"
 payload = {
     "game_name": "MyAwesomeGame",
     "game_page": "index", # page name without .html
@@ -700,14 +700,14 @@ Retrieves the HTML content of a specific page within a game.
 
 **Curl Example:**
 ```bash
-curl "http://localhost:5000/api/game/page_html?game_name=MyAwesomeGame&game_page=index"
+curl "http://localhost:4444/api/game/page_html?game_name=MyAwesomeGame&game_page=index"
 ```
 
 **Python Example:**
 ```python
 import requests
 
-url = "http://localhost:5000/api/game/page_html"
+url = "http://localhost:4444/api/game/page_html"
 params = {"game_name": "MyAwesomeGame", "game_page": "index"}
 response = requests.get(url, params=params)
 print(response.json())
