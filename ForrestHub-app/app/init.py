@@ -51,6 +51,9 @@ def create_app(config_class: object | str):
     from app.socketio_events import socketio_bp as socketio_blueprint
     app.register_blueprint(socketio_blueprint)
 
+    from app.api_routes import api_bp as api_blueprint
+    app.register_blueprint(api_blueprint)
+
     # Initialize SocketIO with eventlet support
     socketio.init_app(app, async_mode="eventlet")
 

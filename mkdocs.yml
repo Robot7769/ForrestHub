@@ -114,3 +114,4 @@ nav:
   - Instalace: install/index.md
   - Generování her: game/index.md
   - Propojení her: connection/index.md
+  - Pokročilé funkce: advanced/index.md
