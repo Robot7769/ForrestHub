@@ -70,6 +70,7 @@ class Database:
         eventlet.sleep(1)
         while True:
             self.save_to_file()
+            print("Data saved to file")
             eventlet.sleep(5)
 
     ##########################################
