@@ -7,7 +7,7 @@ from config import Config
 from pathlib import Path
 from app.utils import is_port_free, find_free_port, setup_logging
 from werkzeug.middleware.proxy_fix import ProxyFix
-
+from app.utils import get_readable_ip
 
 logger = logging.getLogger(__name__)
 __version__ = (Path(__file__).parent / "VERSION").read_text().strip()
@@ -57,6 +57,7 @@ def main(port, host, host_qr, version):
         
     if host_qr:
         config.HOST_QR = host_qr
+        config.HOST_QR_READABLE = get_readable_ip(config.HOST, config.PORT, config.HOST_QR)
 
     if not is_port_free(config.HOST, config.PORT):
         new_port = find_free_port(config.HOST, 4444)
